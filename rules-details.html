@@ -1,0 +1,47 @@
+<head>
+  <link rel="icon" type="image/png" href="./public/icons8-edit-64.png" />
+  <link rel="stylesheet" href="./public/style.css" />
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+  <script src="http://code.jquery.com/jquery-1.10.0.min.js"></script>
+
+  <script src="https://unpkg.com/react@16/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/babel-standalone@6.26.0/babel.js"></script>
+</head>
+
+<body>
+  <h1 class="class">VIEW RULES DETAILS</h1>
+  <div id="root"></div>
+  <script id="babel" type="text/babel">
+    $(document).ready(function() {
+      $.get("/getRulesDetails", function(data) {
+        function Table(props) {
+          let rows = [];
+          for (let i = 0; i < props.data.length; i++) {
+            rows.push(
+              <tr>
+                <th>{props.data[i].name}</th>
+                <th>{props.data[i].rule}</th>
+              </tr>
+            );
+          }
+          return rows;
+        }
+
+        var count = 0;
+        var table = (
+          <table id="table">
+            <tbody>
+              <tr id="header">
+                <th>Name</th>
+                <th>Rule</th>
+              </tr>
+              <Table data={data} />
+            </tbody>
+          </table>
+        );
+        ReactDOM.render(table, document.getElementById("root"));
+      });
+    });
+  </script>
+</body>
