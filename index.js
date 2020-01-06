@@ -33,15 +33,22 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
+//set render engine
+app.engine('html', require('ejs').renderFile);
+app.set('view engine', 'ejs');
 // var router = app.Router();
 
 app.get("/", (req, res) => {
   
-  res.sendFile(__dirname + "/webpager.html");
+  res.sendFile(__dirname + "/frontend-transition/main.html");
 });
 
 app.get("/viewRulesDetails", (req, res) => {
-  res.sendFile(__dirname + "/rules-details.html");
+  // res.sendFile(__dirname + "/rules-details.html");
+  let my_variable = 'WE DID IT'; 
+  res.render("rules-details.ejs", {get: my_variable} , function(err,outputHtml) {
+    res.send(outputHtml);
+  });
 });
 
 app.get("/viewDetails", (req, res) => {
