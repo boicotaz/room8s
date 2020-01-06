@@ -7,10 +7,10 @@ var mysql = require("mysql");
 var connection = mysql.createConnection({
   host: "localhost",
   user: "root",
-  password: "boicotaz",
+  password: "tolis",
   database: "home_site",
   insecureAuth: true,
-  port: 3306
+  port: 3306  
 });
 
 connection.connect(function(err) {
@@ -21,9 +21,10 @@ connection.connect(function(err) {
 
   console.log("connected as id " + connection.threadId);
 });
-console;
+
 server.listen(process.env.PORT || 8082, () => {
   console.log(`app is now listening to port ${process.env.PORT || 8082}`);
+  console.log(__dirname);
 });
 
 app.use("/public", express.static(__dirname + "/public"));
@@ -35,15 +36,16 @@ app.use(bodyParser.urlencoded({ extended: true }));
 // var router = app.Router();
 
 app.get("/", (req, res) => {
-  res.sendFile("/home/tolis/PHP/home-site/webpager.html");
+  
+  res.sendFile(__dirname + "/webpager.html");
 });
 
 app.get("/viewRulesDetails", (req, res) => {
-  res.sendFile("/home/tolis/PHP/home-site/rules-details.html");
+  res.sendFile(__dirname + "/rules-details.html");
 });
 
 app.get("/viewDetails", (req, res) => {
-  res.sendFile("/home/tolis/PHP/home-site/details.html");
+  res.sendFile(__dirname + "/details.html");
 });
 
 app.get("/getDetails", (req, res) => {
