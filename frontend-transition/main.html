@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <!-- Required meta tags from Bootstrap for mobile device optimization -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+
+    <!-- ΕΙΣΑΓΩΓΗ ΤΟΥ font-awesome -->
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css"
+        integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous">
+
+
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+
+    <!-- jQuery library -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+    <!-- Latest compiled JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+
+
+
+    <link rel="stylesheet" href="file:///Users/macuser/Developemnt/VScode/room8s/style.css" type="text/css">
+    <script src="file:///Users/macuser/Developemnt/VScode/room8s/main.js" type="text/javascript"></script>
+
+    <title>Room8s</title>
+
+
+    <!-- To script για να λειτουργεί το Show-hide button -->
+    <script type="text/javascript">
+        function showHideDiv(ele) {
+            var srcElement = document.getElementById(ele);
+            if (srcElement != null) {
+                if (srcElement.style.display == "block") {
+                    srcElement.style.display = 'none';
+                } else {
+                    srcElement.style.display = 'block';
+                }
+                return false;
+            }
+        }
+    </script>
+
+
+
+</head>
+
+
+
+
+
+
+
+
+<body>
+
+
+
+
+    <!--NAVIGATION BAR-->
+    <div id="navbar">
+
+        <div id="navigation-container">
+
+            <a href="main.html" style="text-decoration: none"><img id="room8s-logo"
+                    src="file:///Users/macuser/Developemnt/VScode/room8s/room8s_logo.png"></a>
+
+
+            <ul>
+                <li style="margin-left:5px"><a href="main.html" style="text-decoration: none">Αρχική</a></li>
+                <li><a href="eksoda.html" style="text-decoration: none">Έξοδα</a></li>
+                <li><a href="settings.html" style="text-decoration: none">Ρυθμίσεις</a></li>
+
+            </ul>
+        </div>
+
+    </div>
+
+
+
+
+    <div id="enoikoi">
+        <h2><i class="fas fa-home"></i> ΕΝΟΙΚΟΙ </h2>
+
+
+        <div class="row">
+            <div class="col-xs-4">
+
+                <!-- Κουμπί που πατιέται και εμφανίζει τα στοιχεία του εκάστοτε ενοίκου-->
+                <input class="btn btn-block" type="button" value="Αποστόλης Γεροδήμος"
+                    onClick="showHideDiv('divMsg')" /><br><br>
+                <div class="wheat-box" id="divMsg"
+                    style="color: black; background-color: wheat; height: 300px; width: 415px;  display:none">
+                    <ul>
+                        <li class="pers-info">Όνομα: Αποστόλης</li> <br>
+                        <li class="pers-info">Επίθετο: Γεροδήμος</li> <br>
+                        <li class="pers-info">Ημερομηνία Γέννησης: 02/02/1994</li> <br>
+                        <li class="pers-info">Ηλεκτρονική Διεύθυνση: aposgerodimos@gmail.com</li><br>
+                        <li class="pers-info">Τηλέφωνο: 6970123891</li> <br>
+                        <li class="pers-info">Κατηγορία: A'</li>
+                    </ul>
+                </div>
+
+            </div>
+
+
+            <div class="col-xs-4">
+
+                <input style="margin-left:10px" class="btn btn-block" type="button" value="Φίλιππος Γεροδήμος"
+                    onClick="showHideDiv('divMsg2')" /><br><br>
+                <div class="wheat-box" id="divMsg2"
+                    style=" color: black; background-color:wheat; height: 300px; width: 415px; display:none">
+                    <ul>
+                        <li class="pers-info">Όνομα: Φίλιππος</li> <br>
+                        <li class="pers-info">Επίθετο: Γεροδήμος</li> <br>
+                        <li class="pers-info">Ημερομηνία Γέννησης: 01/01/1996 </li><br>
+                        <li class="pers-info">Ηλεκτρονική Διεύθυνση: filgerodimos@gmail.com</li><br>
+                        <li class="pers-info">Τηλέφωνο: 6978910123 </li><br>
+                        <li class="pers-info">Κατηγορία: Β'</li>
+                    </ul>
+
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!--ΠΛΗΡΟΦΟΡΙΕΣ ΣΧΕΤΙΚΑ ΜΕ ΤΑ ΣΤΟΙΧΕΙΑ ΤΟΥ ΣΠΙΤΙΟΥ ΠΟΥ ΕΝΟΙΚΙΑΖΕΤΑΙ-->
+    <div id="topothesia">
+
+
+        <h2><i class="fas fa-globe-europe"></i> ΤΟΠΟΘΕΣΙΑ </h2>
+
+        <div class="wheat-box">
+            <ul>
+                <li class="pers-info"><em>ID:</em>abse14</li><br>
+                <li class="pers-info"><em>Διεύθυνση:</em> Γαμβέτα 17</li><br>
+                <li class="pers-info"><em>Όροφος:</em> 1ος</li><br>
+                <li class="pers-info"><em>Τ.Κ:</em> 41221</li><br>
+                <li class="pers-info"><em>Χώρα:</em> Ελλάδα</li>
+
+            </ul>
+        </div>
+
+        <!-- O χάρτης Google Maps που θα δείχνει την τοποθεσία του σπιτιού που ενοικιάζουν-->
+        <h3><i class="fas fa-map-marked-alt"></i> Δες το στον χάρτη: </h3>
+
+        <div id="googleMap" style="width: 600px;height:300px;"></div>
+
+        <script>
+            function myMap() {
+                var mapProp = {
+                    center: new google.maps.LatLng(51.508742, -0.120850),
+                    zoom: 5,
+                };
+                var map = new google.maps.Map(document.getElementById("googleMap"), mapProp);
+            }
+        </script>
+
+        <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_KEY&callback=myMap"></script>
+
+    </div>
+
+
+
+</body>
+
+</html>
