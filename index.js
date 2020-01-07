@@ -39,8 +39,7 @@ app.set('view engine', 'ejs');
 // var router = app.Router();
 
 app.get("/", (req, res) => {
-  
-  res.sendFile(__dirname + "/frontend-transition/main.html");
+  res.render("sign-in-room8s.ejs");
 });
 
 app.get("/viewRulesDetails", (req, res) => {
