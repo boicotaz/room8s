@@ -2,36 +2,56 @@ const express = require("express");
 const app = express();
 const server = require("http").createServer(app);
 const bodyParser = require("body-parser");
-var cors = require("cors");
-var mysql = require("mysql");
-var connection = mysql.createConnection({
-  host: "localhost",
-  user: "root",
-  password: "tolis",
-  database: "home_site",
-  insecureAuth: true,
-  port: 3306  
-});
+var cors = require("cors"); 
+// var mysql = require("mysql");
+var sequelize = require("./services/sqlService");
+var morgan = require('morgan');
+var passport = require('passport');
+const user = require("./model/User");
 
-connection.connect(function(err) {
-  if (err) {
-    console.error(err.stack);
-    return;
-  }
 
-  console.log("connected as id " + connection.threadId);
-});
+// SQL Connection
 
+// var connection = mysql.createConnection({
+//   host: "localhost",
+//   user: "root",
+//   password: "tolis",
+//   database: "home_site",
+//   insecureAuth: true,
+//   port: 3306  
+// });
+
+// connection.connect(function(err) {
+//   if (err) {
+//     console.error(err.stack);
+//     return;
+//   }
+
+//   console.log("connected as id " + connection.threadId);
+// });
+
+// Initialize server
 server.listen(process.env.PORT || 8082, () => {
   console.log(`app is now listening to port ${process.env.PORT || 8082}`);
   console.log(__dirname);
 });
 
+// Hook up the HTTP logger.
+app.use(morgan('dev'));
+
+//  Hook up Passport for authentication
+app.use(passport.initialize());
+
+
 app.use("/public", express.static(__dirname + "/public"));
 app.use(cors());
 
+app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+
+
+// app.use(express.json());
+// app.use(express.urlencoded());
 
 //set render engine
 app.engine('html', require('ejs').renderFile);
@@ -70,6 +90,14 @@ app.get("/getRulesDetails", (req, res) => {
   });
 });
 
+app.post("/validate", function(req,res) {
+  let my_variable = 'WE DID IT'; 
+  console.log(req.body.email);
+  console.log(req.body.password);
+  res.render("main.ejs", {get: my_variable} , function(err,outputHtml) {
+    res.send(outputHtml);
+  });
+});
 app.post("/post", function(req, res) {
   console.log(req.body);
   console.log("in post");
