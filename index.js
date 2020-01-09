@@ -4,13 +4,11 @@ const server = require("http").createServer(app);
 const bodyParser = require("body-parser");
 var cors = require("cors");
 var passport = require("passport");
-const LocalStrategy = require("passport-local").Strategy;
-const sequelize = require("./services/sqlService");
 var morgan = require("morgan");
 const session = require("express-session");
 const sessionStore = new session.MemoryStore();
-
-const User = require("./model/User");
+const passportService = require("./services/passportService");
+const signUpController = require("./controllers/signUpController");
 
 // Initialize server
 server.listen(process.env.PORT || 8082, () => {
@@ -43,20 +41,24 @@ app.use(
 // Init the passport.
 app.use(passport.initialize());
 app.use(passport.session());
-require("./services/passportService")(passport);
+passportService.passportConfigure(passport);
 
 // Set render engine
 app.engine("html", require("ejs").renderFile);
 app.set("view engine", "ejs");
 
 app.get("/", (req, res) => {
-  res.render("sign-in-room8s.ejs");
+  res.render("sign-in-room8s.ejs", { user: null, userAlreadyExists: null, mail: null });
 });
 
-app.get("/home", (req, res) => {
+app.get("/home", passportService.authValidation, (req, res) => {
   console.log("Is the user authenticated? => " + req.isAuthenticated());
+  // console.log(req.user.firstName);
   res.render("main.ejs");
 });
+
+app.use("/sign-up", signUpController);
+
 
 app.post(
   "/validate",

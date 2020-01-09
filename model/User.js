@@ -28,6 +28,9 @@ var userModelDefinition = {
     },
     birthDate: {
         type: Sequelize.DATEONLY
+    },
+    gender: {
+        type: Sequelize.STRING
     }
 };
 

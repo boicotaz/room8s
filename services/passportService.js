@@ -7,7 +7,7 @@ function passportConfigure(passport) {
     done(null, user.id);
   });
   passport.deserializeUser((id, done) => {
-    console.log("deserialize routine with key:  ");
+    console.log("deserialize routine with key: " + id);
     User.findOne({ where: { id: id } }).then(user => done(null, user));
   });
   passport.use(
@@ -41,4 +41,13 @@ function passportConfigure(passport) {
   );
 }
 
-module.exports = passportConfigure;
+function authValidation(req, res, next) {
+  if (req.isAuthenticated()) {
+    console.log(req.user.firstName);
+    return next();
+  } else {
+    res.status(500).json({ message: "You are not logged in, you dummy!" });
+  }
+}
+
+module.exports = { passportConfigure, authValidation };

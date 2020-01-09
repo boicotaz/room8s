@@ -3,8 +3,7 @@
 
 <head>
 
-    <link href="../public/sign-up-room8s.css" rel="stylesheet"
-        id="bootstrap-css">
+    <link href="../public/sign-up-room8s.css" rel="stylesheet" id="bootstrap-css">
     <script src="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
     <!------ Include the above in your HEAD tag ---------->
@@ -21,12 +20,10 @@
         integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU" crossorigin="anonymous">
 
     <!--Custom styles-->
-    <link rel="stylesheet" type="text/css"
-        href="../public/sign-in-room8s.css">
+    <link rel="stylesheet" type="text/css" href="../public/sign-in-room8s.css">
 
 
-    <link href="../public/sign-in-room8s.css" rel="stylesheet"
-        id="bootstrap-css">
+    <link href="../public/sign-in-room8s.css" rel="stylesheet" id="bootstrap-css">
 </head>
 
 <body>
@@ -42,50 +39,53 @@
                     </div>-->
                 </div>
                 <div class="card-body">
-                    <form>
+                    <form action="/sign-up" method="post">
                         <div class="input-group form-group">
-                            <div  class="input-group-prepend">
+                            <div class="input-group-prepend">
                                 <span class="input-group-text"><i class="fas fa-venus-mars"></i></span>
                             </div>
-                            
-                                <input style="margin-left:10px" type="radio" name="gender" value="male"><span style="color:white; margin-left: 4px">Male</span><br>
-                                <input style="margin-left:10px" type="radio" name="gender" value="female"><span  style="color:white; margin-left: 4px">Female</span><br>
-                                
-                                
-    
+
+                            <input style="margin-left:10px" type="radio" name="gender" value="male"><span
+                                style="color:white; margin-left: 4px">Male</span><br>
+                            <input style="margin-left:10px" type="radio" name="gender" value="female"><span
+                                style="color:white; margin-left: 4px">Female</span><br>
+
+
+
                         </div>
 
                         <div class="input-group form-group">
                             <div class="input-group-prepend">
                                 <span class="input-group-text"><i class="fas fa-user"></i></span>
                             </div>
-                            <input name="Name" type="text" class="form-control" placeholder="Name">
+                            <input name="firstName" type="text" class="form-control" placeholder="Name">
                         </div>
                         <div class="input-group form-group">
                             <div class="input-group-prepend">
                                 <span class="input-group-text"><i class="fas fa-user"></i></span>
                             </div>
-                            <input name="Surname" type="text" class="form-control" placeholder="Surname">
+                            <input name="lastName" type="text" class="form-control" placeholder="Surname">
                         </div>
 
-                        
+
                         <div class="input-group form-group">
                             <div class="input-group-prepend">
                                 <span class="input-group-text"><i class="fas fa-envelope-square"></i></span>
                             </div>
-                            <input name="e-mail" type="email" class="form-control" placeholder="e-mail">
+                            <input name="email" type="email" class="form-control" placeholder="e-mail">
                         </div>
                         <div class="input-group form-group">
                             <div class="input-group-prepend">
                                 <span class="input-group-text"><i class="fas fa-mobile-alt"></i></span>
                             </div>
-                            <input name="mobile number" type="tel" class="form-control" placeholder="mobile number">
+                            <input name="phoneNumber" type="tel" class="form-control" placeholder="mobile number">
                         </div>
                         <div class="input-group form-group">
                             <div class="input-group-prepend">
                                 <span class="input-group-text"><i class="far fa-calendar-alt"></i></span>
                             </div>
-                            <input name="birth date" placeholder="birth date" type="text" onfocus="(this.type='date')" class="form-control" >
+                            <input name="birthDate" placeholder="birth date" type="text" onfocus="(this.type='date')"
+                                class="form-control">
                         </div>
 
                         <!-- <input name="birth date" placeholder="birth date" class="form-control" type="text" onfocus="(this.type='date')"> 
@@ -107,7 +107,7 @@
                         </div>
 
 
-                        
+
 
                         <div class="form-group">
                             <input type="submit" value="Sign Up" class="btn float-right login_btn">
