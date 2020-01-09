@@ -2,33 +2,21 @@ const express = require("express");
 const app = express();
 const server = require("http").createServer(app);
 const bodyParser = require("body-parser");
-var cors = require("cors"); 
+var cors = require("cors");
+const passport = require('passport');
+const LocalStrategy = require('passport-local').Strategy;
 // var mysql = require("mysql");
 var sequelize = require("./services/sqlService");
 var morgan = require('morgan');
-var passport = require('passport');
-const user = require("./model/User");
+// const jwt = require('jsonwebtoken');
 
 
-// SQL Connection
+const session = require('express-session');
+const sessionStore = new session.MemoryStore();
 
-// var connection = mysql.createConnection({
-//   host: "localhost",
-//   user: "root",
-//   password: "tolis",
-//   database: "home_site",
-//   insecureAuth: true,
-//   port: 3306  
-// });
 
-// connection.connect(function(err) {
-//   if (err) {
-//     console.error(err.stack);
-//     return;
-//   }
+const User = require("./model/User");
 
-//   console.log("connected as id " + connection.threadId);
-// });
 
 // Initialize server
 server.listen(process.env.PORT || 8082, () => {
@@ -38,9 +26,13 @@ server.listen(process.env.PORT || 8082, () => {
 
 // Hook up the HTTP logger.
 app.use(morgan('dev'));
-
 //  Hook up Passport for authentication
-app.use(passport.initialize());
+
+
+// Hook the passport strategy.
+// var validateRouter = require('./services/passportStrategyService');
+// app.use('/validate', validateRouter);
+
 
 
 app.use("/public", express.static(__dirname + "/public"));
@@ -48,6 +40,10 @@ app.use(cors());
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
+
+
+
+app.use(session({ secret: 'sdfsdfasdfasdfasdfsdaasdasdfasd', resave: true, saveUninitialized: true, key: 'express.sid', store: sessionStore }));
 
 
 // app.use(express.json());
@@ -62,75 +58,55 @@ app.get("/", (req, res) => {
   res.render("sign-in-room8s.ejs");
 });
 
-app.get("/viewRulesDetails", (req, res) => {
-  // res.sendFile(__dirname + "/rules-details.html");
-  let my_variable = 'WE DID IT'; 
-  res.render("rules-details.ejs", {get: my_variable} , function(err,outputHtml) {
-    res.send(outputHtml);
-  });
+
+app.get("/home", (req, res) => {
+  console.log('Is the user authenticated? => ' + req.isAuthenticated());
+  res.render("main.ejs");
 });
 
-app.get("/viewDetails", (req, res) => {
-  res.sendFile(__dirname + "/details.html");
+
+
+app.use(passport.initialize());
+app.use(passport.session());
+
+
+passport.serializeUser((user, done) => {
+
+  console.log("serialize routine with user id = " + user.id);
+  done(null, user.id);
 });
 
-app.get("/getDetails", (req, res) => {
-  connection.query("select * from jobs", function(error, results, fields) {
-    if (error) throw error;
-    res.send(results);
-    console.log("we in get request");
-  });
+passport.deserializeUser((id, done) => {
+
+  console.log('deserialize routine with key:  ');
+  User.findOne({ where: { 'id': id } }).then(user => done(null, user));
 });
 
-app.get("/getRulesDetails", (req, res) => {
-  connection.query("select * from Rules", function(error, results, fields) {
-    if (error) throw error;
-    res.send(results);
-    console.log("we in get request");
+passport.use('local', new LocalStrategy({ usernameField: 'email', passwordField: 'password' }, (username, password, done) => {
+  potentialUser = { where: { email: username } };
+  User.findOne(potentialUser).then(function (user, error) {
+    if (!user) {
+      return done(null, false);
+    } else if (error) {
+      return done(error);
+    }
+    else {
+      user.comparePasswords(password, function (error, isMatch) {
+        console.log(isMatch, error);
+        if (isMatch && !error) {
+          return done(null, user);
+        } else {
+          return done(null, false);
+        }
+      });
+    }
+  }).catch(function (error) {
+    res.status(500).json({ message: 'There was an error!' });
   });
-});
+}));
 
-app.post("/validate", function(req,res) {
-  let my_variable = 'WE DID IT'; 
-  console.log(req.body.email);
-  console.log(req.body.password);
-  res.render("main.ejs", {get: my_variable} , function(err,outputHtml) {
-    res.send(outputHtml);
-  });
-});
-app.post("/post", function(req, res) {
-  console.log(req.body);
-  console.log("in post");
 
-  connection.query("show tables;", function(error, results, fields) {
-    // if (error) throw error;
-    console.log("it returned", results[0]["Tables_in_home_site"]);
-  });
+app.post("/validate", passport.authenticate('local', { failureRedirect: "/", successRedirect: "/home" }));
 
-  let post = req.body;
 
-  connection.query("insert into jobs set ?", post, function(
-    err,
-    results,
-    fields
-  ) {
-    if (err) throw error;
-    console.log(results);
-  });
 
-  res.send({ redirectUrl: "/viewDetails" });
-});
-
-app.post("/postRules", function(req, res) {
-  let post = req.body;
-  connection.query("insert into Rules set ?", post, function(
-    err,
-    results,
-    fields
-  ) {
-    if (err) throw error;
-    console.log(results);
-  });
-  res.send({ redirectUrl: "/viewRulesDetails" });
-  // res.redirect("/viewRulesDetails");
-});
