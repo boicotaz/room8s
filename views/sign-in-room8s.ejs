@@ -39,6 +39,13 @@
     </p>
   </div>
   <% } %>
+  <% if (user == false){ %>
+  <div class="alert alert-warning col-12" role="alert" style="padding-bottom: 0">
+    <p class='text-center '>
+      <strong>Error!</strong> Invalid combination of email and password!
+    </p>
+  </div>
+  <% } %>
   <div class="container">
     <div class="d-flex justify-content-center h-100">
       <div class="card">

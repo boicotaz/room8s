@@ -47,23 +47,29 @@ passportService.passportConfigure(passport);
 app.engine("html", require("ejs").renderFile);
 app.set("view engine", "ejs");
 
+//Sign-In page
 app.get("/", (req, res) => {
   res.render("sign-in-room8s.ejs", { user: null, userAlreadyExists: null, mail: null });
 });
 
+//Home page
 app.get("/home", passportService.authValidation, (req, res) => {
   console.log("Is the user authenticated? => " + req.isAuthenticated());
-  // console.log(req.user.firstName);
   res.render("main.ejs");
 });
 
+//Sign up page
 app.use("/sign-up", signUpController);
 
-
-app.post(
-  "/validate",
-  passport.authenticate("local", {
-    failureRedirect: "/",
-    successRedirect: "/home"
-  })
-);
+app.post('/validate', function (req, res, next) {
+  passport.authenticate('local', function (err, user, info) {
+    if (err) { return next(err); }
+    if (!user) {
+      return res.render("sign-in-room8s.ejs", { user: false, userAlreadyExists: null, mail: null });
+    }
+    req.logIn(user, function (err) {
+      if (err) { return next(err); }
+      return res.redirect('/home');
+    });
+  })(req, res, next);
+});

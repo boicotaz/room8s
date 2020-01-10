@@ -1,0 +1,33 @@
+
+"use strict"
+const UserModel = require('../model/User');
+
+function getUserService() {
+    var userService = new UserService(UserModel);
+    return userService;
+}
+
+class UserService {
+
+    constructor(userModel) {
+        this.userModel = userModel;
+    }
+
+    createUser(options, done) {
+        this.userModel.findOne({ where: { email: options.email } }).then((user) => {
+            if (user != null) {
+                return done(false, user);
+            }
+            else {
+                options.phoneNumber = parseInt(options.phoneNumber);
+                if (options.birthDate == '') options.birthDate = null;
+                this.userModel.create(options).then(function (user) {
+                    return done(true, user);
+                })
+            }
+        });
+    };
+}
+
+
+module.exports = getUserService;
