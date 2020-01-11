@@ -5,11 +5,17 @@
 html,body{
 background-image: url('../public/sign_in_background_image.jpg');
 background-size: cover;
+-webkit-background-size: cover;
+-moz-background-size: cover;
+-o-background-size: cover;
 background-repeat: no-repeat;
 height: 100%;
 font-family: 'Numans', sans-serif;
 }
 
+/* @media screen and ( max-width: 500px ) {
+    html,body { background-size: 400px,796px; }
+} */
 .container{
 height: 100%;
 align-content: center;

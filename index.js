@@ -61,6 +61,13 @@ app.get("/home", passportService.authValidation, (req, res) => {
 //Sign up page
 app.use("/sign-up", signUpController);
 
+//xrei page
+app.get("/home/xrei", passportService.authValidation, (req, res) => {
+  console.log("Is the user authenticated? => " + req.isAuthenticated());
+  res.render("eksoda.ejs");
+});
+
+
 app.post('/validate', function (req, res, next) {
   passport.authenticate('local', function (err, user, info) {
     if (err) { return next(err); }
@@ -73,3 +80,4 @@ app.post('/validate', function (req, res, next) {
     });
   })(req, res, next);
 });
+
