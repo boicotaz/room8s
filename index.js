@@ -9,6 +9,7 @@ const session = require("express-session");
 const sessionStore = new session.MemoryStore();
 const passportService = require("./services/passportService");
 const signUpController = require("./controllers/signUpController");
+const signOutController = require("./controllers/signOutController");
 
 // Initialize server
 server.listen(process.env.PORT || 8082, () => {
@@ -34,7 +35,8 @@ app.use(
     resave: true,
     saveUninitialized: true,
     key: "express.sid",
-    store: sessionStore
+    store: sessionStore,
+    expires: new Date(Date.now() + (120 * 60 * 1000))
   })
 );
 
@@ -60,6 +62,9 @@ app.get("/home", passportService.authValidation, (req, res) => {
 
 //Sign up page
 app.use("/sign-up", signUpController);
+
+//Sign out route
+app.use("/sign-out", signOutController)
 
 //xrei page
 app.get("/home/xrei", passportService.authValidation, (req, res) => {
