@@ -47,7 +47,7 @@ function authValidation(req, res, next) {
     console.log(req.user.firstName);
     return next();
   } else {
-    res.status(500).json({ message: "You are not logged in, you dummy!" });
+    res.redirect('/');
   }
 }
 

@@ -10,6 +10,9 @@ const sessionStore = new session.MemoryStore();
 const passportService = require("./services/passportService");
 const signUpController = require("./controllers/signUpController");
 const signOutController = require("./controllers/signOutController");
+const expensesController = require("./controllers/expensesController");
+var splitwiseService = require('./services/splitwiseService')();
+const groupService = require('./services/groupService')();
 
 // Initialize server
 server.listen(process.env.PORT || 8082, () => {
@@ -56,8 +59,19 @@ app.get("/", (req, res) => {
 
 //Home page
 app.get("/home", passportService.authValidation, (req, res) => {
-  console.log("Is the user authenticated? => " + req.isAuthenticated());
-  res.render("main.ejs");
+  console.log("Is the user authenticated? =>  " + req.isAuthenticated());
+  console.log("Home Route");
+  groupService.findGroupByUserId(req.user.id).then(groupId => {
+    if (groupId != null) {
+      res.render("main.ejs", { userHasGroup: true, user: req.user });
+    }
+    else {
+      console.log('User Has Group is false');
+      req.user.noBother = 'My text';
+      res.render("main.ejs", { userHasGroup: false, user: req.user });
+    }
+  })
+
 });
 
 //Sign up page
@@ -66,11 +80,8 @@ app.use("/sign-up", signUpController);
 //Sign out route
 app.use("/sign-out", signOutController)
 
-//xrei page
-app.get("/home/xrei", passportService.authValidation, (req, res) => {
-  console.log("Is the user authenticated? => " + req.isAuthenticated());
-  res.render("eksoda.ejs");
-});
+//expenses page
+app.get("/home/expenses", expensesController);
 
 
 app.post('/validate', function (req, res, next) {
@@ -85,4 +96,6 @@ app.post('/validate', function (req, res, next) {
     });
   })(req, res, next);
 });
+
+
 

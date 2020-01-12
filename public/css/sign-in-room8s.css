@@ -3,7 +3,7 @@
 @import url('https://fonts.googleapis.com/css?family=Numans');
 
 html,body{
-background-image: url('../public/sign_in_background_image.jpg');
+background-image: url('../sign_in_background_image.jpg');
 background-size: cover;
 -webkit-background-size: cover;
 -moz-background-size: cover;
@@ -28,6 +28,11 @@ margin-bottom: auto;
 width: 400px;
 background-color: rgba(0,0,0,0.5) !important;
 }
+
+/* .table{
+    margin-top: auto;
+    margin-bottom: auto; 
+} */
 
 .social_icon span{
 font-size: 60px;

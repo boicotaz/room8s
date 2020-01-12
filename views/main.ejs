@@ -8,24 +8,28 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
 
-    <!-- ΕΙΣΑΓΩΓΗ ΤΟΥ font-awesome -->
-    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css"
-        integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous">
+    <!--Fontawesome CDN-->
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css"
+        integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU" crossorigin="anonymous" />
 
 
-    <!-- Latest compiled and minified CSS -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+    <!--Bootsrap.css 4 CDN-->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
+        integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous" />
 
-    <!-- jQuery library -->
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+        integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+        crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+        integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+        crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+        integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+        crossorigin="anonymous"></script>
 
-    <!-- Latest compiled JavaScript -->
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
+    <script src="../public/js/main.js"></script>
+    <link rel="stylesheet" type="text/css" href="../public/css/main.css">
 
-    <!-- file:///Users/macuser/Developemnt/VScode/room8s/style.css -->
-
-    <link rel="stylesheet" href="../public/style.css" type="text/css">
-    <script src="file:///Users/macuser/Developemnt/VScode/room8s/main.js" type="text/javascript"></script>
 
     <title>Room8s</title>
 
@@ -43,43 +47,55 @@
                 return false;
             }
         }
+
     </script>
-
-
 
 </head>
 
-
-
-
-
-
-
-
 <body>
 
-
     <!--NAVIGATION BAR-->
-    <div id="navbar">
+    <%- include("template-nav-bar.ejs") %>
+    <br>
+    <br>
+    <br>
 
-        <div id="navigation-container">
+    <% if (userHasGroup == false){ %>
+    <script>
+        window.onload = function () {
+            if (this.name == 'done') {
+            } else {
+                this.name = 'done';
+                $('#exampleModalCenter').modal('show');
+            }
+        }
+    </script>
+    <% } %>
 
-            <a href="main.html" style="text-decoration: none"><img id="room8s-logo" src="../public/room8s_logo.png"></a>
-
-
-            <ul>
-                <li style="margin-left:5px"><a href="main.html" style="text-decoration: none">Αρχική</a></li>
-                <li><a href="/home/xrei" style="text-decoration: none">Έξοδα</a></li>
-                <li><a href="settings.html" style="text-decoration: none">Ρυθμίσεις</a></li>
-
-            </ul>
+    <!-- Modal -->
+    <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog"
+        aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLongTitle">Welcome, <%= user.firstName %></h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    It seems like you are not assigned in a group, would you like to create a group?
+                </div>
+                <div class="modal-footer">
+                    <button id='rjct-btn' type="button" class="btn btn-secondary" data-dismiss="modal">Maybe
+                        later</button>
+                    <button type="button" class="btn btn-primary">Yes, let's go</button>
+                </div>
+            </div>
         </div>
-
     </div>
 
-
-
-
+    <% if (userHasGroup == true ){ %>
     <div id="enoikoi">
         <h2><i class="fas fa-home"></i> ΕΝΟΙΚΟΙ </h2>
 
@@ -126,6 +142,26 @@
         </div>
 
     </div>
+    <% } else { %>
+
+    <div class="container-fluid">
+        <!-- <div class="d-flex flex-row  mb-5 justify-content-left"> -->
+
+        <div class="row">
+            <div class="col">
+                <h4> Group wasn't found :-( </h4>
+            </div>
+        </div>
+        <div class="row mb-5">
+            <div class="col">
+                <button type="button" class="btn btn-primary">Create Group</button> </div>
+        </div>
+        <!-- </div> -->
+    </div>
+    </div>
+
+
+    <% } %>
 
     <!--ΠΛΗΡΟΦΟΡΙΕΣ ΣΧΕΤΙΚΑ ΜΕ ΤΑ ΣΤΟΙΧΕΙΑ ΤΟΥ ΣΠΙΤΙΟΥ ΠΟΥ ΕΝΟΙΚΙΑΖΕΤΑΙ-->
     <div id="topothesia">

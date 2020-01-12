@@ -3,7 +3,7 @@
 @import url('https://fonts.googleapis.com/css?family=Numans');
 
 html,body{
-background-image: url('file:///Users/macuser/Developemnt/VScode/room8s/signup/living-room-2732939_1920.jpg');
+background-image: url('../sign_in_background_image.jpg');
 background-size: cover;
 background-repeat: no-repeat;
 height: 100%;
