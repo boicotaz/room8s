@@ -44,5 +44,6 @@
   "bugs": {
     "url": "https://github.com/boicotaz/Home-Site/issues"
   },
-  "homepage": "https://github.com/boicotaz/Home-Site#readme"
+  "homepage": "https://github.com/boicotaz/Home-Site#readme",
+  "proxy": "http://localhost:8082"
 }

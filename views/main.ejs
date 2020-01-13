@@ -27,8 +27,19 @@
         integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
         crossorigin="anonymous"></script>
 
-    <script src="../public/js/main.js"></script>
+    <!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script> -->
+
+    <script type="text/babel" src="../public/js/main.js"></script>
     <link rel="stylesheet" type="text/css" href="../public/css/main.css">
+
+    <!-- React dependecies -->
+    <script src="https://unpkg.com/react@16/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@16/umd/react-dom.development.js" crossorigin></script>
+    <script src="https://unpkg.com/babel-standalone@6.26.0/babel.js"></script>
+    <!-- 
+    <script src="https://unpkg.com/react@16/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"></script> -->
+
 
 
     <title>Room8s</title>
@@ -52,7 +63,6 @@
 </head>
 
 <body>
-
     <!--NAVIGATION BAR-->
     <%- include("template-nav-bar.ejs") %>
     <br>
@@ -95,51 +105,16 @@
     </div>
 
     <% if (userHasGroup == true ){ %>
-    <div id="enoikoi">
-        <h2><i class="fas fa-home"></i> ΕΝΟΙΚΟΙ </h2>
-
-
+    <div class="container">
         <div class="row">
-            <div class="col-xs-4">
-
-                <!-- Κουμπί που πατιέται και εμφανίζει τα στοιχεία του εκάστοτε ενοίκου-->
-                <input class="btn btn-block" type="button" value="Αποστόλης Γεροδήμος"
-                    onClick="showHideDiv('divMsg')" /><br><br>
-                <div class="wheat-box" id="divMsg"
-                    style="color: black; background-color: wheat; height: 300px; width: 415px;  display:none">
-                    <ul>
-                        <li class="pers-info">Όνομα: Αποστόλης</li> <br>
-                        <li class="pers-info">Επίθετο: Γεροδήμος</li> <br>
-                        <li class="pers-info">Ημερομηνία Γέννησης: 02/02/1994</li> <br>
-                        <li class="pers-info">Ηλεκτρονική Διεύθυνση: aposgerodimos@gmail.com</li><br>
-                        <li class="pers-info">Τηλέφωνο: 6970123891</li> <br>
-                        <li class="pers-info">Κατηγορία: A'</li>
-                    </ul>
-                </div>
-
-            </div>
-
-
-            <div class="col-xs-4">
-
-                <input style="margin-left:10px" class="btn btn-block" type="button" value="Φίλιππος Γεροδήμος"
-                    onClick="showHideDiv('divMsg2')" /><br><br>
-                <div class="wheat-box" id="divMsg2"
-                    style=" color: black; background-color:wheat; height: 300px; width: 415px; display:none">
-                    <ul>
-                        <li class="pers-info">Όνομα: Φίλιππος</li> <br>
-                        <li class="pers-info">Επίθετο: Γεροδήμος</li> <br>
-                        <li class="pers-info">Ημερομηνία Γέννησης: 01/01/1996 </li><br>
-                        <li class="pers-info">Ηλεκτρονική Διεύθυνση: filgerodimos@gmail.com</li><br>
-                        <li class="pers-info">Τηλέφωνο: 6978910123 </li><br>
-                        <li class="pers-info">Κατηγορία: Β'</li>
-                    </ul>
-
+            <div class="jumbotron col-6">
+                <h1 class="display-6"> <i class="fas fa-home"> </i> My Roomates</h1>
+                <hr class="my-4">
+                <p class="lead">Click to view Details </p>
+                <div id='usersInGroup' class="lead">
                 </div>
             </div>
-
         </div>
-
     </div>
     <% } else { %>
 
@@ -162,44 +137,32 @@
 
     <% } %>
 
-    <!--ΠΛΗΡΟΦΟΡΙΕΣ ΣΧΕΤΙΚΑ ΜΕ ΤΑ ΣΤΟΙΧΕΙΑ ΤΟΥ ΣΠΙΤΙΟΥ ΠΟΥ ΕΝΟΙΚΙΑΖΕΤΑΙ-->
-    <div id="topothesia">
-
-
-        <h2><i class="fas fa-globe-europe"></i> ΤΟΠΟΘΕΣΙΑ </h2>
-
-        <div class="wheat-box">
-            <ul>
-                <li class="pers-info"><em>ID:</em>abse14</li><br>
-                <li class="pers-info"><em>Διεύθυνση:</em> Γαμβέτα 17</li><br>
-                <li class="pers-info"><em>Όροφος:</em> 1ος</li><br>
-                <li class="pers-info"><em>Τ.Κ:</em> 41221</li><br>
-                <li class="pers-info"><em>Χώρα:</em> Ελλάδα</li>
-
-            </ul>
-        </div>
-
-        <!-- O χάρτης Google Maps που θα δείχνει την τοποθεσία του σπιτιού που ενοικιάζουν-->
-        <h3><i class="fas fa-map-marked-alt"></i> Δες το στον χάρτη: </h3>
-
-        <div id="googleMap" style="width: 600px;height:300px;"></div>
-
-        <script>
-            function myMap() {
-                var mapProp = {
-                    center: new google.maps.LatLng(51.508742, -0.120850),
-                    zoom: 5,
-                };
-                var map = new google.maps.Map(document.getElementById("googleMap"), mapProp);
-            }
-        </script>
-
-        <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_KEY&callback=myMap"></script>
-
-    </div>
-
-
 
 </body>
 
 </html>
+
+<script type="text/babel">
+
+    class Userbutton extends React.Component {
+        render() {
+            return (<a className="btn btn-dark btn-lg mr-1" href="#" role="button">{this.props.userFirstName}</a>);
+        }
+    }
+
+    class Group extends React.Component {
+        render() {
+
+            let users = this.props.userNames;
+            let usernames = users.map( user => user.firstName);
+
+            const buttons = usernames.map( username => <Userbutton userFirstName = {username} /> )
+            return ( <React.Fragment> {buttons} </React.Fragment> ) 
+        }
+    }
+    $(document).ready(function () {
+        ReactDOM.render(
+            <Group userNames={ <%- JSON.stringify(user.usersInGroup) %> } />, document.getElementById("usersInGroup") )
+    });
+
+</script>

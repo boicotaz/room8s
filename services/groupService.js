@@ -14,6 +14,10 @@ class GroupService {
     async findGroupByUserId(userId) {
         return this.groupModel.findGroupByUserId(userId);
     }
+
+    async findUsersInGroup(groupId) {
+        return this.groupModel.findUsersInGroup(groupId);
+    }
 }
 
 module.exports = getGroupService;

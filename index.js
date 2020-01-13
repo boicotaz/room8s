@@ -63,7 +63,7 @@ app.get("/home", passportService.authValidation, (req, res) => {
   console.log("Home Route");
   groupService.findGroupByUserId(req.user.id).then(groupId => {
     if (groupId != null) {
-      res.render("main.ejs", { userHasGroup: true, user: req.user });
+      groupService.findUsersInGroup(groupId).then((usersInGroup) => { req.user.usersInGroup = usersInGroup; res.render("main.ejs", { userHasGroup: true, user: req.user }) });
     }
     else {
       console.log('User Has Group is false');

@@ -1,7 +1,17 @@
 
 @import url('https://fonts.googleapis.com/css?family=Numans');
 
-body {
-    background-color:rgb(148, 236, 225);
-    font-family: 'Numans', sans-serif;
+html,body{
+  background-image: url('../sign_in_background_image.jpg');
+  background-size: cover;
+  -webkit-background-size: cover;
+  -moz-background-size: cover;
+  -o-background-size: cover;
+  background-repeat: no-repeat;
+  height: 100%;
+  font-family: 'Numans', sans-serif;
   }
+
+.btn {
+  min-width: 132px;
+}
