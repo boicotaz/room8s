@@ -18,6 +18,9 @@ class GroupService {
     async findUsersInGroup(groupId) {
         return this.groupModel.findUsersInGroup(groupId);
     }
+    async getGroupNameByGroupId(groupId) {
+        return this.groupModel.getGroupNameByGroupId(groupId);
+    }
 }
 
 module.exports = getGroupService;

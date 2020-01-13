@@ -60,7 +60,10 @@ GroupModel.findGroupByUserId = async function (userId) {
             return null;
         }
     });
+}
 
+GroupModel.getGroupNameByGroupId = async function (groupId) {
+    return this.findOne({ where: { id: groupId } }, { attributes: ['name'] }).then(group => { return group.getGroupName() });
 }
 
 module.exports = GroupModel;

@@ -48,16 +48,6 @@ var userModelOptions = {
 
 const UserModel = sequelize.define('users', userModelDefinition, userModelOptions);
 
-// UserModel.findAll({attributes:['firstName', 'lastName', 'id', 'password', 'email' , 'phoneNumber', 'birthDate']}).then(users => {
-//     console.log("All users:", JSON.stringify(users, null, 4));
-//   });
-// UserModel.create({ firstName: 'tolaras', lastName: 'boicotaz', password: 'tolis', email: 'boicotaz@example.com', date: '1994-03-16' }).then(res => {
-//     console.log(res.getDataValue('firstName'), res.password, res.changed('password'));
-// })
-// sequelize.query("SELECT * FROM `users`", { type: sequelize.QueryTypes.SELECT})
-//   .then(users => {
-//     console.log("All users:", JSON.stringify(users, null, 4));
-//   })
 
 // Compares two passwords.
 UserModel.prototype.comparePasswords = function comparePasswords(password, callback) {
@@ -71,7 +61,9 @@ UserModel.prototype.comparePasswords = function comparePasswords(password, callb
         return callback(null, isMatch);
     });
 }
-
+UserModel.prototype.getGroupName = function getGroupName() {
+    return 'Picachu'
+}
 // Hashes the password for a user object.
 function hashPassword(user) {
     if (user.changed('password')) {
