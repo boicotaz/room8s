@@ -38,31 +38,41 @@
     <%- include("template-nav-bar.ejs") %>
 
 
-    <div class="container">
+    <div class="container" style="margin-top: 250px">
         <!-- <h2 class="h2-responsive" style="color: rgb(187, 255, 0)"><strong>Material Design Edge Headers</strong></h2> -->
-        <div class="d-flex align-items-center h-100">
+        <div class="row">
+            <div class='col-12'>
+                <div class="btn-group btn-group-md" role="group" aria-label="Basic example">
+                    <button type="button" class="btn btn-secondary">Create Expense</button>
+                    <button type="button" class="btn btn-secondary">View Totals</button>
+                </div>
+            </div>
+        </div>
 
-            <table class="table table-hover table-dark">
-                <thead>
-                    <tr>
-                        <th scope="col">#</th>
-                        <th scope="col">Payer</th>
-                        <th scope="col">Bitch</th>
-                        <th scope="col">When</th>
-                        <th scope="col">Description</th>
-                        <th scope="col">How much</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <th scope="row">1</th>
-                        <td>Tolis</td>
-                        <td>Pakis</td>
-                        <td>2020-01-10</td>
-                        <td>Grocery</td>
-                        <td>10 $</td>
-                    </tr>
-                    <!-- <tr>
+
+        <div class="row">
+            <div class='col-12'>
+                <table class="table table-hover table-dark ">
+                    <thead>
+                        <tr>
+                            <th scope="col">#</th>
+                            <th scope="col">Payer</th>
+                            <th scope="col">Bitch</th>
+                            <th scope="col">When</th>
+                            <th scope="col">Description</th>
+                            <th scope="col">How much</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <th scope="row">1</th>
+                            <td>Tolis</td>
+                            <td>Pakis</td>
+                            <td>2020-01-10</td>
+                            <td>Grocery</td>
+                            <td>10 $</td>
+                        </tr>
+                        <!-- <tr>
                         <th scope="row">2</th>
                         <td>Jacob</td>
                         <td>Thornton</td>
@@ -73,9 +83,11 @@
                         <td colspan="2">Larry the Bird</td>
                         <td>@twitter</td>
                     </tr> -->
-                </tbody>
-            </table>
+                    </tbody>
+                </table>
+            </div>
         </div>
+
     </div>
 </body>
 
