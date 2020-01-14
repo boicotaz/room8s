@@ -66,9 +66,6 @@
 <body>
     <!--NAVIGATION BAR-->
     <%- include("template-nav-bar.ejs") %>
-    <br>
-    <br>
-    <br>
 
     <% if (userHasGroup == false){ %>
     <script>
@@ -108,7 +105,7 @@
     <% if (userHasGroup == true ){ %>
     <div class="container">
         <div class="row">
-            <div class="jumbotron col-6">
+            <div class="jumbotron col-6 mb">
                 <h1 class="display-6"> <i class="fas fa-home"> </i> <%= groupName %> </h1>
                 <hr class="my-4">
                 <p class="lead"> Users in group </p>
@@ -120,6 +117,7 @@
             </div>
         </div>
     </div>
+
 
     <div class="modal fade" id="addUserForm" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
         aria-hidden="true">
@@ -162,6 +160,15 @@
                             </div>
                             <!--Grid row-->
                         </form>
+                    </div>
+                    <div id="user-added-success" class="modal-footer" style="display: none">
+                        <div id="alert-success" class="alert alert-success col-12 mt-0" role="alert"
+                            style="padding-bottom: 0">
+                            <p class='text-center '>
+                                <strong>Success!</strong> User: <strong id='strong-added-success'> </strong> added to
+                                group successfully.
+                            </p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -231,18 +238,25 @@
 
     let data = $(this).serializeArray();
     data[0].user = <%- JSON.stringify(user) %>
-
+    
     console.log(data);
     var request = $.ajax({
         url: '/add-user-in-group',
         type: "POST",
         data: data[0],
         dataType: "json",
-        success: function (data) {
-            console.log('We returned ? from post create new group');
-            console.log('returned data is ' , data);
-            $('#addUserForm').modal('hide');
-            renderGroup (data.group);
+        success: function (returnedData) {
+            $("#strong-added-success").text(data[0].value);
+            $("#user-added-success").show(function () {
+                var myVar = setInterval(myTimer, 3000);
+
+                function myTimer() {
+                    $('#addUserForm').modal('hide');
+                    window.clearInterval(myVar);
+                }
+                
+            });
+            renderGroup (returnedData.group);
             
         }
     });
