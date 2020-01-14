@@ -68,6 +68,34 @@ app.use("/sign-out", signOutController)
 //expenses page
 app.get("/home/expenses", expensesController);
 
+const userService = require('./services/userService')();
+const groupService = require('./services/groupService')();
+
+app.post("/add-user-in-group", function (req, res, next) {
+  console.log('get request');
+  console.log(req.body);
+  console.log(req.body['user[id]']);
+  // console.log(req.user)
+  userService.getUserIdbyEmail(req.body.value).then((userToAddId) => {
+    let userInGroupId = req.body['user[id]'];
+    console.log('in callback');
+    groupService.addUserToGroup(userToAddId, userInGroupId, function (wasCreated, groupUsers) {
+      if (wasCreated) {
+        console.log('create group ok');
+        groupUsers.then(group => res.json({ group: group }));
+
+      }
+      else {
+        console.log('create group fail');
+      }
+    });
+
+  });
+
+
+})
+
+
 
 app.post('/validate', function (req, res, next) {
   passport.authenticate('local', function (err, user, info) {

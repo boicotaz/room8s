@@ -21,6 +21,12 @@ class GroupService {
     async getGroupNameByGroupId(groupId) {
         return this.groupModel.getGroupNameByGroupId(groupId);
     }
+
+    async addUserToGroup(userToAddId, userInGroupId, done) {
+        this.findGroupByUserId(userInGroupId).then(group => {
+            return this.groupModel.addUserToGroup(group, userToAddId, done);
+        });
+    }
 }
 
 module.exports = getGroupService;

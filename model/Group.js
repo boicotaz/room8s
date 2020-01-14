@@ -54,7 +54,7 @@ GroupModel.findUsersInGroup = async function (groupId) {
 GroupModel.findGroupByUserId = async function (userId) {
     return this.findOne({ where: { id: userId } }).then(group => {
         if (group) {
-            return group.getGroupId();
+            return group;
         }
         else {
             return null;
@@ -64,6 +64,19 @@ GroupModel.findGroupByUserId = async function (userId) {
 
 GroupModel.getGroupNameByGroupId = async function (groupId) {
     return this.findOne({ where: { id: groupId } }, { attributes: ['name'] }).then(group => { return group.getGroupName() });
+}
+
+GroupModel.addUserToGroup = async function (group, userToAddId, done) {
+    let groupId = group.getGroupId()
+    let groupName = group.getGroupName();
+    this.create({ user_id: userToAddId, id: groupId, name: groupName }).then(function (group) {
+        if (group) {
+            return done(true, GroupModel.findUsersInGroup(group.getGroupId()));
+        }
+        else {
+            return done(false, null);
+        }
+    })
 }
 
 module.exports = GroupModel;

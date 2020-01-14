@@ -15,3 +15,11 @@ html,body{
 .btn {
   min-width: 132px;
 }
+
+
+.input-group-prepend span{
+  width: 50px;
+  background-color: rgb(7, 91, 124);
+  color: black;
+  border:0 !important;
+}

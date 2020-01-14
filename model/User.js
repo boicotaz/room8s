@@ -61,8 +61,8 @@ UserModel.prototype.comparePasswords = function comparePasswords(password, callb
         return callback(null, isMatch);
     });
 }
-UserModel.prototype.getGroupName = function getGroupName() {
-    return 'Picachu'
+UserModel.prototype.getUserId = function getUserId() {
+    return this.getDataValue('id');
 }
 // Hashes the password for a user object.
 function hashPassword(user) {
@@ -79,5 +79,10 @@ function hashPassword(user) {
         });
     }
 }
+
+UserModel.getUserIdbyEmail = async function (email) {
+    return this.findOne({ where: { email: email } }).then((user) => { console.log(user.getUserId()); return user.getUserId() })
+}
+
 
 module.exports = UserModel;

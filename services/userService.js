@@ -27,6 +27,10 @@ class UserService {
             }
         });
     };
+
+    async getUserIdbyEmail(email) {
+        return this.userModel.getUserIdbyEmail(email);
+    }
 }
 
 
