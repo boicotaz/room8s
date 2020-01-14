@@ -52,7 +52,7 @@ GroupModel.findUsersInGroup = async function (groupId) {
 }
 
 GroupModel.findGroupByUserId = async function (userId) {
-    return this.findOne({ where: { id: userId } }).then(group => {
+    return this.findOne({ where: { user_id: userId } }).then(group => {
         if (group) {
             return group;
         }
