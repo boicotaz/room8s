@@ -1,6 +1,7 @@
 const express = require("express");
 const app = express();
 const server = require("http").createServer(app);
+var io = require("./services/socketService")(server);
 const bodyParser = require("body-parser");
 var cors = require("cors");
 var passport = require("passport");

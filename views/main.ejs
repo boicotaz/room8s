@@ -6,7 +6,20 @@
     <!-- Required meta tags from Bootstrap for mobile device optimization -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-
+    
+    <!-- Init socket client  -->
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+      var socket = io();
+      let data = {user: <%- JSON.stringify(user) %> }
+      socket.emit('user_connected', data);
+      socket.on('user_in_my_group_connected', function (userName) {
+          $(document).ready(function {
+            console.log($('#usersInGroup'));
+            console.log('hi');
+          });
+      })
+    </script>
 
     <!--Fontawesome CDN-->
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css"
@@ -103,7 +116,7 @@
     </div>
 
     <% if (userHasGroup == true ){ %>
-    <div class="container">
+    <div class="container mt-5">
         <div class="row">
             <div class="jumbotron col-6 mb">
                 <h1 class="display-6"> <i class="fas fa-home"> </i> <%= groupName %> </h1>
@@ -205,7 +218,7 @@
 
     class Userbutton extends React.Component {
         render() {
-            return (<a className="btn btn-dark btn-lg mr-1" href="#" role="button">{this.props.userFirstName}</a>);
+            return (<a className="btn btn-danger btn-lg mr-1" href="#" role="button">{this.props.userFirstName}</a>);
         }
     }
 
@@ -213,53 +226,53 @@
         render() {
 
             let users = this.props.users;
-            {console.log(users)}
-            let usernames = users.map( user => user.firstName);
+            { console.log(users) }
+            let usernames = users.map(user => user.firstName);
 
-            const buttons = usernames.map( username => <Userbutton userFirstName = {username} /> )
-            return ( <React.Fragment> {buttons} </React.Fragment> ) 
+            const buttons = usernames.map(username => <Userbutton userFirstName={username} />)
+            return (<React.Fragment> {buttons} </React.Fragment>)
         }
     }
     $(document).ready(function () {
         ReactDOM.render(
-            <Group users={ <%- JSON.stringify(user.usersInGroup) %> } />, document.getElementById("usersInGroup") )
+            <Group users={ <%- JSON.stringify(user.usersInGroup) %> } />, document.getElementById("usersInGroup"))
     });
 
-    function renderGroup (users) {
+    function renderGroup(users) {
         console.log(users)
         ReactDOM.render(
-            <Group users={ users } />, document.getElementById("usersInGroup") )
+            <Group users={users} />, document.getElementById("usersInGroup"))
     }
 
     $('#add-user-form').submit(function (event) {
-    event.preventDefault();
-    console.log("Add User Form Submitted");
-    console.log("User is " , ' <%= user %> ')
+        event.preventDefault();
+        console.log("Add User Form Submitted");
+        console.log("User is ", ' <%= user %> ')
 
-    let data = $(this).serializeArray();
-    data[0].user = <%- JSON.stringify(user) %>
-    
-    console.log(data);
-    var request = $.ajax({
-        url: '/add-user-in-group',
-        type: "POST",
-        data: data[0],
-        dataType: "json",
-        success: function (returnedData) {
-            $("#strong-added-success").text(data[0].value);
-            $("#user-added-success").show(function () {
-                var myVar = setInterval(myTimer, 3000);
+        let data = $(this).serializeArray();
+        data[0].user = <%- JSON.stringify(user) %>
 
-                function myTimer() {
-                    $('#addUserForm').modal('hide');
-                    window.clearInterval(myVar);
-                }
-                
-            });
-            renderGroup (returnedData.group);
-            
-        }
+            console.log(data);
+        var request = $.ajax({
+            url: '/add-user-in-group',
+            type: "POST",
+            data: data[0],
+            dataType: "json",
+            success: function (returnedData) {
+                $("#strong-added-success").text(data[0].value);
+                $("#user-added-success").show(function () {
+                    var myVar = setInterval(myTimer, 3000);
+
+                    function myTimer() {
+                        $('#addUserForm').modal('hide');
+                        window.clearInterval(myVar);
+                    }
+
+                });
+                renderGroup(returnedData.group);
+
+            }
+        });
     });
-});
 
 </script>
