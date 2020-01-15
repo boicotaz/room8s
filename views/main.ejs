@@ -6,19 +6,47 @@
     <!-- Required meta tags from Bootstrap for mobile device optimization -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    
+
     <!-- Init socket client  -->
     <script src="/socket.io/socket.io.js"></script>
     <script>
-      var socket = io();
-      let data = {user: <%- JSON.stringify(user) %> }
-      socket.emit('user_connected', data);
-      socket.on('user_in_my_group_connected', function (userName) {
-          $(document).ready(function {
-            console.log($('#usersInGroup'));
-            console.log('hi');
-          });
-      })
+        var socket = io();
+        let data = { user: <%- JSON.stringify(user) %> }
+        console.log('front end script ? ok');
+        socket.emit('user_connected', data);
+        socket.on('user_in_my_group_connected', function (userNames) {
+            $(document).ready(function () {
+
+                window.addEventListener('buttons-created', function (e) {
+                    $("#usersInGroup").children().each(function() {
+                        console.log($(this).text());
+                        userNames.map((name) => {
+                            if($(this).text() == name) {
+                                $(this).removeClass("btn-danger").addClass("btn-success");
+                            }
+                        });
+                    })   
+                });
+                $("#usersInGroup").children().each(function() {
+                    userNames.map((name) => {
+                        if($(this).text() == name) {
+                            $(this).removeClass("btn-danger").addClass("btn-success");
+                        }
+                    });
+                });
+            })
+        });
+        socket.on('user_in_my_group_disconnected', function(userName) {
+            console.log('disconnect event received by client',userName );
+            $("#usersInGroup").children().each(function() {
+
+                if($(this).text() == userName) {
+                    $(this).removeClass("btn-success").addClass("btn-danger");
+                }
+
+            })  
+        })
+
     </script>
 
     <!--Fontawesome CDN-->
@@ -215,6 +243,7 @@
 </html>
 
 <script type="text/babel">
+    var evt = new CustomEvent('buttons-created', {state: "done"})
 
     class Userbutton extends React.Component {
         render() {
@@ -234,10 +263,13 @@
         }
     }
     $(document).ready(function () {
+        console.log('Lets make the buttons in group')
         ReactDOM.render(
-            <Group users={ <%- JSON.stringify(user.usersInGroup) %> } />, document.getElementById("usersInGroup"))
+            <Group users={ <%- JSON.stringify(user.usersInGroup) %> } />, document.getElementById("usersInGroup")
+        )
+        window.dispatchEvent(evt);
     });
-
+        
     function renderGroup(users) {
         console.log(users)
         ReactDOM.render(
@@ -246,13 +278,10 @@
 
     $('#add-user-form').submit(function (event) {
         event.preventDefault();
-        console.log("Add User Form Submitted");
-        console.log("User is ", ' <%= user %> ')
 
         let data = $(this).serializeArray();
         data[0].user = <%- JSON.stringify(user) %>
 
-            console.log(data);
         var request = $.ajax({
             url: '/add-user-in-group',
             type: "POST",
