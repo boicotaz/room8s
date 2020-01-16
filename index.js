@@ -13,6 +13,7 @@ const signUpController = require("./controllers/signUpController");
 const signOutController = require("./controllers/signOutController");
 const expensesController = require("./controllers/expensesController");
 const homeController = require('./controllers/homeContoller');
+const apiController = require('./controllers/apiController');
 
 // Initialize server
 server.listen(process.env.PORT || 8082, () => {
@@ -69,6 +70,9 @@ app.use("/sign-out", signOutController)
 //expenses page
 app.get("/home/expenses", expensesController);
 
+//get api services
+app.use('/api', apiController);
+
 const userService = require('./services/userService')();
 const groupService = require('./services/groupService')();
 
@@ -93,6 +97,9 @@ app.post("/add-user-in-group", function (req, res, next) {
 
 
 
+
+
+
 app.post('/validate', function (req, res, next) {
   passport.authenticate('local', function (err, user, info) {
     if (err) { return next(err); }
@@ -106,5 +113,10 @@ app.post('/validate', function (req, res, next) {
   })(req, res, next);
 });
 
+// let sw = require('./services/splitwiseService')();
 
+// sw.splitwiseApi.getCurrentUser().then(console.log)
+// sw.splitwiseApi.getGroups().then(console.log);
+
+// sw.splitwiseApi.getExpenses({ group_id: '9911849' }).then(res => console.log(res[2].repayments));
 
