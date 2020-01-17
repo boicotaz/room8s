@@ -84,5 +84,12 @@ UserModel.getUserIdbyEmail = async function (email) {
     return this.findOne({ where: { email: email } }).then((user) => { console.log(user.getUserId()); return user.getUserId() })
 }
 
+UserModel.getAllUsers = async function () {
+     return await UserModel.findAll().then((users) => {
+         let userNamesAndIds = users.map( (user) => {return [user.firstName + " " + user.lastName, user.id] }  );
+         return userNamesAndIds
+     });
+}
+
 
 module.exports = UserModel;

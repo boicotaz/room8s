@@ -19,7 +19,7 @@ homeController.get("/home", passportService.authValidation, async (req, res) => 
             groupService.getGroupNameByGroupId(groupId), // register user
         ]);
         req.user.usersInGroup = usersInGroup;
-
+        req.user.groupId = "DYNO";
         res.render("main.ejs", { userHasGroup: true, user: req.user, groupName: groupName })
     }
 

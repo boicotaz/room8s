@@ -16,6 +16,7 @@
             $(document).ready(function () {
 
                 window.addEventListener('buttons-created', function (e) {
+                    createAutoSuggest(); 
                     $("#usersInGroup").children().each(function() {
                         console.log($(this).text());
                         userNames.map((name) => {
@@ -47,7 +48,7 @@
     }
     </script>
 
-    <script type="text/babel" src="../public/js/main.ejs"></script>
+    <script type="text/babel" src="../public/js/main.js"></script>
     <link rel="stylesheet" type="text/css" href="../public/css/main.css">
 
     <title>Room8s</title>
@@ -150,7 +151,7 @@
                                     <div class="input-group-prepend">
                                         <span class="input-group-text"><i class="fas fa-envelope-square"></i></span>
                                     </div>
-                                    <input name="email" type="email" class="form-control" placeholder="user email">
+                                    <input id="add-user-in-group-field" name="email" type="text" autocomplete="off" class="form-control" placeholder="user email">
                                 </div>
                             </div>
 
@@ -199,76 +200,12 @@
         <!-- </div> -->
     </div>
     </div>
-
-
     <% } %>
-
 
 </body>
 
 </html>
 
 <script type="text/babel">
-    var evt = new CustomEvent('buttons-created', {state: "done"})
-
-    class Userbutton extends React.Component {
-        render() {
-            return (<a className="btn btn-danger btn-lg mr-1" href="#" role="button">{this.props.userFirstName}</a>);
-        }
-    }
-
-    class Group extends React.Component {
-        render() {
-
-            let users = this.props.users;
-            { console.log(users) }
-            let usernames = users.map(user => user.firstName);
-
-            const buttons = usernames.map(username => <Userbutton userFirstName={username} />)
-            return (<React.Fragment> {buttons} </React.Fragment>)
-        }
-    }
-    
-    $(document).ready(function () {
-        console.log('Lets make the buttons in group')
-        ReactDOM.render(
-            <Group users={ <%- JSON.stringify(user.usersInGroup) %> } />, document.getElementById("usersInGroup")
-        )
-        window.dispatchEvent(evt);
-    });
-        
-    function renderGroup(users) {
-        console.log(users)
-        ReactDOM.render(
-            <Group users={users} />, document.getElementById("usersInGroup"))
-    }
-
-    $('#add-user-form').submit(function (event) {
-        event.preventDefault();
-
-        let data = $(this).serializeArray();
-        data[0].user = <%- JSON.stringify(user) %>
-
-        var request = $.ajax({
-            url: '/add-user-in-group',
-            type: "POST",
-            data: data[0],
-            dataType: "json",
-            success: function (returnedData) {
-                $("#strong-added-success").text(data[0].value);
-                $("#user-added-success").show(function () {
-                    var myVar = setInterval(myTimer, 3000);
-
-                    function myTimer() {
-                        $('#addUserForm').modal('hide');
-                        window.clearInterval(myVar);
-                    }
-
-                });
-                renderGroup(returnedData.group);
-
-            }
-        });
-    });
 
 </script>

@@ -31,6 +31,10 @@ class UserService {
     async getUserIdbyEmail(email) {
         return this.userModel.getUserIdbyEmail(email);
     }
+
+    async getAllUsers() {
+        return this.userModel.getAllUsers();
+    }
 }
 
 
