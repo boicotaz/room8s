@@ -88,6 +88,7 @@
                     <!--Body-->
                     <div class="modal-body">
                         <!--Body-->
+                        <form id = "expense-form" method = "POST" >
                         <div class="md-form mb-4">
                             <div class="input-group form-group">
                                 <div class="input-group-prepend">
@@ -95,8 +96,9 @@
                                     <div id= 'creditor-drop-down' class="dropdown-menu">
                                     </div>
                                 </div>
-                                <input readonly = true id = "creditor-field" type="text" class="form-control" aria-label="Text input with dropdown button" value = 
+                                <input readonly = true name = "creditor" id = "creditor-field" type="text" class="form-control" aria-label="Text input with dropdown button" value = 
                                 "<%= user.firstName %> ">
+                                <input type="hidden" id="creditor-id" name="creditorId" value="<%= user.id %>">
                             </div>
                         </div>
 
@@ -105,7 +107,7 @@
                                 <div class="input-group-prepend">
                                         <button class="btn btn-dark btn-block" type="button">Credit</button>
                                 </div>
-                                <input id = "credit" autocomplete="off" name="email" type="number" class="form-control" placeholder="$$$">
+                                <input id = "credit" autocomplete="off" name="credit" type="number" class="form-control" placeholder="$$$">
                             </div>
                         </div>
                         
@@ -139,8 +141,9 @@
                                             </div>
                                     </div>
                                 </div>
-                                    <input readonly = true id="debtor-field-1" name="debtor" type="text" class="form-control" placeholder="Bitch">
-                                    <input name="email" type="number" class="form-control" placeholder="Debt">
+                                    <input readonly = true id="debtor-field-1" name="debtor-1" type="text" class="form-control" placeholder="Bitch">
+                                    <input name="debt-1" type="number" class="form-control" placeholder="Debt">
+                                    <input id="hidden1" name="debtorId-1" type=hidden>
                                     <div id = "debtor-remove-1">
                                             <a href="#">  <i class="fa fa-times ml-2 mt-2 "  aria-hidden="true" style = "color:black"></i> </a>
                                     </div>
@@ -154,7 +157,7 @@
                                 <div class="input-group-prepend">
                                         <button class="btn btn-dark btn-block" type="button">Date</button>
                                 </div>
-                                <input name="email" type="date" class="form-control" onfocus="(this.type='date')"
+                                <input name="date" type="date" class="form-control" onfocus="(this.type='date')"
                                     placeholder="When">
                             </div>
                         </div>
@@ -164,7 +167,7 @@
                                 <div class="input-group-prepend">
                                     <button class="btn btn-dark btn-block" type="button">Info</button>
                                 </div>
-                                <input  name="email" type="text" class="form-control" autocomplete="off" placeholder="Description">
+                                <input  name="desc" type="text" class="form-control" autocomplete="off" placeholder="Description">
                             </div>
                         </div>
 
@@ -173,14 +176,14 @@
 
                             <!--Grid column-->
                             <div class="text-center mb-3 col-md-12">
-                                <button type="button"
+                                <button type="submit"
                                     class="btn btn-success btn-block btn-rounded z-depth-1">Confirm</button>
                             </div>
                             <!--Grid column-->
 
                         </div>
                         <!--Grid row-->
-
+                    </form>
                     </div>
                 </div>
                 <div id="alert-warning"  style="display:none" class="modal-footer">

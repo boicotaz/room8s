@@ -1,7 +1,7 @@
 var Sequelize = require("sequelize");
 
 const sequelize = new Sequelize(
-  "mysql://root:tolis@192.168.1.3:3306/home_site"
+  "mysql://root:tolis@localhost:3306/home_site"
 );
 sequelize
   .authenticate()

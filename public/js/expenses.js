@@ -2,20 +2,26 @@ var userNames;
 var counter = 1;
 class User_drop_down_item extends React.Component {
     render() {
-        return (<a className="dropdown-item"  onClick={(e) => this.handleSelectDebtorEvent(e)} nani='wut' href="#">{this.props.userFirstName}</a>);
+        return (<a className="dropdown-item" map = {this.props.mapping}  onClick={(e) => this.handleSelectDebtorEvent(e)} href="#">{this.props.userFirstName}</a>);
     }
 
     handleSelectDebtorEvent() {
-        if(this.props.inputFieldId != null)
-        document.getElementById(this.props.inputFieldId).value = this.props.userFirstName;
+        if(this.props.inputFieldId != null){
+            console.log( 'in handle select debtor', this.props.hiddenId);
+            document.getElementById(this.props.inputFieldId).value = this.props.userFirstName;
+        }
+
+        if(this.props.hiddenId != null) document.getElementById(this.props.hiddenId).value = userNames[this.props.mapping][1];
+        
     }
 }
 
 class User_drop_down_list extends React.Component {
     render() {
         let usernames = this.props.users.map(elem => elem[0]);
-
-        const dropDownList = usernames.map(username => <User_drop_down_item userFirstName={username} inputFieldId={this.props.inputFieldId} />)
+        console.log('in create drop down list' , this.props.hiddenId);
+        const dropDownList = usernames.map( (username,index) => <User_drop_down_item userFirstName={username} inputFieldId={this.props.inputFieldId} hiddenId={this.props.hiddenId} mapping={index} />)
+    
         return (<React.Fragment> {dropDownList} </React.Fragment>)
     }
 }
@@ -30,12 +36,13 @@ class Debtor extends React.Component {
                                     <div className="input-group-prepend"> 
                                         <button className="btn btn-dark dropdown-toggle btn-block" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Debtor</button> 
                                         <div id = {this.props.dropDownId}  className="dropdown-menu"> 
-                                            <User_drop_down_list users = { this.props.userNames } inputFieldId={this.props.inputFieldId} />
+                                            <User_drop_down_list users = { this.props.userNames } inputFieldId={this.props.inputFieldId} hiddenId = {this.props.hiddenId} />
                                         </div> 
                                 </div> 
                             </div> 
                             <input readOnly = {true} id = {this.props.inputFieldId} name="debtor" type="text" className="form-control" placeholder="Bitch"/> 
-                            <input name="email" type="number" className="form-control" placeholder="Debt"/>
+                            <input name={this.props.debtName} type="number" className="form-control" placeholder="Debt"/>
+                            <input id = {this.props.hiddenId} name={this.props.hiddenName} type="hidden"/>
                             <div id = {this.props.removeButtonId}>
                                 <a href="#">  <i className="fa fa-times ml-2 mt-2 "  aria-hidden="true" style = {{color: 'black' }} ></i> </a>
                             </div>
@@ -52,9 +59,15 @@ function renderDropDownList(userNames,id) {
     )
 }
 $(document).ready(function () {
-
+    $("#expense-form").submit(function (event) {
+        event.preventDefault(); 
+        console.log($( this ).serializeArray());
+        console.log(userNames);
+    })
     $(document).on('click', "#creditor-drop-down a" ,function() {
         $("#creditor-field").val($(this).text());
+        $("#creditor-id").val(userNames[$(this).attr("map")][1]);
+        // console.log($(this).attr("map"));
     })
 
     $(document).on('click', "#method-payment-dropdown a" ,function() {
@@ -64,6 +77,7 @@ $(document).ready(function () {
 
     $(document).on('click', "#debtor-drop-down-1 a" ,function() {
         $("#debtor-field-1").val($(this).text());
+        $("#hidden1").val(userNames[$(this).attr("map")][1]); 
     })
 
     
@@ -78,9 +92,9 @@ $(document).ready(function () {
 
     $("#split-evenly").click(function () {
         console.log('evenly trigged');
-        $("div input:nth-of-type(2)").each( function () {
+        $("div input:nth-of-type(2):not([type=hidden])").each( function () {
             $(this).attr("readonly", true);
-            let divCreditBy = $("div input:nth-of-type(2)").length;
+            let divCreditBy = $("div input:nth-of-type(2):not([type=hidden])").length;
             let credit = parseFloat($("#credit").val());
 
             let debt = credit/divCreditBy; 
@@ -116,11 +130,14 @@ $(document).ready(function () {
 
         let inputFieldId = "debtor-field-" +  String(counter);
         let removeButtonId = 'debtor-remove-' + String(counter);
-
+        let hiddenId = "hidden" + String(counter);
+        let debtName = "debt-" + String(counter);
+        let hiddenName = "debtorId-" + String(counter);
+        // console.log(hiddenId);
         $("#debtors-group").append('<div id ="' + newDeptorId + '"> </div>')
 
         ReactDOM.render(
-            <Debtor  userNames={ userNames } dropDownId={ dropDownId} inputFieldId={inputFieldId} removeButtonId = {removeButtonId}  />, document.getElementById(newDeptorId)
+            <Debtor  userNames={ userNames } dropDownId={ dropDownId} inputFieldId={inputFieldId} removeButtonId = {removeButtonId} hiddenId = {hiddenId} debtName={debtName} hiddenName={hiddenName} />, document.getElementById(newDeptorId)
         )
         $("#" + removeButtonId).click(function () {
             $("#" + newDeptorId).remove();
@@ -149,6 +166,7 @@ $(document).ready(function () {
                 dataType: "json",
                 success: function (returnedData) {
                     userNames = returnedData;
+                    console.log(userNames);
                     let elementToAppendDataTo = "creditor-drop-down"; 
                     renderDropDownList(returnedData ,elementToAppendDataTo);
 

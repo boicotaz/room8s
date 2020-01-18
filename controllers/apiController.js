@@ -6,7 +6,6 @@ apiController.post('/get-users-in-group', function(req,res) {
     let user
     if (!req.body)  user = req.body;
     else user = req.user;
-    // console.log('is user added to req obj ?', req.user);
     groupService.findGroupByUserId(user.id).then((group) => {
         groupService.findUsersInGroup(group.getGroupId()).then( (users) => {
             let userNamesAndIds = users.map( userInGroup => [userInGroup.firstName, userInGroup.id] );
@@ -22,7 +21,7 @@ apiController.get('/get-current-user', function (req,res) {
 
 apiController.get('/get-users', function(req,res) {
     // console.log('group Id is ', req.user);
-    userService.getAllUsers().then(results => res.json({data:results})  )
+    userService.getAllUsers().then(results => res.json(results)  )
     // res.json({data: });
 })
 

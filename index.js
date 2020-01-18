@@ -77,7 +77,7 @@ const userService = require('./services/userService')();
 const groupService = require('./services/groupService')();
 
 app.post("/add-user-in-group", function (req, res, next) {
-  userService.getUserIdbyEmail(req.body.value).then((userToAddId) => {
+  userService.getUserIdbyName(req.body.value).then((userToAddId) => {
     let userInGroupId = req.body['user[id]'];
     groupService.addUserToGroup(userToAddId, userInGroupId, function (wasCreated, groupUsers) {
       if (wasCreated) {

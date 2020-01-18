@@ -32,6 +32,11 @@ class UserService {
         return this.userModel.getUserIdbyEmail(email);
     }
 
+    async getUserIdbyName(name) {
+        // console.log(name.split(" "));
+        return this.userModel.getUserIdbyName(name.split(" "));
+    }
+
     async getAllUsers() {
         return this.userModel.getAllUsers();
     }

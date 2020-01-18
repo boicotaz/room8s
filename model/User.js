@@ -82,6 +82,10 @@ function hashPassword(user) {
 
 UserModel.getUserIdbyEmail = async function (email) {
     return this.findOne({ where: { email: email } }).then((user) => { console.log(user.getUserId()); return user.getUserId() })
+
+}
+UserModel.getUserIdbyName = async function(name) {
+    return this.findOne({ where: { firstName: name[0], lastName: name[1] } }).then((user) => { console.log(user.getUserId()); return user.getUserId() })
 }
 
 UserModel.getAllUsers = async function () {
