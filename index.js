@@ -68,7 +68,7 @@ app.use("/sign-up", signUpController);
 app.use("/sign-out", signOutController)
 
 //expenses page
-app.get("/home/expenses", expensesController);
+app.use("/home/expenses", expensesController);
 
 //get api services
 app.use('/api', apiController);
@@ -96,10 +96,6 @@ app.post("/add-user-in-group", function (req, res, next) {
 })
 
 
-
-
-
-
 app.post('/validate', function (req, res, next) {
   passport.authenticate('local', function (err, user, info) {
     if (err) { return next(err); }
@@ -113,10 +109,5 @@ app.post('/validate', function (req, res, next) {
   })(req, res, next);
 });
 
-// let sw = require('./services/splitwiseService')();
 
-// sw.splitwiseApi.getCurrentUser().then(console.log)
-// sw.splitwiseApi.getGroups().then(console.log);
-
-// sw.splitwiseApi.getExpenses({ group_id: '9911849' }).then(res => console.log(res[2].repayments));
 

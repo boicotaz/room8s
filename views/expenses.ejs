@@ -34,15 +34,15 @@
 
         <div class="row">
             <div class='col-12'>
-                <table class="table table-hover table-dark ">
-                    <thead>
+                <table id='expenses-table' class="table table-hover table-dark ">
+                    <!-- <thead>
                         <tr>
                             <th scope="col">#</th>
-                            <th scope="col">Payer</th>
-                            <th scope="col">Bitch</th>
+                            <th scope="col">Creditor</th>
+                            <th scope="col">Debtors</th>
                             <th scope="col">When</th>
                             <th scope="col">Description</th>
-                            <th scope="col">How much</th>
+                            <th scope="col">Credit</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -54,18 +54,7 @@
                             <td>Grocery</td>
                             <td>10 $</td>
                         </tr>
-                        <!-- <tr>
-                        <th scope="row">2</th>
-                        <td>Jacob</td>
-                        <td>Thornton</td>
-                        <td>@fat</td>
-                    </tr>
-                    <tr>
-                        <th scope="row">3</th>
-                        <td colspan="2">Larry the Bird</td>
-                        <td>@twitter</td>
-                    </tr> -->
-                    </tbody>
+                    </tbody> -->
                 </table>
             </div>
         </div>
@@ -88,111 +77,133 @@
                     <!--Body-->
                     <div class="modal-body">
                         <!--Body-->
-                        <form id = "expense-form" method = "POST" >
-                        <div class="md-form mb-4">
-                            <div class="input-group form-group">
-                                <div class="input-group-prepend">
-                                    <button class="btn btn-dark dropdown-toggle btn-block" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Creditor</button>
-                                    <div id= 'creditor-drop-down' class="dropdown-menu">
-                                    </div>
-                                </div>
-                                <input readonly = true name = "creditor" id = "creditor-field" type="text" class="form-control" aria-label="Text input with dropdown button" value = 
-                                "<%= user.firstName %> ">
-                                <input type="hidden" id="creditor-id" name="creditorId" value="<%= user.id %>">
-                            </div>
-                        </div>
-
-                        <div class="md-form mb-4">
-                            <div class="input-group form-group">
-                                <div class="input-group-prepend">
-                                        <button class="btn btn-dark btn-block" type="button">Credit</button>
-                                </div>
-                                <input id = "credit" autocomplete="off" name="credit" type="number" class="form-control" placeholder="$$$">
-                            </div>
-                        </div>
-                        
-                        <div class="md-form mb-4">
-                            
-                            <div class="input-group form-group">
-                                <div class="input-group-prepend">
-                                    <button class="btn btn-dark dropdown-toggle btn-block" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Method</button>
-                                    <div id='method-payment-dropdown' class="dropdown-menu">
-                                        <a id="split-evenly" class="dropdown-item">Evenly</a>
-                                        <a id="split-manual" class="dropdown-item">Manual</a>
-                                    </div>
-                                </div>
-                                <input readonly = true value = "Evenly" id = "method-payment-field" type="text" class="form-control" aria-label="Text input with dropdown button">
-                                <div id = "link-div">
-                                    <a id = "add-debtor-link" href="#">  <i class="fa fa-user-plus ml-2 mt-2 " style = "color:black"></i> </a>
-                                </div>
-                               </div>
-                            
-                        </div>
-                             
-                        
-                        
-                        <div id = "debtors-group">
-                            <div id = 'debtor-1' class="md-form mb-4">
+                        <form id="expense-form" method="POST">
+                            <div class="md-form mb-4">
                                 <div class="input-group form-group">
                                     <div class="input-group-prepend">
+                                        <button class="btn btn-dark dropdown-toggle btn-block" type="button"
+                                            data-toggle="dropdown" aria-haspopup="true"
+                                            aria-expanded="false">Creditor</button>
+                                        <div id='creditor-drop-down' class="dropdown-menu">
+                                        </div>
+                                    </div>
+                                    <input readonly=true name="creditor" id="creditor-field" type="text"
+                                        class="form-control" aria-label="Text input with dropdown button"
+                                        value="<%= user.firstName %> ">
+                                    <input type="hidden" id="creditor-id" name="creditorId" value="<%= user.id %>">
+                                </div>
+                            </div>
+
+                            <div class="md-form mb-4">
+                                <div class="input-group form-group">
+                                    <div class="input-group-prepend">
+                                        <button class="btn btn-dark btn-block" type="button">Credit</button>
+                                    </div>
+                                    <input id="credit" autocomplete="off" name="credit" type="number"
+                                        class="form-control" placeholder="$$$">
+                                </div>
+                            </div>
+
+                            <div class="md-form mb-4">
+
+                                <div class="input-group form-group">
+                                    <div class="input-group-prepend">
+                                        <button class="btn btn-dark dropdown-toggle btn-block" type="button"
+                                            data-toggle="dropdown" aria-haspopup="true"
+                                            aria-expanded="false">Method</button>
+                                        <div id='method-payment-dropdown' class="dropdown-menu">
+                                            <a id="split-evenly" class="dropdown-item">Evenly</a>
+                                            <a id="split-manual" class="dropdown-item">Manual</a>
+                                        </div>
+                                    </div>
+                                    <input readonly=true value="Evenly" id="method-payment-field" type="text"
+                                        class="form-control" aria-label="Text input with dropdown button">
+                                    <div id="link-div">
+                                        <a id="add-debtor-link" href="#"> <i class="fa fa-user-plus ml-2 mt-2 "
+                                                style="color:black"></i> </a>
+                                    </div>
+                                </div>
+
+                            </div>
+
+
+
+                            <div id="debtors-group">
+                                <div id='debtor-1' class="md-form mb-4">
+                                    <div class="input-group form-group">
                                         <div class="input-group-prepend">
-                                            <button class="btn btn-dark dropdown-toggle btn-block" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Debtor</button>
-                                            <div id= 'debtor-drop-down-1' class="dropdown-menu">
+                                            <div class="input-group-prepend">
+                                                <button class="btn btn-dark dropdown-toggle btn-block" type="button"
+                                                    data-toggle="dropdown" aria-haspopup="true"
+                                                    aria-expanded="false">Debtor</button>
+                                                <div id='debtor-drop-down-1' class="dropdown-menu">
+                                                </div>
                                             </div>
+                                        </div>
+                                        <input readonly=true id="debtor-field-1" name="debtor-1" type="text"
+                                            class="form-control" placeholder="Bitch">
+                                        <input name="debt-1" type="number" class="form-control" placeholder="Debt">
+                                        <input id="hidden1" name="debtorId-1" type=hidden>
+                                        <div id="debtor-remove-1">
+                                            <a href="#"> <i class="fa fa-times ml-2 mt-2 " aria-hidden="true"
+                                                    style="color:black"></i> </a>
+                                        </div>
                                     </div>
                                 </div>
-                                    <input readonly = true id="debtor-field-1" name="debtor-1" type="text" class="form-control" placeholder="Bitch">
-                                    <input name="debt-1" type="number" class="form-control" placeholder="Debt">
-                                    <input id="hidden1" name="debtorId-1" type=hidden>
-                                    <div id = "debtor-remove-1">
-                                            <a href="#">  <i class="fa fa-times ml-2 mt-2 "  aria-hidden="true" style = "color:black"></i> </a>
-                                    </div>
-                                </div>
+
                             </div>
-                           
-                        </div>
-                        
-                        <div class="mb-4">
-                            <div class="input-group form-group">
-                                <div class="input-group-prepend">
+
+                            <div class="mb-4">
+                                <div class="input-group form-group">
+                                    <div class="input-group-prepend">
                                         <button class="btn btn-dark btn-block" type="button">Date</button>
+                                    </div>
+                                    <input name="date" type="date" class="form-control" onfocus="(this.type='date')"
+                                        placeholder="When">
                                 </div>
-                                <input name="date" type="date" class="form-control" onfocus="(this.type='date')"
-                                    placeholder="When">
                             </div>
-                        </div>
-                        
-                        <div class="mb-5">
-                            <div class="input-group form-group">
-                                <div class="input-group-prepend">
-                                    <button class="btn btn-dark btn-block" type="button">Info</button>
+
+                            <div class="mb-5">
+                                <div class="input-group form-group">
+                                    <div class="input-group-prepend">
+                                        <button class="btn btn-dark btn-block" type="button">Info</button>
+                                    </div>
+                                    <input name="desc" type="text" class="form-control" autocomplete="off"
+                                        placeholder="Description">
                                 </div>
-                                <input  name="desc" type="text" class="form-control" autocomplete="off" placeholder="Description">
                             </div>
-                        </div>
 
-                        <!--Grid row-->
-                        <div class="row d-flex align-items-center mb-4">
+                            <!--Grid row-->
+                            <div class="row d-flex align-items-center mb-4">
 
-                            <!--Grid column-->
-                            <div class="text-center mb-3 col-md-12">
-                                <button type="submit"
-                                    class="btn btn-success btn-block btn-rounded z-depth-1">Confirm</button>
+                                <!--Grid column-->
+                                <div class="text-center mb-3 col-md-12">
+                                    <button type="submit"
+                                        class="btn btn-success btn-block btn-rounded z-depth-1">Confirm</button>
+                                </div>
+                                <!--Grid column-->
+
                             </div>
-                            <!--Grid column-->
-
-                        </div>
-                        <!--Grid row-->
-                    </form>
+                            <!--Grid row-->
+                        </form>
                     </div>
                 </div>
-                <div id="alert-warning"  style="display:none" class="modal-footer">
+                <div id="alert-warning" style="display:none" class="modal-footer">
                     <div class="alert alert-warning col-12" role="alert" style="padding-bottom: 0">
                         <p class='text-center '>
                             <strong>Warning!</strong> you dont need any more debtors, trust me! ;)
                         </p>
                     </div>
                 </div>
+
+                <div id="alert-success" style="display:none" class="modal-footer">
+                    <div class="alert alert-success col-12" role="alert" style="padding-bottom: 0">
+                        <p class='text-center '>
+                            <strong>Success</strong> Expense created! Hooray!
+                        </p>
+                    </div>
+                </div>
+
             </div>
             <!--/.Content-->
         </div>

@@ -1,21 +1,23 @@
-var evt = new CustomEvent('buttons-created', {state: "done"})
+var evt = new CustomEvent('buttons-created', { state: "done" })
 var user;
 
 var usernames;
 var usernamesInGroup;
 
 
+// let event = new CustomEvent('userNamesReady', );
+
 
 function getAllUsers() {
-    return new Promise( (resolve, reject) => {
+    return new Promise((resolve, reject) => {
         $.ajax({
             url: '/api/get-users',
             type: "GET",
-            success: function(returnedData) {
+            success: function (returnedData) {
                 // console.log(returnedData);
                 resolve(returnedData);
             },
-            error: function(error) {
+            error: function (error) {
                 console.log(error);
                 reject(error);
             }
@@ -24,20 +26,20 @@ function getAllUsers() {
 }
 
 function getUsersInGroup() {
-    return new Promise((resolve,reject) => {
-        $.ajax({ 
+    return new Promise((resolve, reject) => {
+        $.ajax({
             url: '/api/get-users-in-group',
             type: 'POST',
-            success: function(usersInGroup){
+            success: function (usersInGroup) {
                 usernamesInGroup = usersInGroup;
                 // console.log('get users ajax returned: ', usersInGroup);
                 ReactDOM.render(
-                    <Group users={ usersInGroup } />, document.getElementById("usersInGroup")
+                    <Group users={usersInGroup} />, document.getElementById("usersInGroup")
                 )
                 window.dispatchEvent(evt);
                 resolve(usersInGroup);
             },
-            error: function(error) {
+            error: function (error) {
                 console.log(error);
                 reject(error);
             }
@@ -46,7 +48,7 @@ function getUsersInGroup() {
 }
 
 
-function  createAutoSuggest() {
+function createAutoSuggest() {
 
 }
 
@@ -63,7 +65,7 @@ class Group extends React.Component {
         let userNamesAndIds = this.props.users;
         let usernames = userNamesAndIds.map((user) => {
             // if (typeof us) user[0]);
-            if(user.constructor === Array) {
+            if (user.constructor === Array) {
                 return user[0];
             }
             else {
@@ -81,7 +83,7 @@ $(document).ready(function () {
     var getCurrentUser = $.ajax({
         url: '/api/get-current-user',
         type: 'GET',
-        success: function(User){
+        success: function (User) {
             user = User;
             // console.log('User got ', user);
         }
@@ -89,13 +91,13 @@ $(document).ready(function () {
 
     // let usersInGroupPromise = getUsersInGroup();
 
-    Promise.all([getAllUsers(), getUsersInGroup()]).then(function(values) {
+    Promise.all([getAllUsers(), getUsersInGroup()]).then(function (values) {
         // console.log('All users are: ' , values[0]);
         // console.log('Users in group are: ', values[1]);
-        let allUsers =  values[0];
+        let allUsers = values[0];
         let groupUsers = values[1];
 
-        let idsInGroup = groupUsers.map( elem => elem[1]);
+        let idsInGroup = groupUsers.map(elem => elem[1]);
         // console.log(idsInGroup);
 
         //search bar suggestions
@@ -120,7 +122,7 @@ $(document).ready(function () {
 
         // group suggestions
         let correctUsers = allUsers.filter((elem) => {
-            if ( !idsInGroup.includes(elem[1]) ) return elem;
+            if (!idsInGroup.includes(elem[1])) return elem;
         });
 
         var add_in_group_suggestions = new Bloodhound({
@@ -141,10 +143,10 @@ $(document).ready(function () {
 
 
 
-      });
+    });
 
 });
-    
+
 function renderGroup(users) {
 
     ReactDOM.render(
@@ -183,7 +185,7 @@ $('#add-user-form').submit(function (event) {
 
 
 var substringMatcher = function (strs) {
-    
+
     return function findMatches(q, cb) {
         var matches, substringRegex;
         let stringsToMatch = strs.local.map(entry => entry[0])
