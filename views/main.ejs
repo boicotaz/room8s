@@ -3,69 +3,96 @@
 
 <head>
     <%- include("headers.ejs") %>
+    <%- include("createExpense.ejs") %>
     <!-- Init socket client  -->
     <script src="socket.io/socket.io.js"></script>
-    <script>
-        if ( socket === undefined) {
-        var socket = io.connect(); 
-        // socket = io.connect('http://localhost:8082/expenses');
-        let data = { user: <%- JSON.stringify(user) %> }
-        console.log('front end script ? ok');
-        socket.emit('user_connected', data);
-        socket.on('user_in_my_group_connected', function (userNames) {
-            $(document).ready(function () {
+    <script type="text/babel" src="../public/js/expenses.js"></script>
+    <script type="text/babel" src="../public/js/viewTotals.js"></script>
+    <script type="text/babel" src="../public/js/components/ExpensesTableComponent.js"></script>
+    <script type="text/babel" src="../public/js/components/ExpensesFormComponent.js"></script>
+    <script type="text/babel" src="../public/js/components/GroupComponent.js"></script>
+    <script src="../public/client/client.js"></script>
+    <script src="../public/client/worker.js"></script>
 
-                window.addEventListener('buttons-created', function (e) {
-                    createAutoSuggest(); 
-                    $("#usersInGroup").children().each(function() {
-                        console.log($(this).text());
+    <script>
+        if (socket === undefined) {
+            var socket = io.connect();
+            // socket = io.connect('http://localhost:8082/expenses');
+            let data = { user: <%- JSON.stringify(user) %> }
+            console.log('user logged in is=========', data.user.id);
+            socket.emit('user_connected', data);
+            document.addEventListener('LoggedInStatus', function (e) {
+                console.log('EVENT FOR LOG STATUS CAUGHT SUCCESSFULLY with user', e.detail);
+                RequestFromUser = e.detail
+                socket.emit('get_logged_in_users', RequestFromUser);
+
+            });
+            socket.on('sent_logged_in_users', function (loggedInUsers) {
+                console.log('ABOUT TO INFORM HOME COMPONENT', loggedInUsers);
+                var getUserLoggedStatusEventReply = new CustomEvent('LoggedInStatusReply', { detail: loggedInUsers });
+                document.dispatchEvent(getUserLoggedStatusEventReply);
+            })
+            socket.on('user_in_my_group_connected', function (userNames) {
+                $(document).ready(function () {
+
+                    window.addEventListener('buttons-created', function (e) {
+                        createAutoSuggest();
+                        $("#usersInGroup").children().each(function () {
+                            console.log($(this).text());
+                            userNames.map((name) => {
+                                if ($(this).text() == name) {
+                                    $(this).removeClass("btn-danger").addClass("btn-success");
+                                }
+                            });
+                        })
+                    });
+                    $("#usersInGroup").children().each(function () {
                         userNames.map((name) => {
-                            if($(this).text() == name) {
+                            if ($(this).text() == name) {
                                 $(this).removeClass("btn-danger").addClass("btn-success");
                             }
                         });
-                    })   
-                });
-                $("#usersInGroup").children().each(function() {
-                    userNames.map((name) => {
-                        if($(this).text() == name) {
-                            $(this).removeClass("btn-danger").addClass("btn-success");
-                        }
                     });
-                });
+                })
+            });
+
+            socket.on('user_in_my_group_added_expense', function (expenseData) {
+                console.log('i received the event change in expense table');
+                let createEvent = new CustomEvent('new-expense', { detail: expenseData });
+                document.dispatchEvent(createEvent);
             })
-        });
-        socket.on('user_in_my_group_disconnected', function(userName) {
-            console.log('disconnect event received by client',userName );
-            $("#usersInGroup").children().each(function() {
+            socket.on('user_in_my_group_disconnected', function (userName) {
+                console.log('disconnect event received by client', userName);
+                $("#usersInGroup").children().each(function () {
 
-                if($(this).text() == userName) {
-                    $(this).removeClass("btn-success").addClass("btn-danger");
-                }
+                    if ($(this).text() == userName) {
+                        $(this).removeClass("btn-success").addClass("btn-danger");
+                    }
 
-            })  
-        })
-    }
+                })
+            })
+        }
     </script>
 
-    <script type="text/babel" src="../public/js/main.js"></script>
+    <script type="text/babel" currentUser=<%- user %> src = "../public/js/main.js" ></script>
+    <script> var myUser = <%- JSON.stringify(user) %> </script>
     <link rel="stylesheet" type="text/css" href="../public/css/main.css">
 
     <title>Room8s</title>
 
     <!-- To script για να λειτουργεί το Show-hide button -->
     <script type="text/javascript">
-        function showHideDiv(ele) {
-            var srcElement = document.getElementById(ele);
-            if (srcElement != null) {
-                if (srcElement.style.display == "block") {
-                    srcElement.style.display = 'none';
-                } else {
-                    srcElement.style.display = 'block';
+            function showHideDiv(ele) {
+                var srcElement = document.getElementById(ele);
+                if (srcElement != null) {
+                    if (srcElement.style.display == "block") {
+                        srcElement.style.display = 'none';
+                    } else {
+                        srcElement.style.display = 'block';
+                    }
+                    return false;
                 }
-                return false;
             }
-        }
 
     </script>
 
@@ -109,23 +136,16 @@
             </div>
         </div>
     </div>
+    <!-- Modal End -->
+
+
 
     <% if (userHasGroup == true ){ %>
-    <div class="container mt-5">
-        <div class="row">
-            <div class="jumbotron col-6 mb">
-                <h1 class="display-6"> <i class="fa fa-home"> </i> <%= groupName %> </h1>
-                <hr class="my-4">
-                <p class="lead"> Users in group </p>
-                <div id='usersInGroup' class="lead">
-                </div>
-                <button id='add-user' type="button" data-toggle="modal" data-target="#addUserForm"
-                    class="btn btn-secondary mt-5"> Add users in
-                    group </button>
-            </div>
-        </div>
-    </div>
+    <div id="content-container">
+        <!-- <div id="content">
 
+            </div> -->
+    </div>
 
     <div class="modal fade" id="addUserForm" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
         aria-hidden="true">
@@ -151,8 +171,9 @@
                                     <div class="input-group-prepend">
                                         <span class="input-group-text"><i class="fa fa-user"></i></span>
                                     </div>
-                                    <input id="add-user-in-group-field" name="email" type="text" autocomplete="off" class="form-control" placeholder="Firstname Lastname">
-                                </div>  
+                                    <input id="add-user-in-group-field" name="email" type="text" autocomplete="off"
+                                        class="form-control" placeholder="Firstname Lastname">
+                                </div>
                             </div>
 
                             <!--Grid row-->
@@ -201,11 +222,7 @@
     </div>
     </div>
     <% } %>
-
+    <div id="root"></div>
 </body>
 
 </html>
-
-<script type="text/babel">
-
-</script>

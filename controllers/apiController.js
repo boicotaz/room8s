@@ -16,13 +16,15 @@ apiController.post('/get-users-in-group', function(req,res) {
 
 apiController.get('/get-current-user', function (req,res) {
     res.json(req.user);
-})
+});
 
 
 apiController.get('/get-users', function(req,res) {
-    // console.log('group Id is ', req.user);
     userService.getAllUsers().then(results => res.json(results)  )
-    // res.json({data: });
+})
+
+apiController.get('/get-group-details', function(req,res) {
+    groupService.findGroupByUserId(req.user.id).then(group => res.json({groupName : group.getGroupName(), groupId: group.getGroupId() }));
 })
 
 module.exports = apiController;

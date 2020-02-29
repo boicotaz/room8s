@@ -5,7 +5,34 @@ var usernames;
 var usernamesInGroup;
 
 
-// let event = new CustomEvent('userNamesReady', );
+var getMainPage = function (user) {
+
+    console.log('GOT THE USER BABY', user);
+    if ($("#group-dashboard").length) return;
+    console.log("FIRST CHILD IS=======",$("#content").first(), $("#content").children(":first"));
+    console.log("group dashboard is online ?" , $("#group-dashboard").length);
+    $("#content").remove();
+    $("#content-container").append("<div id = 'content'></div>")
+
+    // getUsersInGroup().then( users => {
+    //     console.log('users in group are' , users);
+
+    // })
+     
+    Promise.all([getUsersInGroup(), getGroupDetails()]).then((res) => {
+        console.log('Results are: ', res);
+        let usersInGroup = res[0];
+        let groupDetails = res[1];
+        ReactDOM.render(
+            <Group usersInGroup={usersInGroup} groupDetails={groupDetails} currentUser={user} > </Group>, document.getElementById('content')
+        );
+    }).catch((error) => console.log(error));
+}
+getMainPage(myUser);
+
+let createAutoSuggest = () => {
+
+}
 
 
 function getAllUsers() {
@@ -22,8 +49,25 @@ function getAllUsers() {
                 reject(error);
             }
         })
-    });
+    })
 }
+
+function getCurrentUser() {
+    return new Promise((resolve,reject) => {
+        $.ajax({
+            url: '/api/get-current-user',
+            type: 'GET',
+            success: function (currentUser){
+                resolve(currentUser);
+            },
+            error: function (error) {
+                console.log(error);
+                reject(error);
+            }
+        })
+    })
+}
+
 
 function getUsersInGroup() {
     return new Promise((resolve, reject) => {
@@ -33,9 +77,9 @@ function getUsersInGroup() {
             success: function (usersInGroup) {
                 usernamesInGroup = usersInGroup;
                 // console.log('get users ajax returned: ', usersInGroup);
-                ReactDOM.render(
-                    <Group users={usersInGroup} />, document.getElementById("usersInGroup")
-                )
+                // ReactDOM.render(
+                //     <Group users={usersInGroup} />, document.getElementById("usersInGroup")
+                // )
                 window.dispatchEvent(evt);
                 resolve(usersInGroup);
             },
@@ -47,39 +91,25 @@ function getUsersInGroup() {
     })
 }
 
-
-function createAutoSuggest() {
-
-}
-
-
-class Userbutton extends React.Component {
-    render() {
-        return (<a className="btn btn-danger btn-lg mr-1" href="#" role="button">{this.props.userFirstName}</a>);
-    }
-}
-
-class Group extends React.Component {
-    render() {
-
-        let userNamesAndIds = this.props.users;
-        let usernames = userNamesAndIds.map((user) => {
-            // if (typeof us) user[0]);
-            if (user.constructor === Array) {
-                return user[0];
-            }
-            else {
-                return user.firstName;
+function  getGroupDetails() {
+    return new Promise((resolve, reject) => {
+        $.ajax({
+            url: '/api/get-group-details',
+            type: 'GET',
+            success: function (groupDetails){
+                resolve(groupDetails);
+            },
+            error: function (error) {
+                console.log(error);
+                reject(error);
             }
         })
-
-        const buttons = usernames.map(username => <Userbutton userFirstName={username} />)
-        return (<React.Fragment> {buttons} </React.Fragment>)
-    }
+    })
 }
 
+
 $(document).ready(function () {
-    console.log('Lets make the buttons in group');
+    // getMainPage();
     var getCurrentUser = $.ajax({
         url: '/api/get-current-user',
         type: 'GET',
@@ -89,26 +119,15 @@ $(document).ready(function () {
         }
     })
 
-    // let usersInGroupPromise = getUsersInGroup();
-
-    Promise.all([getAllUsers(), getUsersInGroup()]).then(function (values) {
-        // console.log('All users are: ' , values[0]);
-        // console.log('Users in group are: ', values[1]);
-        let allUsers = values[0];
-        let groupUsers = values[1];
-
-        let idsInGroup = groupUsers.map(elem => elem[1]);
-        // console.log(idsInGroup);
-
-        //search bar suggestions
-
+    // create search bar
+    getAllUsers().then(function (values) {
+        let allUsers = values;
         console.log(allUsers.map(elem => elem[0]));
         var users_suggestions = new Bloodhound({
             datumTokenizer: Bloodhound.tokenizers.whitespace, // see its meaning above
             queryTokenizer: Bloodhound.tokenizers.whitespace, // see its meaning above
             local: allUsers
         });
-
         $('#search-bar').typeahead({
             hint: true,
             highlight: true,
@@ -118,9 +137,16 @@ $(document).ready(function () {
                 name: 'user_suggestions',
                 source: substringMatcher(users_suggestions)  // Bloodhound instance is passed as the source
             });
+    })
+    
+    // create add user in group search bar
+    Promise.all([getAllUsers(), getUsersInGroup()]).then(function (values) {
+        let allUsers = values[0];
+        let groupUsers = values[1];
 
+        let idsInGroup = groupUsers.map(elem => elem[1]);
 
-        // group suggestions
+        // suggest users that are not already in the group
         let correctUsers = allUsers.filter((elem) => {
             if (!idsInGroup.includes(elem[1])) return elem;
         });
@@ -140,18 +166,15 @@ $(document).ready(function () {
                 name: 'add_in_group_suggestions',
                 source: substringMatcher(add_in_group_suggestions)  // Bloodhound instance is passed as the source
             });
-
-
-
     });
 
 });
 
-function renderGroup(users) {
+// function renderGroup(users) {
 
-    ReactDOM.render(
-        <Group users={users} />, document.getElementById("usersInGroup"))
-}
+//     ReactDOM.render(
+//         <Group users={users} />, document.getElementById("usersInGroup"))
+// }
 
 $('#add-user-form').submit(function (event) {
     event.preventDefault();
@@ -207,3 +230,4 @@ var substringMatcher = function (strs) {
         cb(matches);
     };
 };
+

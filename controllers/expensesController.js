@@ -41,11 +41,22 @@ expensesController.get('/get-expense-table', authValidation, async function (req
 
             Promise.all(expensesData).then(function (results) {
                 res.json(results);
+                console.log("the results are:", results);
             })
         })
     })
 
 })
+
+expensesController.get('/get-expense-totals-table', authValidation, function(req,res,next) {
+    console.log("the user that made the request is:", req.user);
+
+    groupService.findGroupByUserId(req.user.id).then((group) => { 
+        groupService.findUsersInGroup(group.getGroupId());
+    });
+    // console.log("request ")
+    res.json(req.user);
+});
 
 
 module.exports = expensesController;

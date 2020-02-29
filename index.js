@@ -1,6 +1,13 @@
 const express = require("express");
 const app = express();
-const server = require("http").createServer(app);
+// const server = require("http").createServer(app);
+
+const fs = require('fs');
+const options = {
+  key: fs.readFileSync("/home/tolis/Desktop/dev/Home-Site/server.key"),
+  cert: fs.readFileSync("/home/tolis/Desktop/dev/Home-Site/server.cert")
+};
+const server = require("https").createServer(options, app);
 var io = require("./services/socketService")(server);
 const bodyParser = require("body-parser");
 var cors = require("cors");
@@ -16,7 +23,7 @@ const homeController = require('./controllers/homeContoller');
 const apiController = require('./controllers/apiController');
 
 // Initialize server
-server.listen(process.env.PORT || 8082, () => {
+server.listen(process.env.PORT || 8082, '192.168.1.14', () => {
   console.log(`app is now listening to port ${process.env.PORT || 8082}`);
   console.log(__dirname);
 });
@@ -110,4 +117,23 @@ app.post('/validate', function (req, res, next) {
 });
 
 
+const webpush = require('web-push');
 
+const publicVapidKey = 'BMKMaCxQjf2NtwfODDDx5wCBW51kMsomozcyvFK_O1NUjyS8xspuZDPoKOEMXZoPxS3g5dAvFNxUNpWkvBRqjV4'
+const privateVapidKey = 'PBDKERhv9kEHJhOBPGrD2rcHRM_BtTvuHMXEbkDJq9g'
+
+webpush.setVapidDetails('mailto:tolisgerodimos94@gmail.com', publicVapidKey, privateVapidKey);
+
+app.post('/subscribe', (req, res) => {
+  // Get pushSubsription object
+  const subscription = req.body;
+
+  // Send 201 - resource created;
+  res.status(201).json({});
+
+  //Create payload
+  const payload = JSON.stringify({ title: 'Push Test', hiddenData: 'Specific parameters for action' });
+
+  //Pass object into SendNotification
+  webpush.sendNotification(subscription, payload).catch(error => console.error(error))
+})
