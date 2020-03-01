@@ -64,6 +64,15 @@ UserModel.prototype.comparePasswords = function comparePasswords(password, callb
 UserModel.prototype.getUserId = function getUserId() {
     return this.getDataValue('id');
 }
+
+UserModel.prototype.getUserFirstName = function getUserName(){
+    return this.getDataValue('firstName');
+}
+
+UserModel.prototype.getUserLastName = function getUserName(){
+    return this.getDataValue('lastName');
+}
+
 // Hashes the password for a user object.
 function hashPassword(user) {
     if (user.changed('password')) {

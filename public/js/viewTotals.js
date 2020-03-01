@@ -3,7 +3,7 @@ var getTotalsPage = function () {
     console.log("in get Totals Page");
     $("#expense-table-id").remove();
     $("#expenses-content").append("<div id = 'expense-table-totals-id'></div>");
-    getExpenseTotalsDataAjax().then(res =>console.log("the user that made the request is: ", res) );
+    getExpenseTotalsDataAjax().then(res => console.log("this should the totals table state", res));
 }
 
 
@@ -16,6 +16,7 @@ var getExpenseTotalsDataAjax = function () {
             dataType: "json",
             success: function (data) {
                 resolve(data);
+                // console.log('this should the totals table state');
             },
             error: function (error) {
                 reject(error);

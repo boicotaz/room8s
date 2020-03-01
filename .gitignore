@@ -1,2 +1,4 @@
 node_modules/
 bugs.txt
+server.cert
+server.key

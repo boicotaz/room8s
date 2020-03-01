@@ -40,6 +40,12 @@ class UserService {
     async getAllUsers() {
         return this.userModel.getAllUsers();
     }
+
+    createFullNameIdArray(users){
+        return users.map(user => {
+            return {id: user.getUserId(), fullname: user.getUserFirstName() + " " + user.getUserLastName()}
+        });
+    }
 }
 
 
