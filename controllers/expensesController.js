@@ -66,7 +66,9 @@ expensesController.get('/get-expense-totals-table', authValidation, function (re
                 expenseEntry.map(transaction => {
                     let creditorId = transaction.creditor;
                     let debtorId = transaction.debtor;
-                    console.log('for this transaction the debt is', transaction.debt)
+                    let remainingDebt;
+                    let CommonDebtsFlag;
+                    let paidDebt;
 
                     if (creditorId == debtorId) return;
 
@@ -74,90 +76,89 @@ expensesController.get('/get-expense-totals-table', authValidation, function (re
                         if (transaction.debt <= totalExpenses[creditorId].debts[debtorId]) { // is the debt enough to settle the current transaction ?
                             totalExpenses[creditorId].debts[debtorId] -= transaction.debt;
                             totalExpenses[debtorId].debts[creditorId] += transaction.debt;
+                            return;
                         }
                         else { // settle up some of the debt
-                            let remainingDebt = transaction.debt - totalExpenses[creditorId].debts[debtorId];
-                            let CommonDebtsFlag = true;
+                            remainingDebt = transaction.debt - totalExpenses[creditorId].debts[debtorId];
+                            CommonDebtsFlag = true;
 
-                            let paidDebt = totalExpenses[creditorId].debts[debtorId]
+                            paidDebt = totalExpenses[creditorId].debts[debtorId]
                             totalExpenses[creditorId].debts[debtorId] -= paidDebt;
                             totalExpenses[debtorId].debts[creditorId] += paidDebt;
-
-
-                            //check if we can settle the remaining debt with another user
-                            while (remainingDebt > 0 && CommonDebtsFlag) {
-                                // searchResut struct keeps the user that has related debts with current creditor and debtor
-                                // weight shows how "good" is to use this user to settle the debts 
-                                // "1": creditor owes to "key" user and "key" user owes to debtor
-                                // "2": enough to settle up creditor but not settle up debtor
-                                // "3": enough to settle both
-                                let searchResult = { userId: -1, weight: 0 }
-                                paidDebt = 0;
-                                //loop through all other Creditor debts, so we can settle up any related debts
-                                Object.keys(totalExpenses[creditorId]).forEach((key, index) => {
-                                    // the user we are looking should have common debts with Creditor and Debtor
-                                    if (!key == debtorId) {
-                                        if (totalExpenses[key].debts[creditorId] < 0) { // user identified by "key" owes some money to our creditor
-                                            if (totalExpenses[key].debts[debtorId] > 0) { //user with key to be of any use, he should at least owe some money to the debtor
-                                                let userDebtValue = 1;
-                                                if (totalExpenses[key].debts[creditorId] < (-1) * remainingDebt) userDebtValue = 2;
-                                                if ((totalExpenses[key].debts[creditorId] < ((-1) * remainingDebt)) && totalExpenses[key].debts[debtorId] > remainingDebt) userDebtValue = 3;
-
-                                                if (userDebtValue > searchResult.weight) {
-                                                    searchResult.userId = key;
-                                                    searchResult.weight = userDebtValue;
-                                                }
-                                            }
-                                        }
-                                    }
-                                });
-
-                                switch (searchResult.weight) {
-                                    case 0:
-                                        CommonDebtsFlag = false; // we couldnt find any user that has common debt
-                                        // update the remaining debt that need be settled bettween creditor and debtor
-                                        totalExpenses[creditorId].debts[debtorId] -= remainingDebt;
-                                        totalExpenses[debtorId].debts[creditorId] += remainingDebt;
-
-                                        break;
-                                    case 1:
-                                        // calculate the remainind debt
-                                        remainingDebt -= Math.abs(totalExpenses[searchResult.userId].debts[creditorId]);
-
-                                        // paid debt (positive)
-                                        paidDebt = Math.abs(totalExpenses[searchResult.userId].debts[creditorId]);
-
-                                        // update the debt bettween the user, creditor, debtor
-                                        totalExpenses[creditorId].debts[searchResult.userId] -= paidDebt;
-                                        totalExpenses[searchResult.userId].debts[creditorId] += paidDebt;
-
-                                        totalExpenses[debtorId].debts[searchResult.userId] -= paidDebt;
-                                        totalExpenses[searchResult.userId].debts[debtorId] += paidDebt;
-                                        break;
-                                    case 2 || 3:
-                                        paidDebt = remainingDebt;
-                                        remainingDebt = 0;
-
-                                        // update the debt bettween the user, creditor, debtor
-                                        totalExpenses[creditorId].debts[searchResult.userId] -= paidDebt;
-                                        totalExpenses[searchResult.userId].debts[creditorId] += paidDebt;
-
-                                        totalExpenses[debtorId].debts[searchResult.userId] -= paidDebt;
-                                        totalExpenses[searchResult.userId].debts[debtorId] += paidDebt;
-                                        break;
-                                }
-
-                            }
-
                         }
                     }
                     else { // Maria doesnt owe money to tolis
-                        totalExpenses[creditorId].debts[debtorId] -= transaction.debt;
-                        totalExpenses[debtorId].debts[creditorId] += transaction.debt;
+                        remainingDebt = transaction.debt;
+                        CommonDebtsFlag = true;
+                    }
+
+                    //check if we can settle the remaining debt with another user
+                    while (remainingDebt > 0 && CommonDebtsFlag) {
+                        // searchResut struct keeps the user that has related debts with current creditor and debtor
+                        // weight shows how "good" is to use this user to settle the debts 
+                        // "1": creditor owes to "key" user and "key" user owes to debtor
+                        // "2": enough to settle up creditor but not settle up debtor
+                        // "3": enough to settle the transaction
+                        let searchResult = { userId: -1, weight: 0 }
+                        paidDebt = 0;
+                        //loop through all other Creditor debts, so we can settle up any related debts
+                        Object.keys(totalExpenses[creditorId]).forEach((key, index) => {
+                            // the user we are looking should have common debts with Creditor and Debtor
+                            if (!key == debtorId) {
+                                if (totalExpenses[key].debts[creditorId] < 0) { // user identified by "key" owes some money to our creditor
+                                    if (totalExpenses[key].debts[debtorId] > 0) { //user with key to be of any use, he should at least owe some money to the debtor
+                                        let userDebtValue = 1;
+                                        if (totalExpenses[key].debts[creditorId] < (-1) * remainingDebt) userDebtValue = 2;
+                                        if ((totalExpenses[key].debts[creditorId] < ((-1) * remainingDebt)) && totalExpenses[key].debts[debtorId] > remainingDebt) userDebtValue = 3;
+
+                                        if (userDebtValue > searchResult.weight) {
+                                            searchResult.userId = key;
+                                            searchResult.weight = userDebtValue;
+                                        }
+                                    }
+                                }
+                            }
+                        });
+
+                        switch (searchResult.weight) {
+                            case 0:
+                                CommonDebtsFlag = false; // we couldnt find any user that has common debt
+                                // update the remaining debt that need be settled bettween creditor and debtor
+                                totalExpenses[creditorId].debts[debtorId] -= remainingDebt;
+                                totalExpenses[debtorId].debts[creditorId] += remainingDebt;
+
+                                break;
+                            case 1:
+                                // calculate the remainind debt
+                                remainingDebt -= Math.abs(totalExpenses[searchResult.userId].debts[creditorId]);
+
+                                // paid debt (positive)
+                                paidDebt = Math.abs(totalExpenses[searchResult.userId].debts[creditorId]);
+
+                                // update the debt bettween the user, creditor, debtor
+                                totalExpenses[creditorId].debts[searchResult.userId] -= paidDebt;
+                                totalExpenses[searchResult.userId].debts[creditorId] += paidDebt;
+
+                                totalExpenses[debtorId].debts[searchResult.userId] -= paidDebt;
+                                totalExpenses[searchResult.userId].debts[debtorId] += paidDebt;
+                                break;
+                            case 2 || 3:
+                                paidDebt = remainingDebt;
+                                remainingDebt = 0;
+
+                                // update the debt bettween the user, creditor, debtor
+                                totalExpenses[creditorId].debts[searchResult.userId] -= paidDebt;
+                                totalExpenses[searchResult.userId].debts[creditorId] += paidDebt;
+
+                                totalExpenses[debtorId].debts[searchResult.userId] -= paidDebt;
+                                totalExpenses[searchResult.userId].debts[debtorId] += paidDebt;
+                                break;
+                        }
+
                     }
                 });
             });
-            console.log(totalExpenses);
+
             //Calculate the debt sum
             Object.keys(totalExpenses).forEach((key, index) => {
                 Object.keys(totalExpenses[key].debts).forEach((innerKey, innerIndex) => {
