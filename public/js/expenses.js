@@ -3,24 +3,48 @@ var counter = 1;
 var expenseData;
 
 var getExpensesPage = function () {
-    console.log("FIRST CHILD IS=======",$("#content").first(), $("#content").children(":first"));
+    console.log("FIRST CHILD IS=======", $("#content").first(), $("#content").children(":first"));
 
     $("#content").remove();
     $("#content-container").append("<div id = 'content'></div>")
-    
-    ReactDOM.render(
-        <ExpensesPage> </ExpensesPage>, document.getElementById('content')
-    );
 
-    Promise.all([getGroupInfoAjax(), getExpenseDataAjax()]).then((res) => {
+    // ReactDOM.render(
+    //     <ExpensesPage view="eachExpense">  </ExpensesPage>, document.getElementById('content')
+    // );
+
+    Promise.all([getGroupInfoAjax(), getExpenseDataAjax(), getExpenseTotalsDataAjax()]).then((res) => {
         var userIdsAndNamesInGroup = res[0];
         var expenseData = res[1];
+        var expensesTotals = res[2];
         let processedData = processData(expenseData, userIdsAndNamesInGroup)
+        console.log("data for TOTALS is ", expensesTotals);
         console.log(res);
-        ReactDOM.render(<ExpensesTable expenses={processedData} />, document.getElementById('expenses-table'))
+        ReactDOM.render(
+            <ExpensesPage view="eachExpense" expenses={processedData} totals={expensesTotals}>  </ExpensesPage>, document.getElementById('content')
+        );
+        // ReactDOM.render(<ExpensesTable expenses={processedData} />, document.getElementById('expenses-table'))
     }).catch((error) => console.log(error));
 }
 
+// Ajax request to retrieve the TOTALS data needed to create the expense TOTALS table
+var getExpenseTotalsDataAjax = function () {
+    return new Promise((resolve, reject) => {
+        $.ajax({
+            url: '/home/expenses/get-expense-totals-table',
+            method: 'GET',
+            dataType: "json",
+            success: function (data) {
+                resolve(data);
+                console.log('this should the totals table state: ', data);
+            },
+            error: function (error) {
+                reject(error);
+            }
+
+        })
+    });
+
+}
 
 // Creates the expense table by using the ExpensesTable Component
 function processData(data, userNames) {
