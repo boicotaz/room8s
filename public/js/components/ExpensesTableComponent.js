@@ -110,9 +110,17 @@ class ExpensesTable extends React.Component {
         this.state.view = props.view;
         // console.log("is the constructor called each time tho?");
         document.addEventListener('new-expense', e => {
-            this.setState({ expenses: [...this.state.expenses, e.detail] })
+            console.log("THE DATA ARE!!!", e.detail);
+            getExpenseTotalsDataAjax().then(totalDebtsForEachUser => {
+                this.setState({ expenses: [...this.state.expenses, e.detail], totals: totalDebtsForEachUser });
+            })
+            
         })
 
+    }
+
+    componentDidUpdate() {
+        $('[data-toggle="tooltip"]').tooltip();
     }
 
     renderEachExpense(expenses) {
@@ -145,17 +153,41 @@ class ExpensesTable extends React.Component {
             <tbody>
             </tbody> </React.Fragment>
     }
+    
+    /**
+     * @typedef TotalDebts
+     * @type {object}
+     * @property {object} userId 
+     * @property {string} userId.fullname
+     * @property {number} userId.debtSum
+     * @property {Object} userId.debts
+     * @property {number} userId.debts.userId
+     */
+    
+    //E.g.  '1': { fullname: apostolis gerodimos, debtSum: 0, debts : {'8' : 15 } } 
 
+    /**
+     * Creates for each user the debts that he owes or how much he gets back
+     * @param {TotalDebts} totals 
+     * @returns {ReactFragment}
+     */
     renderTotals(totals) {
         let data = [];
         console.log("totals in render Totals is: ", totals);
         Object.keys(totals).forEach(key => {
-            let debtsInfo = "";
-            Object.keys(totals[key].debts).forEach(innerKey => {
-                debtsInfo += totals[innerKey].fullname + "-" + totals[key].debts[innerKey] + "$ "
-            })
+            let debtsInfo = '';
             let color = "";
             let debtsSumInfo = "";
+            debtsInfo = '<u><b>' + totals[key].fullname + "</b></u><br>";
+
+            Object.keys(totals[key].debts).forEach(innerKey => {
+                let text;
+                totals[key].debts[innerKey] <= 0 ? text = " <b>gets</b> " : text = " <b>owes</b> ";
+                debtsInfo += "<br>" + totals[innerKey].fullname + text + Math.abs(totals[key].debts[innerKey]) + "$ ";
+            })
+            // debtsInfo += "</p>";
+
+
             if (totals[key].debtSum <= 0) {
                 color = "green";
                 debtsSumInfo = "Gets " + Math.abs(totals[key].debtSum) + "$";
@@ -167,7 +199,7 @@ class ExpensesTable extends React.Component {
             let row = <React.Fragment> <tr>
                 <td >{totals[key].fullname}</td>
                 <td style={{ color: color }} >{debtsSumInfo}</td>
-                <td><a href="#" data-toggle="modal" data-target={"#info-totals-modal-id-" + key}><img src="/public/info.png" alt="Info IMG" height="42" width="42" ></img></a></td>
+                <td><a href="#" data-toggle="tooltip" data-placement="right" sanitize="false" data-html="true" title={debtsInfo}><img src="/public/info.png" alt="Info IMG" height="42" width="42" ></img></a></td>
             </tr>
             </React.Fragment>
             data.push(row);
@@ -190,7 +222,7 @@ class ExpensesTable extends React.Component {
             return this.renderEachExpense(this.state.expenses);
         }
         else if (this.props.view == "allExpenses") {
-            renderInfoTotalsModal(this.state.totals);
+            // renderInfoTotalsModal(this.state.totals);
             return this.renderTotals(this.state.totals);
         }
 

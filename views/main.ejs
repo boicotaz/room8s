@@ -12,7 +12,11 @@
     <script type="text/babel" src="../public/js/components/GroupComponent.js"></script>
     <script src="../public/client/client.js"></script>
     <script src="../public/client/worker.js"></script>
-
+    <style>
+        .tooltip-inner {
+            min-width: 250px; /* the minimum width */
+        }
+    </style>
     <script>
         if (socket === undefined) {
             var socket = io.connect();
