@@ -114,9 +114,12 @@ class ExpensesTable extends React.Component {
             getExpenseTotalsDataAjax().then(totalDebtsForEachUser => {
                 this.setState({ expenses: [...this.state.expenses, e.detail], totals: totalDebtsForEachUser });
             })
-            
+
         })
 
+    }
+    componentDidMount() {
+        $('[data-toggle="tooltip"]').tooltip();
     }
 
     componentDidUpdate() {
@@ -126,16 +129,20 @@ class ExpensesTable extends React.Component {
     renderEachExpense(expenses) {
         let data = expenses.map(expense => {
 
-            let tranactionsData = expense.map(transaction => {
-                return transaction.debtorName + ' - ' + transaction.debt + '$'
-            })
-            // console.log(tranactionsData);
+            let tranactionsData = expense.reduce((sum, entry) => {
+                let text = "";
+                console.log("current entry is:", entry);
+                entry.debt <= 0 ? text = " <b>gets</b> " : text = " <b>owes</b> ";
+                sum += entry.debtorName + text + Math.abs(entry.debt) + "$" + "<br>";
+                return sum;
+            }, "");
+
             return <tr>
-                <td >{expense[0].creditorName}</td>
-                <td>{tranactionsData.reduce((accumulator, currentValue) => accumulator + ' , ' + currentValue)}</td>
+                <td>{expense[0].creditorName}</td>
                 <td>{expense[0].when}</td>
                 <td>{expense[0].description}</td>
                 <td>{expense[0].credit} $</td>
+                <td><a href="#" data-toggle="tooltip" data-placement="right" sanitize="false" data-html="true" title={tranactionsData}><img src="/public/info.png" alt="Info IMG" height="42" width="42" ></img></a></td>
             </tr>
         })
 
@@ -143,17 +150,17 @@ class ExpensesTable extends React.Component {
             <tr>
                 {/* <th scope="col">#</th> */}
                 <th scope="col">Creditor</th>
-                <th scope="col">Debtors</th>
                 <th scope="col">When</th>
                 <th scope="col">Description</th>
                 <th scope="col">Credit</th>
+                <th scope="col">Info</th>
             </tr>
             {[...data]}
         </thead>
             <tbody>
             </tbody> </React.Fragment>
     }
-    
+
     /**
      * @typedef TotalDebts
      * @type {object}
@@ -163,7 +170,7 @@ class ExpensesTable extends React.Component {
      * @property {Object} userId.debts
      * @property {number} userId.debts.userId
      */
-    
+
     //E.g.  '1': { fullname: apostolis gerodimos, debtSum: 0, debts : {'8' : 15 } } 
 
     /**
