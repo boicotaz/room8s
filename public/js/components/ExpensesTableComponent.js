@@ -118,6 +118,7 @@ class ExpensesTable extends React.Component {
         })
 
     }
+
     componentDidMount() {
         $('[data-toggle="tooltip"]').tooltip();
     }
@@ -126,12 +127,17 @@ class ExpensesTable extends React.Component {
         $('[data-toggle="tooltip"]').tooltip();
     }
 
+    /**
+     * @todo create typedef for expenses object
+     * @param {*} expenses 
+     */
     renderEachExpense(expenses) {
+        console.log("current expenses are:", expenses);
         let data = expenses.map(expense => {
 
             let tranactionsData = expense.reduce((sum, entry) => {
                 let text = "";
-                console.log("current entry is:", entry);
+
                 entry.debt <= 0 ? text = " <b>gets</b> " : text = " <b>owes</b> ";
                 sum += entry.debtorName + text + Math.abs(entry.debt) + "$" + "<br>";
                 return sum;
@@ -192,8 +198,6 @@ class ExpensesTable extends React.Component {
                 totals[key].debts[innerKey] <= 0 ? text = " <b>gets</b> " : text = " <b>owes</b> ";
                 debtsInfo += "<br>" + totals[innerKey].fullname + text + Math.abs(totals[key].debts[innerKey]) + "$ ";
             })
-            // debtsInfo += "</p>";
-
 
             if (totals[key].debtSum <= 0) {
                 color = "green";
