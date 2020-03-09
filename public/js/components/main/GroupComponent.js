@@ -20,9 +20,9 @@ class Group extends React.Component {
     render() {
         console.log('do i even bother');
         return (        
-        <div id="group-dashboard" className="container mt-5">
-            <div className="row">
-            <div className="jumbotron col-6 mb">
+        <div id="group-dashboard" className="row mt-5 ml-1">
+            {/* <div className="row"> */}
+            <div className="jumbotron col-3 mb">
                 <h1 className="display-6"> <i className="fa fa-home"> </i> {this.state.groupDetails.groupName} </h1>
                 <hr className="my-4"/>
                 <p className="lead"> Users in group </p>
@@ -35,7 +35,7 @@ class Group extends React.Component {
                     className="btn btn-secondary mt-5"> Add users in
                     group </button>
             </div>
-        </div>
+        {/* </div> */}
     </div>)
     
     }

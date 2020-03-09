@@ -9,7 +9,7 @@
     <script type="text/babel" src="../public/js/expenses.js"></script>
     <script type="text/babel" src="../public/js/components/ExpensesTableComponent.js"></script>
     <script type="text/babel" src="../public/js/components/ExpensesFormComponent.js"></script>
-    <script type="text/babel" src="../public/js/components/GroupComponent.js"></script>
+    <script type="text/babel" src="../public/js/components/main/GroupComponent.js"></script>
     <script src="../public/client/client.js"></script>
     <script src="../public/client/worker.js"></script>
     <style>
@@ -144,10 +144,9 @@
 
 
     <% if (userHasGroup == true ){ %>
-    <div id="content-container">
-        <!-- <div id="content">
+    <div id="content-container" class="container-fluid">
 
-            </div> -->
+
     </div>
 
     <div class="modal fade" id="addUserForm" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
@@ -225,7 +224,7 @@
     </div>
     </div>
     <% } %>
-    <div id="root"></div>
+    <%- include("chat.html") %>
 </body>
 
 </html>

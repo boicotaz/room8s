@@ -21,8 +21,9 @@ var getMainPage = function (user) {
      
     Promise.all([getUsersInGroup(), getGroupDetails()]).then((res) => {
         console.log('Results are: ', res);
-        let usersInGroup = res[0];
-        let groupDetails = res[1];
+        // let usersInGroup = res[0];
+        // let groupDetails = res[1];
+        let [usersInGroup, groupDetails] = res;
         ReactDOM.render(
             <Group usersInGroup={usersInGroup} groupDetails={groupDetails} currentUser={user} > </Group>, document.getElementById('content')
         );
