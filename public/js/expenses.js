@@ -85,7 +85,6 @@ var getGroupInfoAjax = function () {
             url: '/api/get-current-user',
             type: "GET",
             success: function (user) {
-                console.log(user);
                 $.ajax({
                     url: '/api/get-users-in-group',
                     type: "POST",

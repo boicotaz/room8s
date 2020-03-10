@@ -66,7 +66,7 @@ app.get("/", (req, res) => {
 });
 
 //Home page
-app.get("/home", homeController);
+app.use("/home", homeController);
 
 //Sign up page
 app.use("/sign-up", signUpController);

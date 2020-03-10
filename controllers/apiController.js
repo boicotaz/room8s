@@ -8,7 +8,7 @@ apiController.post('/get-users-in-group', function(req,res) {
     else user = req.user;
     groupService.findGroupByUserId(user.id).then((group) => {
         groupService.findUsersInGroup(group.getGroupId()).then( (users) => {
-            let userNamesAndIds = users.map( userInGroup => [userInGroup.firstName, userInGroup.id] );
+            let userNamesAndIds = users.map( userInGroup => [userInGroup.firstName, userInGroup.lastName, userInGroup.id] );
             res.json(userNamesAndIds);
         });
     })

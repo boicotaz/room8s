@@ -1,8 +1,9 @@
 const homeController = require('express').Router();
 const passportService = require('../services/passportService');
 const groupService = require('../services/groupService')();
+const messageService = require('../services/messageService')();
 
-homeController.get("/home", passportService.authValidation, async (req, res) => {
+homeController.get("/", passportService.authValidation, async (req, res) => {
     console.log("Is the user authenticated? =>  " + req.isAuthenticated());
     console.log("Home Route");
 
@@ -24,5 +25,17 @@ homeController.get("/home", passportService.authValidation, async (req, res) => 
     }
 
 });
+
+
+homeController.get("/get-group-messages",passportService.authValidation, async (req, res) => {
+    
+
+    group = await groupService.findGroupByUserId(req.user.id);
+
+    messageService.getGroupMessages(group.getGroupId()).then(groupMessages => {
+        res.json(groupMessages);
+    });
+
+})
 
 module.exports = homeController;

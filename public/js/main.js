@@ -7,28 +7,21 @@ var usernamesInGroup;
 
 var getMainPage = function (user) {
 
-    console.log('GOT THE USER BABY', user);
     if ($("#group-dashboard").length) return;
-    console.log("FIRST CHILD IS=======",$("#content").first(), $("#content").children(":first"));
-    console.log("group dashboard is online ?" , $("#group-dashboard").length);
+
     $("#content").remove();
     $("#content-container").append("<div id = 'content'></div>")
 
-    // getUsersInGroup().then( users => {
-    //     console.log('users in group are' , users);
-
-    // })
      
-    Promise.all([getUsersInGroup(), getGroupDetails()]).then((res) => {
-        console.log('Results are: ', res);
-        // let usersInGroup = res[0];
-        // let groupDetails = res[1];
-        let [usersInGroup, groupDetails] = res;
+    Promise.all([getUsersInGroup(), getGroupDetails(), getGroupMessages()]).then((res) => {
+        console.log('Results are from Promise.all: ', res);
+        let [usersInGroup, groupDetails, groupMessages] = res;
         ReactDOM.render(
-            <Group usersInGroup={usersInGroup} groupDetails={groupDetails} currentUser={user} > </Group>, document.getElementById('content')
+            <MainPage usersInGroup={usersInGroup} groupDetails={groupDetails} currentUser={user} > </MainPage>, document.getElementById('content')
         );
     }).catch((error) => console.log(error));
 }
+
 getMainPage(myUser);
 
 let createAutoSuggest = () => {
@@ -42,11 +35,9 @@ function getAllUsers() {
             url: '/api/get-users',
             type: "GET",
             success: function (returnedData) {
-                // console.log(returnedData);
                 resolve(returnedData);
             },
             error: function (error) {
-                console.log(error);
                 reject(error);
             }
         })
@@ -62,7 +53,6 @@ function getCurrentUser() {
                 resolve(currentUser);
             },
             error: function (error) {
-                console.log(error);
                 reject(error);
             }
         })
@@ -77,22 +67,17 @@ function getUsersInGroup() {
             type: 'POST',
             success: function (usersInGroup) {
                 usernamesInGroup = usersInGroup;
-                // console.log('get users ajax returned: ', usersInGroup);
-                // ReactDOM.render(
-                //     <Group users={usersInGroup} />, document.getElementById("usersInGroup")
-                // )
                 window.dispatchEvent(evt);
                 resolve(usersInGroup);
             },
             error: function (error) {
-                console.log(error);
                 reject(error);
             }
         })
     })
 }
 
-function  getGroupDetails() {
+function getGroupDetails() {
     return new Promise((resolve, reject) => {
         $.ajax({
             url: '/api/get-group-details',
@@ -101,11 +86,30 @@ function  getGroupDetails() {
                 resolve(groupDetails);
             },
             error: function (error) {
-                console.log(error);
                 reject(error);
             }
         })
     })
+}
+
+
+ function  getGroupMessages () {
+    return new Promise((resolve, reject) => {
+        $.ajax({
+            url: '/home/get-group-messages',
+            method: 'GET',
+            dataType: "json",
+            success: function (groupMessages) {
+                console.log('get group message data:', groupMessages);
+                resolve(groupMessages);
+            },
+            error: function (error) {
+                reject(error);
+            }
+
+        })
+    });
+
 }
 
 
@@ -116,14 +120,12 @@ $(document).ready(function () {
         type: 'GET',
         success: function (User) {
             user = User;
-            // console.log('User got ', user);
         }
     })
 
     // create search bar
     getAllUsers().then(function (values) {
         let allUsers = values;
-        console.log(allUsers.map(elem => elem[0]));
         var users_suggestions = new Bloodhound({
             datumTokenizer: Bloodhound.tokenizers.whitespace, // see its meaning above
             queryTokenizer: Bloodhound.tokenizers.whitespace, // see its meaning above
@@ -182,7 +184,6 @@ $('#add-user-form').submit(function (event) {
 
     let data = $(this).serializeArray();
     data[0].user = user;
-    console.log(data);
 
     var request = $.ajax({
         url: '/add-user-in-group',
@@ -200,7 +201,6 @@ $('#add-user-form').submit(function (event) {
                 }
 
             });
-            // console.log(returnedData.group);
             renderGroup(returnedData.group);
 
         }
@@ -213,7 +213,7 @@ var substringMatcher = function (strs) {
     return function findMatches(q, cb) {
         var matches, substringRegex;
         let stringsToMatch = strs.local.map(entry => entry[0])
-        console.log(stringsToMatch);
+
         // an array that will be populated with substring matches
         matches = [];
 
