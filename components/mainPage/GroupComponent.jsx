@@ -1,18 +1,28 @@
-class Group extends React.Component {
-    state = {}
+
+export default class Group extends React.Component {
+    // state = {}
 
     constructor(props) {
         super(props);
+        this.state = {}
         this.state.usersInGroup = props.usersInGroup;
+
         this.state.groupDetails = props.groupDetails;
-        let usersInGroupId = props.usersInGroup.map(elem => elem[1]);
-        var getUserLoggedStatusEvent = new CustomEvent('LoggedInStatus', {detail: { currentUserId: props.currentUser.id , usersInGroupId: usersInGroupId}} );
+        let usersInGroupId = props.usersInGroup.map(elem => elem[2]);
+        console.log("The log status event is: ",getUserLoggedStatusEvent );
+        if (getUserLoggedStatusEvent == undefined) {
+            var getUserLoggedStatusEvent = new CustomEvent('LoggedInStatus', {detail: { currentUserId: props.currentUser.id , usersInGroupId: usersInGroupId}} );
+
+            document.addEventListener('LoggedInStatusReply', e => {
+                console.log("i am in GROUP Compenent the users online are", e.detail);
+                this.setState({loggedInMembersId: e.detail})           
+            });
+        }
         document.dispatchEvent(getUserLoggedStatusEvent);
 
-        document.addEventListener('LoggedInStatusReply', e => {
-            this.setState({loggedInMembersId: e.detail})           
-        });
 
+
+        console.log()
     }
 
     render() {
@@ -30,7 +40,6 @@ class Group extends React.Component {
                     className="btn btn-secondary mt-5"> Add users in
                     group </button>
             </div>)
-    
     }
 }
 
@@ -41,7 +50,7 @@ class GroupMember extends React.Component {
             loggedInStatus = "btn-danger";
         }
         else {
-            if (this.props.loggedInMembersId.includes(this.props.user[1])) {
+            if (this.props.loggedInMembersId.includes(this.props.user[2])) {
                 loggedInStatus = "btn-success";
             }
             else{

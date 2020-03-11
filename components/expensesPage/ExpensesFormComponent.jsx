@@ -1,13 +1,6 @@
-let renderFormExpenseModal = function () {
-    getGroupInfoAjax().then(userNames => {
-        ReactDOM.render(
-            <ExpensesForm usersInGroup={userNames} />, document.getElementById('CreateFormContent')
-        )
-    })
 
-}
 
-renderFormExpenseModal();
+import {expensesAjax} from "../../ajax/expensesAjax.js";
 
 // React Component to create the debtors row in the create expense form 
 // depends on User_drop_down_list and User_drop_down_item
@@ -65,7 +58,7 @@ class Debtor extends React.Component {
 
 }
 
-class ExpensesForm extends React.Component {
+export default class ExpensesForm extends React.Component {
     counter = 0;
     state = {
     }
@@ -99,8 +92,8 @@ class ExpensesForm extends React.Component {
             newExpense.push({creditor: creditor.id, debtor: elem.id, when: info.date, description: info.desc, credit: creditor.credit,debt: elem.debt, creditorName, debtorName: debtorNames[index]  })
         });
         
-        console.log(newExpense);
-        storeNewExpense(postFormData, newExpense);
+        console.log("THE NEW EXPENSE IS:", newExpense);
+        expensesAjax.storeNewExpense(postFormData, newExpense);
     }
 
 

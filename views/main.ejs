@@ -6,11 +6,7 @@
     <%- include("createExpense.ejs") %>
     <!-- Init socket client  -->
     <script src="socket.io/socket.io.js"></script>
-    <script type="text/babel" src="../public/js/expenses.js"></script>
-    <script type="text/babel" src="../public/js/components/ExpensesTableComponent.js"></script>
-    <script type="text/babel" src="../public/js/components/ExpensesFormComponent.js"></script>
-    <script type="text/babel" src="../public/js/components/main/GroupComponent.js"></script>
-    <script type="text/babel" src="../public/js/components/main/MainPageComponent.js"></script>
+    <script type="text/babel" src="../public/webpack/expensesPage.js"></script>
     <script src="../public/client/client.js"></script>
     <script src="../public/client/worker.js"></script>
     <style>
@@ -27,9 +23,8 @@
             socket.emit('user_connected', data);
             document.addEventListener('LoggedInStatus', function (e) {
                 console.log('EVENT FOR LOG STATUS CAUGHT SUCCESSFULLY with user', e.detail);
-                RequestFromUser = e.detail
+                let RequestFromUser = e.detail;
                 socket.emit('get_logged_in_users', RequestFromUser);
-
             });
             socket.on('sent_logged_in_users', function (loggedInUsers) {
                 console.log('ABOUT TO INFORM HOME COMPONENT', loggedInUsers);
@@ -40,7 +35,7 @@
                 $(document).ready(function () {
 
                     window.addEventListener('buttons-created', function (e) {
-                        createAutoSuggest();
+                        // createAutoSuggest();
                         $("#usersInGroup").children().each(function () {
                             console.log($(this).text());
                             userNames.map((name) => {
@@ -78,7 +73,7 @@
         }
     </script>
 
-    <script type="text/babel" currentUser=<%- user %> src = "../public/js/main.js" ></script>
+    <script type="text/babel" currentUser=<%- user %> src = "../public/webpack/mainPage.js" ></script>
     <script> var myUser = <%- JSON.stringify(user) %> </script>
     <link rel="stylesheet" type="text/css" href="../public/css/main.css">
 

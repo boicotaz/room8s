@@ -1,8 +1,11 @@
-class MainPage extends React.Component {
-    state = {}
+import Group from "./GroupComponent.jsx"
+
+export default class MainPage extends React.Component {
+    // state = {}
 
     constructor(props) {
         super(props);
+        this.state = {}
         this.state.usersInGroup = props.usersInGroup;
         this.state.groupDetails = props.groupDetails;
         this.state.currentUser = props.currentUser;

@@ -1,9 +1,14 @@
-var evt = new CustomEvent('buttons-created', { state: "done" })
+
 var user;
 
 var usernames;
 var usernamesInGroup;
 
+
+import MainPage from "../components/mainPage/MainPageComponent.jsx";
+import {getGroupDetails, getUsersInGroup} from "../ajax/groupDetailsAjax";
+import {getGroupMessages} from "../ajax/groupMessagesAjax";
+import {getAllUsers} from "../ajax/userAjax"
 
 var getMainPage = function (user) {
 
@@ -23,95 +28,6 @@ var getMainPage = function (user) {
 }
 
 getMainPage(myUser);
-
-let createAutoSuggest = () => {
-
-}
-
-
-function getAllUsers() {
-    return new Promise((resolve, reject) => {
-        $.ajax({
-            url: '/api/get-users',
-            type: "GET",
-            success: function (returnedData) {
-                resolve(returnedData);
-            },
-            error: function (error) {
-                reject(error);
-            }
-        })
-    })
-}
-
-function getCurrentUser() {
-    return new Promise((resolve,reject) => {
-        $.ajax({
-            url: '/api/get-current-user',
-            type: 'GET',
-            success: function (currentUser){
-                resolve(currentUser);
-            },
-            error: function (error) {
-                reject(error);
-            }
-        })
-    })
-}
-
-
-function getUsersInGroup() {
-    return new Promise((resolve, reject) => {
-        $.ajax({
-            url: '/api/get-users-in-group',
-            type: 'POST',
-            success: function (usersInGroup) {
-                usernamesInGroup = usersInGroup;
-                window.dispatchEvent(evt);
-                resolve(usersInGroup);
-            },
-            error: function (error) {
-                reject(error);
-            }
-        })
-    })
-}
-
-function getGroupDetails() {
-    return new Promise((resolve, reject) => {
-        $.ajax({
-            url: '/api/get-group-details',
-            type: 'GET',
-            success: function (groupDetails){
-                resolve(groupDetails);
-            },
-            error: function (error) {
-                reject(error);
-            }
-        })
-    })
-}
-
-
- function  getGroupMessages () {
-    return new Promise((resolve, reject) => {
-        $.ajax({
-            url: '/home/get-group-messages',
-            method: 'GET',
-            dataType: "json",
-            success: function (groupMessages) {
-                console.log('get group message data:', groupMessages);
-                resolve(groupMessages);
-            },
-            error: function (error) {
-                reject(error);
-            }
-
-        })
-    });
-
-}
-
 
 $(document).ready(function () {
     // getMainPage();
@@ -173,11 +89,6 @@ $(document).ready(function () {
 
 });
 
-// function renderGroup(users) {
-
-//     ReactDOM.render(
-//         <Group users={users} />, document.getElementById("usersInGroup"))
-// }
 
 $('#add-user-form').submit(function (event) {
     event.preventDefault();
@@ -231,4 +142,6 @@ var substringMatcher = function (strs) {
         cb(matches);
     };
 };
+
+export {getMainPage};
 

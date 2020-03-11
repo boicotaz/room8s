@@ -12,6 +12,7 @@ function socketInit(server){
         // socket.emit('sent_logged_in_users', sequenceNumberByClient);
         let userSocket;
         let loggedInData = [];
+        console.log("the sockets online up till now are:",sequenceNumberByClient );
         for(const [client, userInLoggedInList] of sequenceNumberByClient) {
           if (RequestorData.usersInGroupId.includes(userInLoggedInList.id)) {
             // client.emit('user_in_my_group_added_expense', data);

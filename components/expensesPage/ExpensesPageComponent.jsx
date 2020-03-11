@@ -1,12 +1,13 @@
 // import 
-class ExpensesPage extends React.Component {
-    state = {
-        expenses: [],
-        totals: {},
-        view: ""
-    }
+export default class ExpensesPage extends React.Component {
+
     constructor(props) {
         super(props);
+        this.state = {
+            expenses: [],
+            totals: {},
+            view: ""
+        }
         this.state.view = props.view;
         this.state.expenses = props.expenses;
         this.state.totals = props.totals;
@@ -62,38 +63,6 @@ class ExpensesPage extends React.Component {
 
 
 }
-function renderInfoTotalsModal(totals) {
-
-    let modals = [];
-
-    Object.keys(totals).forEach(key => {
-        modals.push(<div className="modal fade" id={"info-totals-modal-id-" + key} tabIndex="-1" role="dialog"
-            aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
-            <div className="modal-dialog modal-dialog-centered" role="document">
-                <div className="modal-content card card-image" style={{ backgroundColor: 'dark' }} >
-                    <div className="modal-header">
-                        <h5 className="modal-title" id="exampleModalLongTitle">{totals[key].fullname}</h5>
-                        <button type="button" className="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    <div className="modal-body">
-                        {/* {Object.keys([key].debts).forEach(innerKey => {
-
-                        })} */}
-                    </div>
-                </div>
-            </div>
-        </div>)
-
-    });
-    ReactDOM.render(
-        <React.Fragment> <div id="modals-content"> {modals} </div></React.Fragment>, document.getElementById('modals-container')
-    );
-    // return modals;
-
-
-}
 
 
 //React componenent that dynamically creates the expense table
@@ -142,9 +111,9 @@ class ExpensesTable extends React.Component {
                 sum += entry.debtorName + text + Math.abs(entry.debt) + "$" + "<br>";
                 return sum;
             }, "");
-
+            
             return <tr>
-                <td>{expense[0].creditorName}</td>
+                <td>{expense[0].creditorFullName}</td>
                 <td>{expense[0].when}</td>
                 <td>{expense[0].description}</td>
                 <td>{expense[0].credit} $</td>
