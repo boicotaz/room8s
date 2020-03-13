@@ -82,7 +82,7 @@ var expensesPageExport =
 /******/
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 6);
+/******/ 	return __webpack_require__(__webpack_require__.s = 5);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -91,16 +91,15 @@ var expensesPageExport =
 /* 2 */,
 /* 3 */,
 /* 4 */,
-/* 5 */,
-/* 6 */
+/* 5 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getExpensesPage", function() { return getExpensesPage; });
-/* harmony import */ var _components_expensesPage_ExpensesPageComponent_jsx__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(7);
+/* harmony import */ var _components_expensesPage_ExpensesPageComponent_jsx__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(6);
 /* harmony import */ var _components_expensesPage_ExpensesFormComponent_jsx__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(8);
-/* harmony import */ var _ajax_expensesAjax_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(9);
+/* harmony import */ var _ajax_expensesAjax_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(7);
 function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _nonIterableRest(); }
 
 function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance"); }
@@ -120,51 +119,66 @@ var getExpensesPage = function getExpensesPage() {
     var _res = _slicedToArray(res, 3),
         userNames = _res[0],
         expenseData = _res[1],
-        expensesTotals = _res[2];
+        expensesTotals = _res[2]; // console.log("Promise.all for expenses are_____________", userNames, expenseData, expensesTotals);
 
-    console.log("Promise.all for expenses are_____________", userNames, expenseData, expensesTotals);
-    var processedData = processData(expenseData, userNames);
+
+    var processedData = _ajax_expensesAjax_js__WEBPACK_IMPORTED_MODULE_2__["expensesAjax"].processData(expenseData, userNames);
     ReactDOM.render(React.createElement(_components_expensesPage_ExpensesPageComponent_jsx__WEBPACK_IMPORTED_MODULE_0__["default"], {
       view: "eachExpense",
       expenses: processedData,
-      totals: expensesTotals
+      totals: expensesTotals,
+      userNamesInGroup: userNames
     }, "  "), document.getElementById('content'));
+    var processedUserNames = processUserNames(userNames);
     ReactDOM.render(React.createElement(_components_expensesPage_ExpensesFormComponent_jsx__WEBPACK_IMPORTED_MODULE_1__["default"], {
-      usersInGroup: userNames
+      usersInGroup: processedUserNames
     }), document.getElementById('CreateFormContent'));
   })["catch"](function (error) {
     return console.log(error);
   });
-}; // Creates the expense table by using the ExpensesTable Component
+};
+/**
+ * @typedef proccessedUserNames
+ * @type {object}
+ * @property {object} userId 
+ * @property {string} userId.firstName
+ * @property {string} userId.lastName
+ * @example - {'1':{firstName:"Tolis",lastName:"Gerodimos"}}
+ * 
+ */
+
+/**
+ * 
+ * @param {import("../ajax/expensesAjax.js").userNames} userNames
+ * @returns {proccessedUserNames} 
+ */
 
 
-var processData = function processData(data, userNames) {
-  console.log("in processData__________________", data, userNames);
-  var userNamesMap = new Map();
-  userNames.forEach(function (user) {
-    userNamesMap.set(user[2], "".concat(user[0], " ").concat(user[1]));
+var processUserNames = function processUserNames(userNames) {
+  var proccessedUserNames = {};
+  userNames.forEach(function (userNameTuple) {
+    var _userNameTuple = _slicedToArray(userNameTuple, 3),
+        firstName = _userNameTuple[0],
+        lastName = _userNameTuple[1],
+        userId = _userNameTuple[2];
+
+    proccessedUserNames[userId] = {};
+    proccessedUserNames[userId].firstName = firstName;
+    proccessedUserNames[userId].lastName = lastName;
   });
-  data.forEach(function (expense) {
-    if (Array.isArray(expense)) {
-      expense.forEach(function (transaction) {
-        transaction.creditorFullName = userNamesMap.get(transaction.creditor);
-      });
-    } else {
-      expense.creditorFullName = userNamesMap.get(expense.creditor);
-    }
-  });
-  return data;
+  return proccessedUserNames;
 };
 
 
 
 /***/ }),
-/* 7 */
+/* 6 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return ExpensesPage; });
+/* harmony import */ var _ajax_expensesAjax__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(7);
 function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _nonIterableSpread(); }
 
 function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance"); }
@@ -193,7 +207,8 @@ function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || func
 
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
-// import 
+
+
 var ExpensesPage =
 /*#__PURE__*/
 function (_React$Component) {
@@ -207,7 +222,7 @@ function (_React$Component) {
     _this = _possibleConstructorReturn(this, _getPrototypeOf(ExpensesPage).call(this, props));
 
     _defineProperty(_assertThisInitialized(_this), "toggleView", function () {
-      console.log(_this.state.view, _this.state.totals);
+      // console.log(this.state.view, this.state.totals);
       var view;
 
       if (_this.state.view == "eachExpense") {
@@ -230,6 +245,7 @@ function (_React$Component) {
     _this.state.view = props.view;
     _this.state.expenses = props.expenses;
     _this.state.totals = props.totals;
+    _this.state.userNamesInGroup = props.userNamesInGroup;
     return _this;
   }
 
@@ -279,6 +295,7 @@ function (_React$Component) {
       }, React.createElement(ExpensesTable, {
         expenses: this.state.expenses,
         totals: this.state.totals,
+        userNamesInGroup: this.state.userNamesInGroup,
         view: this.state.view
       })))), React.createElement("div", {
         id: "modals-container"
@@ -303,6 +320,7 @@ function (_React$Component2) {
 
     _classCallCheck(this, ExpensesTable);
 
+    console.log("i");
     _this2 = _possibleConstructorReturn(this, _getPrototypeOf(ExpensesTable).call(this, props));
 
     _defineProperty(_assertThisInitialized(_this2), "state", {
@@ -312,13 +330,17 @@ function (_React$Component2) {
 
     _this2.state.expenses = props.expenses;
     _this2.state.totals = props.totals;
-    _this2.state.view = props.view; // console.log("is the constructor called each time tho?");
+    _this2.state.view = props.view;
+    _this2.state.userNamesInGroup = props.userNamesInGroup; // console.log("is the constructor called each time tho?");
 
     document.addEventListener('new-expense', function (e) {
       console.log("THE DATA ARE!!!", e.detail);
-      getExpenseTotalsDataAjax().then(function (totalDebtsForEachUser) {
+      _ajax_expensesAjax__WEBPACK_IMPORTED_MODULE_0__["expensesAjax"].getExpenseTotalsDataAjax().then(function (totalDebtsForEachUser) {
+        var newExpense = _ajax_expensesAjax__WEBPACK_IMPORTED_MODULE_0__["expensesAjax"].processData(e.detail, _this2.state.userNamesInGroup);
+        console.log("the processsed new Expense is_______________________________", newExpense);
+
         _this2.setState({
-          expenses: [].concat(_toConsumableArray(_this2.state.expenses), [e.detail]),
+          expenses: [].concat(_toConsumableArray(_this2.state.expenses), [newExpense]),
           totals: totalDebtsForEachUser
         });
       });
@@ -344,12 +366,12 @@ function (_React$Component2) {
   }, {
     key: "renderEachExpense",
     value: function renderEachExpense(expenses) {
-      console.log("current expenses are:", expenses);
+      // console.log("current expenses are:", expenses);
       var data = expenses.map(function (expense) {
         var tranactionsData = expense.reduce(function (sum, entry) {
           var text = "";
           entry.debt <= 0 ? text = " <b>gets</b> " : text = " <b>owes</b> ";
-          sum += entry.debtorName + text + Math.abs(entry.debt) + "$" + "<br>";
+          sum += entry.debtorFullName + text + Math.abs(entry.debt) + "$" + "<br>";
           return sum;
         }, "");
         return React.createElement("tr", null, React.createElement("td", null, expense[0].creditorFullName), React.createElement("td", null, expense[0].when), React.createElement("td", null, expense[0].description), React.createElement("td", null, expense[0].credit, " $"), React.createElement("td", null, React.createElement("a", {
@@ -398,8 +420,8 @@ function (_React$Component2) {
   }, {
     key: "renderTotals",
     value: function renderTotals(totals) {
-      var data = [];
-      console.log("totals in render Totals is: ", totals);
+      var data = []; // console.log("totals in render Totals is: ", totals);
+
       Object.keys(totals).forEach(function (key) {
         var debtsInfo = '';
         var color = "";
@@ -449,7 +471,7 @@ function (_React$Component2) {
   }, {
     key: "render",
     value: function render() {
-      console.log("Each time the button is clicked i am summoned", this.state.view);
+      console.log("Expense page render called_____________________________________________");
 
       if (this.props.view == "eachExpense") {
         return this.renderEachExpense(this.state.expenses);
@@ -464,13 +486,161 @@ function (_React$Component2) {
 }(React.Component);
 
 /***/ }),
+/* 7 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "expensesAjax", function() { return expensesAjax; });
+// Ajax request to retrieve the data needed to create the expense table
+var getExpenseDataAjax = function getExpenseDataAjax(userNames, skip) {
+  return new Promise(function (resolve, reject) {
+    $.ajax({
+      url: '/home/expenses/get-expense-table',
+      method: 'GET',
+      dataType: "json",
+      success: function success(data) {
+        resolve(data);
+      },
+      error: function error(_error) {
+        reject(_error);
+      }
+    });
+  });
+};
+/**
+ * @typedef userNameTuple
+ * @type {array}
+ * @property {string} 0 - firstName
+ * @property {string} 1 - lastName
+ * @property {number} 2 - userId
+ */
+
+/**
+ * @typedef userNames
+ * @type {array<userNameTuple>}
+ */
+
+/**
+ * @return {Promise<userNames>}
+ */
+
+
+var getGroupInfoAjax = function getGroupInfoAjax() {
+  return new Promise(function (resolve, reject) {
+    $.ajax({
+      url: '/api/get-current-user',
+      type: "GET",
+      success: function success(user) {
+        $.ajax({
+          url: '/api/get-users-in-group',
+          type: "POST",
+          data: user,
+          dataType: "json",
+          success: function success(userNames) {
+            resolve(userNames);
+          },
+          error: function error(err) {
+            console.log(err);
+            reject(err);
+          }
+        });
+      }
+    });
+  });
+}; // Ajax request to retrieve the TOTALS data needed to create the expense TOTALS table
+
+
+var getExpenseTotalsDataAjax = function getExpenseTotalsDataAjax() {
+  return new Promise(function (resolve, reject) {
+    $.ajax({
+      url: '/home/expenses/get-expense-totals-table',
+      method: 'GET',
+      dataType: "json",
+      success: function success(data) {
+        resolve(data);
+        console.log('this should the totals table state: ', data);
+      },
+      error: function error(_error2) {
+        reject(_error2);
+      }
+    });
+  });
+}; //Pass the data to backend so it will store them in our db
+
+
+var storeNewExpense = function storeNewExpense(postData, newExpense, clientSocket) {
+  $.ajax({
+    url: '/home/expenses/create-expense',
+    method: 'POST',
+    dataType: 'json',
+    data: JSON.stringify(postData),
+    contentType: "application/json",
+    // contentType: "application/json",
+    success: function success(result) {
+      $("#alert-success").show(function () {
+        new Promise(function (resolve, reject) {
+          setTimeout(function () {
+            $('#alert-success').hide(800);
+            resolve({
+              msg: 'ok'
+            });
+          }, 5000);
+        });
+      });
+      document.getElementById('expense-form').reset();
+      clientSocket.emit('new-expense', newExpense);
+    },
+    error: function error(_error3) {
+      console.log(_error3);
+    }
+  });
+}; // Creates the expense table by using the ExpensesTable Component
+
+
+var processData = function processData(data, userNames) {
+  // console.log("in processData__________________", data, userNames)
+  var userNamesMap = new Map();
+  userNames.forEach(function (user) {
+    userNamesMap.set(parseInt(user[2], 10), "".concat(user[0], " ").concat(user[1]));
+  });
+
+  if (Array.isArray(data)) {
+    data.forEach(function (expense) {
+      if (Array.isArray(expense)) {
+        expense.forEach(function (transaction) {
+          transaction.creditorFullName = userNamesMap.get(parseInt(transaction.creditor, 10));
+          transaction.debtorFullName = userNamesMap.get(parseInt(transaction.debtor, 10));
+        });
+      } else {
+        expense.creditorFullName = userNamesMap.get(parseInt(expense.creditor, 10));
+        expense.debtorFullName = userNamesMap.get(parseInt(expense.debtor, 10));
+      }
+    });
+  } else {
+    data.creditorFullName = userNamesMap.get(parseInt(data.creditor, 10));
+    data.debtorFullName = userNamesMap.get(parseInt(data.debtor, 10));
+  }
+
+  return data;
+};
+
+var expensesAjax = {};
+expensesAjax.storeNewExpense = storeNewExpense;
+expensesAjax.getExpenseTotalsDataAjax = getExpenseTotalsDataAjax;
+expensesAjax.getGroupInfoAjax = getGroupInfoAjax;
+expensesAjax.getExpenseDataAjax = getExpenseDataAjax;
+expensesAjax.processData = processData;
+
+
+/***/ }),
 /* 8 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return ExpensesForm; });
-/* harmony import */ var _ajax_expensesAjax_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(9);
+/* harmony import */ var _ajax_expensesAjax_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(7);
 function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _nonIterableSpread(); }
 
 function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance"); }
@@ -503,7 +673,8 @@ function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || func
 
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
- // React Component to create the debtors row in the create expense form 
+ // import { clientSocket } from "../../js/socketClient";
+// React Component to create the debtors row in the create expense form 
 // depends on User_drop_down_list and User_drop_down_item
 
 var Debtor =
@@ -542,21 +713,22 @@ function (_React$Component) {
   _createClass(Debtor, [{
     key: "render",
     value: function render() {
-      var _this2 = this;
-
       var isDebtorSelected;
       var debtorName;
 
       if (this.props.debtorSelected === undefined) {
         isDebtorSelected = false;
       } else {
-        var debtor = this.props.usersInGroup.filter(function (elem) {
-          if (elem[1] == _this2.props.debtorSelected) {
-            return elem;
+        var userNamesInGroup = this.props.usersInGroup;
+
+        for (var _i = 0, _Object$keys = Object.keys(userNamesInGroup); _i < _Object$keys.length; _i++) {
+          var key = _Object$keys[_i];
+
+          if (key == this.props.debtorSelected) {
+            debtorName = userNamesInGroup[key].firstName;
+            isDebtorSelected = true;
           }
-        });
-        debtorName = debtor[0][0];
-        isDebtorSelected = true;
+        }
       }
 
       return React.createElement(React.Fragment, null, React.createElement("div", {
@@ -620,17 +792,17 @@ function (_React$Component2) {
   _inherits(ExpensesForm, _React$Component2);
 
   function ExpensesForm(props) {
-    var _this3;
+    var _this2;
 
     _classCallCheck(this, ExpensesForm);
 
-    _this3 = _possibleConstructorReturn(this, _getPrototypeOf(ExpensesForm).call(this, props));
+    _this2 = _possibleConstructorReturn(this, _getPrototypeOf(ExpensesForm).call(this, props));
 
-    _defineProperty(_assertThisInitialized(_this3), "counter", 0);
+    _defineProperty(_assertThisInitialized(_this2), "counter", 0);
 
-    _defineProperty(_assertThisInitialized(_this3), "state", {});
+    _defineProperty(_assertThisInitialized(_this2), "state", {});
 
-    _defineProperty(_assertThisInitialized(_this3), "submitForm", function (e) {
+    _defineProperty(_assertThisInitialized(_this2), "submitForm", function (e) {
       e.preventDefault();
       var formData = $('#expense-form').serializeArray();
       console.log(formData);
@@ -674,20 +846,23 @@ function (_React$Component2) {
         });
       });
       console.log("THE NEW EXPENSE IS:", newExpense);
-      _ajax_expensesAjax_js__WEBPACK_IMPORTED_MODULE_0__["expensesAjax"].storeNewExpense(postFormData, newExpense);
+      _ajax_expensesAjax_js__WEBPACK_IMPORTED_MODULE_0__["expensesAjax"].storeNewExpense(postFormData, newExpense, socket);
     });
 
-    _defineProperty(_assertThisInitialized(_this3), "selectCreditor", function (dropDownId) {
-      var creditor = _this3.props.usersInGroup.filter(function (elem) {
-        if (elem[1] == dropDownId) {
-          return elem;
+    _defineProperty(_assertThisInitialized(_this2), "selectCreditor", function (dropDownId) {
+      var creditorName, creditorId;
+      var userNamesInGroup = _this2.props.usersInGroup;
+
+      for (var _i2 = 0, _Object$keys2 = Object.keys(userNamesInGroup); _i2 < _Object$keys2.length; _i2++) {
+        var key = _Object$keys2[_i2];
+
+        if (key == dropDownId) {
+          creditorName = userNamesInGroup[key].firstName;
+          creditorId = key;
         }
-      });
+      }
 
-      var creditorName = creditor[0][0];
-      var creditorId = creditor[0][1];
-
-      _this3.setState({
+      _this2.setState({
         creditor: {
           creditorName: creditorName,
           creditorId: creditorId
@@ -695,8 +870,8 @@ function (_React$Component2) {
       });
     });
 
-    _defineProperty(_assertThisInitialized(_this3), "selectDebtor", function (dropDownId, debtorId) {
-      var debtors = _this3.state.debtors.map(function (elem, index) {
+    _defineProperty(_assertThisInitialized(_this2), "selectDebtor", function (dropDownId, debtorId) {
+      var debtors = _this2.state.debtors.map(function (elem, index) {
         if (elem.id == debtorId) {
           return _objectSpread({}, elem, {
             debtorSelected: dropDownId
@@ -706,21 +881,21 @@ function (_React$Component2) {
         }
       });
 
-      _this3.setState({
+      _this2.setState({
         debtors: debtors
       });
     });
 
-    _defineProperty(_assertThisInitialized(_this3), "updateCreditField", function () {
-      if (_this3.state.evenly) _this3.updateDebtorFields();
+    _defineProperty(_assertThisInitialized(_this2), "updateCreditField", function () {
+      if (_this2.state.evenly) _this2.updateDebtorFields();
     });
 
-    _defineProperty(_assertThisInitialized(_this3), "updateDebtorFields", function () {
-      if (!_this3.state.evenly) {
-        _this3.setState({
-          debtors: _this3.state.debtors,
-          evenly: _this3.state.evenly,
-          credit: _this3.state.credit
+    _defineProperty(_assertThisInitialized(_this2), "updateDebtorFields", function () {
+      if (!_this2.state.evenly) {
+        _this2.setState({
+          debtors: _this2.state.debtors,
+          evenly: _this2.state.evenly,
+          credit: _this2.state.credit
         });
 
         return;
@@ -728,57 +903,57 @@ function (_React$Component2) {
 
       var credit = document.getElementById('credit').value;
 
-      _this3.setState({
-        debtors: _this3.state.debtors,
-        evenly: _this3.state.evenly,
+      _this2.setState({
+        debtors: _this2.state.debtors,
+        evenly: _this2.state.evenly,
         credit: parseFloat(credit)
       });
     });
 
-    _defineProperty(_assertThisInitialized(_this3), "addDropdown", function (e) {
+    _defineProperty(_assertThisInitialized(_this2), "addDropdown", function (e) {
       counter++;
 
-      _this3.setState({
-        debtors: [].concat(_toConsumableArray(_this3.state.debtors), [{
-          usersInGroup: _this3.props.usersInGroup,
+      _this2.setState({
+        debtors: [].concat(_toConsumableArray(_this2.state.debtors), [{
+          usersInGroup: _this2.props.usersInGroup,
           id: counter
         }]),
-        evenly: _this3.state.evenly,
-        credit: _this3.state.credit
+        evenly: _this2.state.evenly,
+        credit: _this2.state.credit
       });
     });
 
-    _defineProperty(_assertThisInitialized(_this3), "changeSplitMethod", function (e) {
+    _defineProperty(_assertThisInitialized(_this2), "changeSplitMethod", function (e) {
       if (e.target.innerText == "Evenly") {
-        _this3.state.evenly = true;
-      } else _this3.state.evenly = false;
+        _this2.state.evenly = true;
+      } else _this2.state.evenly = false;
 
-      _this3.updateDebtorFields();
+      _this2.updateDebtorFields();
     });
 
-    _defineProperty(_assertThisInitialized(_this3), "removeDeptor", function (id) {
-      _this3.setState({
-        credit: _this3.state.credit,
-        evenly: _this3.state.evenly,
-        debtors: _this3.state.debtors.filter(function (debtor) {
+    _defineProperty(_assertThisInitialized(_this2), "removeDeptor", function (id) {
+      _this2.setState({
+        credit: _this2.state.credit,
+        evenly: _this2.state.evenly,
+        debtors: _this2.state.debtors.filter(function (debtor) {
           if (debtor.id != id) return debtor;
         })
       });
     });
 
-    _this3.state.debtors = [{
+    _this2.state.debtors = [{
       usersInGroup: props.usersInGroup,
       id: 0
     }];
-    _this3.state.evenly = true;
-    _this3.state.credit = 0;
-    return _this3;
+    _this2.state.evenly = true;
+    _this2.state.credit = 0;
+    return _this2;
   }
 
   _createClass(ExpensesForm, [{
     key: "render",
     value: function render() {
-      var _this4 = this;
+      var _this3 = this;
 
       return (// <!-- Modal -->
         React.createElement("div", {
@@ -911,14 +1086,14 @@ function (_React$Component2) {
           id: "debtors-group"
         }, this.state.debtors.map(function (elem, index) {
           return React.createElement(Debtor, {
-            selectDebtor: _this4.selectDebtor,
-            evenly: _this4.state.evenly,
+            selectDebtor: _this3.selectDebtor,
+            evenly: _this3.state.evenly,
             usersInGroup: elem.usersInGroup,
             debtorSelected: elem.debtorSelected,
             id: elem.id,
             key: elem.id,
-            debt: _this4.state.credit / _this4.state.debtors.length,
-            removeDeptor: _this4.removeDeptor
+            debt: _this3.state.credit / _this3.state.debtors.length,
+            removeDeptor: _this3.removeDeptor
           }, " ");
         })), React.createElement("div", {
           className: "mb-4"
@@ -1003,7 +1178,7 @@ function (_React$Component3) {
   function User_drop_down_item() {
     var _getPrototypeOf3;
 
-    var _this5;
+    var _this4;
 
     _classCallCheck(this, User_drop_down_item);
 
@@ -1011,17 +1186,17 @@ function (_React$Component3) {
       args[_key2] = arguments[_key2];
     }
 
-    _this5 = _possibleConstructorReturn(this, (_getPrototypeOf3 = _getPrototypeOf(User_drop_down_item)).call.apply(_getPrototypeOf3, [this].concat(args)));
+    _this4 = _possibleConstructorReturn(this, (_getPrototypeOf3 = _getPrototypeOf(User_drop_down_item)).call.apply(_getPrototypeOf3, [this].concat(args)));
 
-    _defineProperty(_assertThisInitialized(_this5), "selectDebtor", function () {
-      _this5.props.selectDebtor(_this5.props.itemId);
+    _defineProperty(_assertThisInitialized(_this4), "selectDebtor", function () {
+      _this4.props.selectDebtor(_this4.props.itemId);
     });
 
-    _defineProperty(_assertThisInitialized(_this5), "selectCreditor", function () {
-      _this5.props.selectCreditor(_this5.props.itemId);
+    _defineProperty(_assertThisInitialized(_this4), "selectCreditor", function () {
+      _this4.props.selectCreditor(_this4.props.itemId);
     });
 
-    return _this5;
+    return _this4;
   }
 
   _createClass(User_drop_down_item, [{
@@ -1033,11 +1208,11 @@ function (_React$Component3) {
         onClickFunc = this.selectDebtor;
       } else if (this.props.selectCreditor) {
         onClickFunc = this.selectCreditor;
-      }
+      } // map={this.props.mapping}
+
 
       return React.createElement("a", {
         className: "dropdown-item",
-        map: this.props.mapping,
         onClick: onClickFunc,
         href: "#"
       }, this.props.userFirstName);
@@ -1055,7 +1230,7 @@ function (_React$Component4) {
   function User_drop_down_list() {
     var _getPrototypeOf4;
 
-    var _this6;
+    var _this5;
 
     _classCallCheck(this, User_drop_down_list);
 
@@ -1063,24 +1238,22 @@ function (_React$Component4) {
       args[_key3] = arguments[_key3];
     }
 
-    _this6 = _possibleConstructorReturn(this, (_getPrototypeOf4 = _getPrototypeOf(User_drop_down_list)).call.apply(_getPrototypeOf4, [this].concat(args)));
+    _this5 = _possibleConstructorReturn(this, (_getPrototypeOf4 = _getPrototypeOf(User_drop_down_list)).call.apply(_getPrototypeOf4, [this].concat(args)));
 
-    _defineProperty(_assertThisInitialized(_this6), "selectDebtor", function (dropDownId) {
-      _this6.props.selectDebtor(dropDownId);
+    _defineProperty(_assertThisInitialized(_this5), "selectDebtor", function (dropDownId) {
+      _this5.props.selectDebtor(dropDownId);
     });
 
-    _defineProperty(_assertThisInitialized(_this6), "selectCreditor", function (dropDownId) {
-      _this6.props.selectCreditor(dropDownId);
+    _defineProperty(_assertThisInitialized(_this5), "selectCreditor", function (dropDownId) {
+      _this5.props.selectCreditor(dropDownId);
     });
 
-    return _this6;
+    return _this5;
   }
 
   _createClass(User_drop_down_list, [{
     key: "render",
     value: function render() {
-      var _this7 = this;
-
       var onClickFunc;
       var select;
 
@@ -1092,143 +1265,30 @@ function (_React$Component4) {
         select = "selectCreditor";
       }
 
-      var dropDownList = this.props.users.map(function (username, index) {
-        return React.createElement(User_drop_down_item, {
+      var userNamesInGroup = this.props.users;
+      var dropDownList = [];
+
+      for (var _i3 = 0, _Object$keys3 = Object.keys(userNamesInGroup); _i3 < _Object$keys3.length; _i3++) {
+        var key = _Object$keys3[_i3];
+        // mapping={index} 
+        var dropDownItem = React.createElement(User_drop_down_item, {
           selectDebtor: select == "selectDebtor" ? onClickFunc : null,
           selectCreditor: select == "selectCreditor" ? onClickFunc : null,
-          userFirstName: username[0],
-          key: username[1],
-          itemId: username[1],
-          inputFieldId: _this7.props.inputFieldId,
-          hiddenId: _this7.props.hiddenId,
-          mapping: index
+          userFirstName: userNamesInGroup[key].firstName,
+          key: key,
+          itemId: key,
+          inputFieldId: this.props.inputFieldId,
+          hiddenId: this.props.hiddenId
         });
-      });
+        dropDownList.push(dropDownItem);
+      }
+
       return React.createElement(React.Fragment, null, " ", dropDownList, " ");
     }
   }]);
 
   return User_drop_down_list;
 }(React.Component);
-
-/***/ }),
-/* 9 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "expensesAjax", function() { return expensesAjax; });
-// Ajax request to retrieve the data needed to create the expense table
-var getExpenseDataAjax = function getExpenseDataAjax(userNames, skip) {
-  return new Promise(function (resolve, reject) {
-    $.ajax({
-      url: '/home/expenses/get-expense-table',
-      method: 'GET',
-      dataType: "json",
-      success: function success(data) {
-        resolve(data);
-      },
-      error: function error(_error) {
-        reject(_error);
-      }
-    });
-  });
-};
-/**
- * @typedef userNameTuple
- * @type {array}
- * @property {string} 0 - firstName
- * @property {string} 1 - lastName
- * @property {number} 2 - userId
- */
-
-/**
- * @typedef userNames
- * @type {array<userNameTuple>}
- */
-
-/**
- * @return {Promise<userNames>}
- */
-
-
-var getGroupInfoAjax = function getGroupInfoAjax() {
-  return new Promise(function (resolve, reject) {
-    $.ajax({
-      url: '/api/get-current-user',
-      type: "GET",
-      success: function success(user) {
-        $.ajax({
-          url: '/api/get-users-in-group',
-          type: "POST",
-          data: user,
-          dataType: "json",
-          success: function success(userNames) {
-            resolve(userNames);
-          },
-          error: function error(err) {
-            console.log(err);
-            reject(err);
-          }
-        });
-      }
-    });
-  });
-}; // Ajax request to retrieve the TOTALS data needed to create the expense TOTALS table
-
-
-var getExpenseTotalsDataAjax = function getExpenseTotalsDataAjax() {
-  return new Promise(function (resolve, reject) {
-    $.ajax({
-      url: '/home/expenses/get-expense-totals-table',
-      method: 'GET',
-      dataType: "json",
-      success: function success(data) {
-        resolve(data);
-        console.log('this should the totals table state: ', data);
-      },
-      error: function error(_error2) {
-        reject(_error2);
-      }
-    });
-  });
-}; //Pass the data to backend so it will store them in our db
-
-
-var storeNewExpense = function storeNewExpense(postData, newExpense) {
-  $.ajax({
-    url: '/home/expenses/create-expense',
-    method: 'POST',
-    dataType: 'json',
-    data: JSON.stringify(postData),
-    contentType: "application/json",
-    // contentType: "application/json",
-    success: function success(result) {
-      $("#alert-success").show(function () {
-        new Promise(function (resolve, reject) {
-          setTimeout(function () {
-            $('#alert-success').hide(800);
-            resolve({
-              msg: 'ok'
-            });
-          }, 5000);
-        });
-      });
-      document.getElementById('expense-form').reset();
-      socket.emit('new-expense', newExpense);
-    },
-    error: function error(_error3) {
-      console.log(_error3);
-    }
-  });
-};
-
-var expensesAjax = {};
-expensesAjax.storeNewExpense = storeNewExpense;
-expensesAjax.getExpenseTotalsDataAjax = getExpenseTotalsDataAjax;
-expensesAjax.getGroupInfoAjax = getGroupInfoAjax;
-expensesAjax.getExpenseDataAjax = getExpenseDataAjax;
-
 
 /***/ })
 /******/ ]);

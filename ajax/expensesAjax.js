@@ -30,10 +30,10 @@ let getExpenseDataAjax = function (userNames, skip) {
  * @type {array<userNameTuple>}
  */
 
- /**
-  * @return {Promise<userNames>}
-  */
- let getGroupInfoAjax = function () {
+/**
+ * @return {Promise<userNames>}
+ */
+let getGroupInfoAjax = function () {
     return new Promise((resolve, reject) => {
         $.ajax({
             url: '/api/get-current-user',
@@ -80,7 +80,7 @@ let getExpenseTotalsDataAjax = function () {
 
 
 //Pass the data to backend so it will store them in our db
-let storeNewExpense = function (postData, newExpense) {
+let storeNewExpense = function (postData, newExpense, clientSocket) {
     $.ajax({
         url: '/home/expenses/create-expense',
         method: 'POST',
@@ -98,7 +98,7 @@ let storeNewExpense = function (postData, newExpense) {
                 })
             })
             document.getElementById('expense-form').reset();
-            socket.emit('new-expense', newExpense);
+            clientSocket.emit('new-expense', newExpense);
         },
         error: function (error) {
             console.log(error);
@@ -107,12 +107,46 @@ let storeNewExpense = function (postData, newExpense) {
     });
 }
 
+// Creates the expense table by using the ExpensesTable Component
+let processData = function (data, userNames) {
+    // console.log("in processData__________________", data, userNames)
+    let userNamesMap = new Map();
+
+    userNames.forEach(user => {
+        userNamesMap.set(parseInt(user[2],10), `${user[0]} ${user[1]}`);
+    });
+
+    if (Array.isArray(data)) {
+        data.forEach(expense => {
+            if (Array.isArray(expense)) {
+                expense.forEach(transaction => {
+                    transaction.creditorFullName = userNamesMap.get(parseInt(transaction.creditor,10));
+                    transaction.debtorFullName = userNamesMap.get(parseInt(transaction.debtor,10));
+                })
+            }
+            else {
+                expense.creditorFullName = userNamesMap.get(parseInt(expense.creditor,10));
+                expense.debtorFullName = userNamesMap.get(parseInt(expense.debtor,10));
+            }
+        });
+    }
+    else {
+        data.creditorFullName = userNamesMap.get(parseInt(data.creditor,10));
+        data.debtorFullName = userNamesMap.get(parseInt(data.debtor,10));
+    }
+
+
+    return data;
+
+}
+
 let expensesAjax = {};
 
 expensesAjax.storeNewExpense = storeNewExpense;
 expensesAjax.getExpenseTotalsDataAjax = getExpenseTotalsDataAjax;
 expensesAjax.getGroupInfoAjax = getGroupInfoAjax;
 expensesAjax.getExpenseDataAjax = getExpenseDataAjax;
+expensesAjax.processData = processData;
 
 
-export {expensesAjax}
+export { expensesAjax }

@@ -25,10 +25,10 @@ function socketInit(server){
         userSocket.emit('sent_logged_in_users',loggedInData);
       })
         
-        socket.on('user_connected', function(data) {  
-          sequenceNumberByClient.push([socket, data.user]);  
+        socket.on('user_connected', function(user) {  
+          sequenceNumberByClient.push([socket, user]);  
           console.log('a user connected with socket id: ' , socket.id);
-          groupService.findGroupByUserId(data.user.id).then((group) => {
+          groupService.findGroupByUserId(user.id).then((group) => {
             if(!group) return;
             groupService.findUsersInGroup(group.getGroupId()).then((users) => {
               let usersIdInGroup;
@@ -39,8 +39,12 @@ function socketInit(server){
               for(const [client, userInLoggedInList] of sequenceNumberByClient) {
 
                 if (usersIdInGroup.includes(userInLoggedInList.id)) {
+                  // let userNameThatisLoggedIn = [];
                   clientSockets.push(client);
-                  userNamesThatAreLoggedIn.push(userInLoggedInList.firstName);
+                  // userNameThatisLoggedIn.push(userInLoggedInList.firstName);
+                  // userNameThatisLoggedIn.push(userInLoggedInList.lastName);
+                  // userNameThatisLoggedIn.push(userInLoggedInList.id);
+                  userNamesThatAreLoggedIn.push(userInLoggedInList.id);
                 }
               }
 
@@ -85,7 +89,7 @@ function socketInit(server){
                   for(const [clientNested, userInLoggedInListNested] of sequenceNumberByClient) {
                     
                     if (usersIdInGroup.includes(userInLoggedInListNested.id)) {
-                      clientNested.emit("user_in_my_group_disconnected" , userInLoggedInList.firstName );
+                      clientNested.emit("user_in_my_group_disconnected" , userInLoggedInList.id );
                     }
                   } 
                   

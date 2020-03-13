@@ -1,4 +1,5 @@
-// import 
+import { expensesAjax } from "../../ajax/expensesAjax"
+
 export default class ExpensesPage extends React.Component {
 
     constructor(props) {
@@ -11,10 +12,11 @@ export default class ExpensesPage extends React.Component {
         this.state.view = props.view;
         this.state.expenses = props.expenses;
         this.state.totals = props.totals;
+        this.state.userNamesInGroup = props.userNamesInGroup;
     }
 
     toggleView = () => {
-        console.log(this.state.view, this.state.totals);
+        // console.log(this.state.view, this.state.totals);
         let view;
         if (this.state.view == "eachExpense") {
             view = "allExpenses";
@@ -51,7 +53,7 @@ export default class ExpensesPage extends React.Component {
             <div id="expense-table-id" className="row">
                 <div className='col-12 pr-0'>
                     <table id='expenses-table' className="table table-hover table-dark ">
-                        <ExpensesTable expenses={this.state.expenses} totals={this.state.totals} view={this.state.view}></ExpensesTable>
+                        <ExpensesTable expenses={this.state.expenses} totals={this.state.totals} userNamesInGroup={this.state.userNamesInGroup} view={this.state.view}></ExpensesTable>
                     </table>
                 </div>
             </div>
@@ -73,15 +75,19 @@ class ExpensesTable extends React.Component {
     }
 
     constructor(props) {
+        console.log("i")
         super(props);
         this.state.expenses = props.expenses;
         this.state.totals = props.totals;
         this.state.view = props.view;
+        this.state.userNamesInGroup = props.userNamesInGroup;
         // console.log("is the constructor called each time tho?");
         document.addEventListener('new-expense', e => {
             console.log("THE DATA ARE!!!", e.detail);
-            getExpenseTotalsDataAjax().then(totalDebtsForEachUser => {
-                this.setState({ expenses: [...this.state.expenses, e.detail], totals: totalDebtsForEachUser });
+            expensesAjax.getExpenseTotalsDataAjax().then(totalDebtsForEachUser => {
+                let newExpense = expensesAjax.processData(e.detail, this.state.userNamesInGroup);
+                console.log("the processsed new Expense is_______________________________", newExpense);
+                this.setState({ expenses: [...this.state.expenses, newExpense], totals: totalDebtsForEachUser });
             })
 
         })
@@ -101,17 +107,17 @@ class ExpensesTable extends React.Component {
      * @param {*} expenses 
      */
     renderEachExpense(expenses) {
-        console.log("current expenses are:", expenses);
+        // console.log("current expenses are:", expenses);
         let data = expenses.map(expense => {
 
             let tranactionsData = expense.reduce((sum, entry) => {
                 let text = "";
 
                 entry.debt <= 0 ? text = " <b>gets</b> " : text = " <b>owes</b> ";
-                sum += entry.debtorName + text + Math.abs(entry.debt) + "$" + "<br>";
+                sum += entry.debtorFullName + text + Math.abs(entry.debt) + "$" + "<br>";
                 return sum;
             }, "");
-            
+
             return <tr>
                 <td>{expense[0].creditorFullName}</td>
                 <td>{expense[0].when}</td>
@@ -155,7 +161,7 @@ class ExpensesTable extends React.Component {
      */
     renderTotals(totals) {
         let data = [];
-        console.log("totals in render Totals is: ", totals);
+        // console.log("totals in render Totals is: ", totals);
         Object.keys(totals).forEach(key => {
             let debtsInfo = '';
             let color = "";
@@ -197,7 +203,7 @@ class ExpensesTable extends React.Component {
     }
 
     render() {
-        console.log("Each time the button is clicked i am summoned", this.state.view)
+        console.log("Expense page render called_____________________________________________");
         if (this.props.view == "eachExpense") {
             return this.renderEachExpense(this.state.expenses);
         }

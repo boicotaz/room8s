@@ -1,6 +1,7 @@
 
 
-import {expensesAjax} from "../../ajax/expensesAjax.js";
+import { expensesAjax } from "../../ajax/expensesAjax.js";
+// import { clientSocket } from "../../js/socketClient";
 
 // React Component to create the debtors row in the create expense form 
 // depends on User_drop_down_list and User_drop_down_item
@@ -26,13 +27,15 @@ class Debtor extends React.Component {
             isDebtorSelected = false;
         }
         else {
-            let debtor = this.props.usersInGroup.filter(elem => {
-                if (elem[1] == this.props.debtorSelected) {
-                    return elem;
+            let userNamesInGroup = this.props.usersInGroup;
+
+            for (let key of Object.keys(userNamesInGroup)) {
+                if (key == this.props.debtorSelected) {
+                    debtorName = userNamesInGroup[key].firstName;
+                    isDebtorSelected = true;
                 }
-            })
-            debtorName = debtor[0][0];
-            isDebtorSelected = true;
+            }
+
         }
 
         return (<React.Fragment>
@@ -74,13 +77,13 @@ export default class ExpensesForm extends React.Component {
         let creditorName;
         let debtorNames = [];
         formData.forEach((elem, index, array) => {
-            if (elem.name == "creditorId")  creditor.id = elem.value;
+            if (elem.name == "creditorId") creditor.id = elem.value;
             if (elem.name == "credit") creditor.credit = elem.value;
             if (elem.name == "debt") {
                 debtors.push({ id: array[index + 1].value, debt: elem.value })
                 debtorNames.push(array[index - 1].value)
             }
-            if(elem.name == "creditor") creditorName = elem.value;
+            if (elem.name == "creditor") creditorName = elem.value;
 
             if (elem.name == "date") info.date = elem.value;
             if (elem.name == "desc") info.desc = elem.value;
@@ -88,23 +91,26 @@ export default class ExpensesForm extends React.Component {
 
         let postFormData = { creditor, debtors, info }
         let newExpense = [];
-        debtors.forEach((elem,index) => {
-            newExpense.push({creditor: creditor.id, debtor: elem.id, when: info.date, description: info.desc, credit: creditor.credit,debt: elem.debt, creditorName, debtorName: debtorNames[index]  })
+        debtors.forEach((elem, index) => {
+            newExpense.push({ creditor: creditor.id, debtor: elem.id, when: info.date, description: info.desc, credit: creditor.credit, debt: elem.debt, creditorName, debtorName: debtorNames[index] })
         });
-        
+
         console.log("THE NEW EXPENSE IS:", newExpense);
-        expensesAjax.storeNewExpense(postFormData, newExpense);
+        expensesAjax.storeNewExpense(postFormData, newExpense, socket );
     }
 
 
     selectCreditor = (dropDownId) => {
-        let creditor = this.props.usersInGroup.filter(elem => {
-            if (elem[1] == dropDownId) {
-                return elem;
+
+        let creditorName, creditorId;
+        let userNamesInGroup = this.props.usersInGroup;
+
+        for (let key of Object.keys(userNamesInGroup)) {
+            if (key == dropDownId) {
+                creditorName = userNamesInGroup[key].firstName;
+                creditorId = key;
             }
-        })
-        let creditorName = creditor[0][0];
-        let creditorId = creditor[0][1];
+        }
 
         this.setState({ creditor: { creditorName: creditorName, creditorId: creditorId } })
     }
@@ -309,7 +315,8 @@ class User_drop_down_item extends React.Component {
         else if (this.props.selectCreditor) {
             onClickFunc = this.selectCreditor;
         }
-        return (<a className="dropdown-item" map={this.props.mapping} onClick={onClickFunc} href="#">{this.props.userFirstName}</a>);
+        // map={this.props.mapping}
+        return (<a className="dropdown-item" onClick={onClickFunc} href="#">{this.props.userFirstName}</a>);
     }
 
     selectDebtor = () => {
@@ -333,7 +340,7 @@ class User_drop_down_list extends React.Component {
     render() {
 
         let onClickFunc;
-        let select
+        let select;
         if (this.props.selectMethod == "Creditor") {
             onClickFunc = this.selectCreditor;
             select = "selectDebtor";
@@ -343,9 +350,13 @@ class User_drop_down_list extends React.Component {
             select = "selectCreditor"
         }
 
-        let dropDownList = this.props.users.map((username, index) => {
-            return <User_drop_down_item selectDebtor={select == "selectDebtor" ? onClickFunc : null} selectCreditor={select == "selectCreditor" ? onClickFunc : null} userFirstName={username[0]} key={username[1]} itemId={username[1]} inputFieldId={this.props.inputFieldId} hiddenId={this.props.hiddenId} mapping={index} />
-        })
+        let userNamesInGroup = this.props.users;
+        let dropDownList = [];
+        for (let key of Object.keys(userNamesInGroup)) {
+            // mapping={index} 
+            let dropDownItem = <User_drop_down_item selectDebtor={select == "selectDebtor" ? onClickFunc : null} selectCreditor={select == "selectCreditor" ? onClickFunc : null} userFirstName={userNamesInGroup[key].firstName} key={key} itemId={key} inputFieldId={this.props.inputFieldId} hiddenId={this.props.hiddenId} />
+            dropDownList.push(dropDownItem);
+        }
 
         return (<React.Fragment> {dropDownList} </React.Fragment>)
     }

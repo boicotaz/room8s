@@ -1,11 +1,11 @@
 var evt = new CustomEvent('buttons-created', { state: "done" })
 
-function getGroupDetails() {
+let getGroupDetails = function getGroupDetails() {
     return new Promise((resolve, reject) => {
         $.ajax({
             url: '/api/get-group-details',
             type: 'GET',
-            success: function (groupDetails){
+            success: function (groupDetails) {
                 resolve(groupDetails);
             },
             error: function (error) {
@@ -15,7 +15,7 @@ function getGroupDetails() {
     })
 }
 
-function getUsersInGroup() {
+let getUsersInGroup = function getUsersInGroup() {
     return new Promise((resolve, reject) => {
         $.ajax({
             url: '/api/get-users-in-group',
@@ -31,5 +31,9 @@ function getUsersInGroup() {
         })
     })
 }
+let grouDetailsAjax = {};
 
-export {getGroupDetails, getUsersInGroup}
+grouDetailsAjax.getGroupDetails = getGroupDetails;
+grouDetailsAjax.getUsersInGroup = getUsersInGroup;
+
+export { grouDetailsAjax }

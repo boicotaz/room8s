@@ -95,7 +95,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _components_mainPage_MainPageComponent_jsx__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(1);
 /* harmony import */ var _ajax_groupDetailsAjax__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(3);
 /* harmony import */ var _ajax_groupMessagesAjax__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(4);
-/* harmony import */ var _ajax_userAjax__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(5);
 function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _nonIterableRest(); }
 
 function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance"); }
@@ -104,19 +103,19 @@ function _iterableToArrayLimit(arr, i) { if (!(Symbol.iterator in Object(arr) ||
 
 function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 
-var user;
-var usernames;
-var usernamesInGroup;
+// var user;
+// var usernames;
+// var usernamesInGroup;
 
 
-
-
+ // import {getAllUsers} from "../ajax/userAjax";
 
 var getMainPage = function getMainPage(user) {
   if ($("#group-dashboard").length) return;
   $("#content").remove();
   $("#content-container").append("<div id = 'content'></div>");
-  Promise.all([Object(_ajax_groupDetailsAjax__WEBPACK_IMPORTED_MODULE_1__["getUsersInGroup"])(), Object(_ajax_groupDetailsAjax__WEBPACK_IMPORTED_MODULE_1__["getGroupDetails"])(), Object(_ajax_groupMessagesAjax__WEBPACK_IMPORTED_MODULE_2__["getGroupMessages"])()]).then(function (res) {
+  console.log("i was called__________________________________________________________________________");
+  Promise.all([_ajax_groupDetailsAjax__WEBPACK_IMPORTED_MODULE_1__["grouDetailsAjax"].getUsersInGroup(), _ajax_groupDetailsAjax__WEBPACK_IMPORTED_MODULE_1__["grouDetailsAjax"].getGroupDetails(), Object(_ajax_groupMessagesAjax__WEBPACK_IMPORTED_MODULE_2__["getGroupMessages"])()]).then(function (res) {
     console.log('Results are from Promise.all: ', res);
 
     var _res = _slicedToArray(res, 3),
@@ -134,110 +133,7 @@ var getMainPage = function getMainPage(user) {
   });
 };
 
-getMainPage(myUser);
-$(document).ready(function () {
-  // getMainPage();
-  var getCurrentUser = $.ajax({
-    url: '/api/get-current-user',
-    type: 'GET',
-    success: function success(User) {
-      user = User;
-    }
-  }); // create search bar
-
-  Object(_ajax_userAjax__WEBPACK_IMPORTED_MODULE_3__["getAllUsers"])().then(function (values) {
-    var allUsers = values;
-    var users_suggestions = new Bloodhound({
-      datumTokenizer: Bloodhound.tokenizers.whitespace,
-      // see its meaning above
-      queryTokenizer: Bloodhound.tokenizers.whitespace,
-      // see its meaning above
-      local: allUsers
-    });
-    $('#search-bar').typeahead({
-      hint: true,
-      highlight: true,
-      minLength: 1
-    }, {
-      name: 'user_suggestions',
-      source: substringMatcher(users_suggestions) // Bloodhound instance is passed as the source
-
-    });
-  }); // create add user in group search bar
-
-  Promise.all([Object(_ajax_userAjax__WEBPACK_IMPORTED_MODULE_3__["getAllUsers"])(), Object(_ajax_groupDetailsAjax__WEBPACK_IMPORTED_MODULE_1__["getUsersInGroup"])()]).then(function (values) {
-    var allUsers = values[0];
-    var groupUsers = values[1];
-    var idsInGroup = groupUsers.map(function (elem) {
-      return elem[1];
-    }); // suggest users that are not already in the group
-
-    var correctUsers = allUsers.filter(function (elem) {
-      if (!idsInGroup.includes(elem[1])) return elem;
-    });
-    var add_in_group_suggestions = new Bloodhound({
-      datumTokenizer: Bloodhound.tokenizers.whitespace,
-      // see its meaning above
-      queryTokenizer: Bloodhound.tokenizers.whitespace,
-      // see its meaning above
-      local: correctUsers
-    });
-    $('#add-user-in-group-field').typeahead({
-      hint: true,
-      highlight: true,
-      minLength: 1
-    }, {
-      name: 'add_in_group_suggestions',
-      source: substringMatcher(add_in_group_suggestions) // Bloodhound instance is passed as the source
-
-    });
-  });
-});
-$('#add-user-form').submit(function (event) {
-  event.preventDefault();
-  var data = $(this).serializeArray();
-  data[0].user = user;
-  var request = $.ajax({
-    url: '/add-user-in-group',
-    type: "POST",
-    data: data[0],
-    dataType: "json",
-    success: function success(returnedData) {
-      $("#strong-added-success").text(data[0].value);
-      $("#user-added-success").show(function () {
-        var myVar = setInterval(myTimer, 3000);
-
-        function myTimer() {
-          $('#addUserForm').modal('hide');
-          window.clearInterval(myVar);
-        }
-      });
-      renderGroup(returnedData.group);
-    }
-  });
-});
-
-var substringMatcher = function substringMatcher(strs) {
-  return function findMatches(q, cb) {
-    var matches, substringRegex;
-    var stringsToMatch = strs.local.map(function (entry) {
-      return entry[0];
-    }); // an array that will be populated with substring matches
-
-    matches = []; // regex used to determine if a string contains the substring `q`
-
-    var substrRegex = new RegExp(q, 'i'); // iterate through the pool of strings and for any string that
-    // contains the substring `q`, add it to the `matches` array
-
-    $.each(stringsToMatch, function (i, str) {
-      if (substrRegex.test(str)) {
-        matches.push(str);
-      }
-    });
-    cb(matches);
-  };
-};
-
+getMainPage(loggedInUser);
 
 
 /***/ }),
@@ -340,6 +236,14 @@ function (_React$Component) {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return Group; });
+function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _nonIterableRest(); }
+
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance"); }
+
+function _iterableToArrayLimit(arr, i) { if (!(Symbol.iterator in Object(arr) || Object.prototype.toString.call(arr) === "[object Arguments]")) { return; } var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
+
+function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
+
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -363,7 +267,6 @@ var Group =
 function (_React$Component) {
   _inherits(Group, _React$Component);
 
-  // state = {}
   function Group(props) {
     var _this;
 
@@ -377,6 +280,25 @@ function (_React$Component) {
       return elem[2];
     });
     console.log("The log status event is: ", getUserLoggedStatusEvent);
+    document.addEventListener('LoggedOffStatus', function (e) {
+      console.log("In group component the logged of userId is_____________________ ", e.detail);
+      var loggedOffUserId = e.detail;
+
+      if (_this.state.loggedInMembersId) {
+        if (_this.state.loggedInMembersId.includes(loggedOffUserId)) {
+          var loggedInMembersId = [];
+          loggedInMembersId = _this.state.loggedInMembersId.filter(function (userId) {
+            if (userId != loggedOffUserId) {
+              return userId;
+            }
+          });
+
+          _this.setState({
+            loggedInMembersId: loggedInMembersId
+          });
+        }
+      }
+    });
 
     if (getUserLoggedStatusEvent == undefined) {
       var getUserLoggedStatusEvent = new CustomEvent('LoggedInStatus', {
@@ -386,7 +308,7 @@ function (_React$Component) {
         }
       });
       document.addEventListener('LoggedInStatusReply', function (e) {
-        console.log("i am in GROUP Compenent the users online are", e.detail);
+        console.log("i am in GROUP Compenent the user's ID online are", e.detail);
 
         _this.setState({
           loggedInMembersId: e.detail
@@ -395,7 +317,6 @@ function (_React$Component) {
     }
 
     document.dispatchEvent(getUserLoggedStatusEvent);
-    console.log();
     return _this;
   }
 
@@ -404,6 +325,7 @@ function (_React$Component) {
     value: function render() {
       var _this2 = this;
 
+      console.log("I should be rerendered since a new user in group connected...");
       return React.createElement("div", {
         id: "group-dashboard",
         className: "jumbotron col-3 ml-5 mt-3"
@@ -418,7 +340,7 @@ function (_React$Component) {
       }, " Users in group "), React.createElement("div", {
         id: "usersInGroup",
         className: "lead"
-      }, this.state.usersInGroup.map(function (user) {
+      }, console.log("userInGroup var is_______________________________", this.state.usersInGroup), this.state.usersInGroup.map(function (user) {
         return React.createElement(GroupMember, {
           user: user,
           key: user[1],
@@ -454,12 +376,17 @@ function (_React$Component2) {
   _createClass(GroupMember, [{
     key: "render",
     value: function render() {
+      var _this$props$user = _slicedToArray(this.props.user, 3),
+          userFirstName = _this$props$user[0],
+          userLastName = _this$props$user[1],
+          userId = _this$props$user[2];
+
       var loggedInStatus;
 
       if (this.props.loggedInMembersId === undefined) {
         loggedInStatus = "btn-danger";
       } else {
-        if (this.props.loggedInMembersId.includes(this.props.user[2])) {
+        if (this.props.loggedInMembersId.includes(userId)) {
           loggedInStatus = "btn-success";
         } else {
           loggedInStatus = "btn-danger";
@@ -484,13 +411,12 @@ function (_React$Component2) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getGroupDetails", function() { return getGroupDetails; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getUsersInGroup", function() { return getUsersInGroup; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "grouDetailsAjax", function() { return grouDetailsAjax; });
 var evt = new CustomEvent('buttons-created', {
   state: "done"
 });
 
-function getGroupDetails() {
+var getGroupDetails = function getGroupDetails() {
   return new Promise(function (resolve, reject) {
     $.ajax({
       url: '/api/get-group-details',
@@ -503,9 +429,9 @@ function getGroupDetails() {
       }
     });
   });
-}
+};
 
-function getUsersInGroup() {
+var getUsersInGroup = function getUsersInGroup() {
   return new Promise(function (resolve, reject) {
     $.ajax({
       url: '/api/get-users-in-group',
@@ -520,8 +446,11 @@ function getUsersInGroup() {
       }
     });
   });
-}
+};
 
+var grouDetailsAjax = {};
+grouDetailsAjax.getGroupDetails = getGroupDetails;
+grouDetailsAjax.getUsersInGroup = getUsersInGroup;
 
 
 /***/ }),
@@ -543,46 +472,6 @@ function getGroupMessages() {
       },
       error: function error(_error) {
         reject(_error);
-      }
-    });
-  });
-}
-
-
-
-/***/ }),
-/* 5 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getAllUsers", function() { return getAllUsers; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getCurrentUser", function() { return getCurrentUser; });
-function getAllUsers() {
-  return new Promise(function (resolve, reject) {
-    $.ajax({
-      url: '/api/get-users',
-      type: "GET",
-      success: function success(returnedData) {
-        resolve(returnedData);
-      },
-      error: function error(_error) {
-        reject(_error);
-      }
-    });
-  });
-}
-
-function getCurrentUser() {
-  return new Promise(function (resolve, reject) {
-    $.ajax({
-      url: '/api/get-current-user',
-      type: 'GET',
-      success: function success(currentUser) {
-        resolve(currentUser);
-      },
-      error: function error(_error2) {
-        reject(_error2);
       }
     });
   });

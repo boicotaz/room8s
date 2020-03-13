@@ -15,7 +15,8 @@ module.exports = {
   entry: {
     mainPage: './js/mainPage.js',
     expensesPage: './js/expenses.js',
-
+    autoComplete: './js/autocomplete.js'
+    // socketClient: './js/socketClient.js'
   },
   output: {
     path: path.resolve(__dirname, 'public/webpack'),

@@ -1,4 +1,4 @@
-function getAllUsers() {
+let getAllUsers = function () {
     return new Promise((resolve, reject) => {
         $.ajax({
             url: '/api/get-users',
@@ -13,12 +13,12 @@ function getAllUsers() {
     })
 }
 
-function getCurrentUser() {
-    return new Promise((resolve,reject) => {
+let getCurrentUser = function () {
+    return new Promise((resolve, reject) => {
         $.ajax({
             url: '/api/get-current-user',
             type: 'GET',
-            success: function (currentUser){
+            success: function (currentUser) {
                 resolve(currentUser);
             },
             error: function (error) {
@@ -28,5 +28,7 @@ function getCurrentUser() {
     })
 }
 
-
-export {getAllUsers,getCurrentUser}
+let userAjax = {};
+userAjax.getAllUsers = getAllUsers;
+userAjax.getCurrentUser = getCurrentUser;
+export { userAjax };
