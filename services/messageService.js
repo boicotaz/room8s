@@ -14,6 +14,10 @@ class MessageService {
     getGroupMessages(groupId) {
         return this.messageModel.getGroupMessages(groupId);
     }
+
+    storeNewGroupMessage(newMsg) {
+        this.messageModel.storeNewGroupMessage(newMsg);
+    }
 };
 
 module.exports = getMessageService;

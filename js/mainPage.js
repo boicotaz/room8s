@@ -7,7 +7,7 @@
 
 import MainPage from "../components/mainPage/MainPageComponent.jsx";
 import { grouDetailsAjax } from "../ajax/groupDetailsAjax";
-import { getGroupMessages } from "../ajax/groupMessagesAjax";
+import { groupMessagesAjax } from "../ajax/groupMessagesAjax";
 // import {getAllUsers} from "../ajax/userAjax";
 
 var getMainPage = function (user) {
@@ -18,11 +18,12 @@ var getMainPage = function (user) {
     $("#content-container").append("<div id = 'content'></div>")
     console.log("i was called__________________________________________________________________________");
 
-    Promise.all([grouDetailsAjax.getUsersInGroup(), grouDetailsAjax.getGroupDetails(), getGroupMessages()]).then((res) => {
+    Promise.all([grouDetailsAjax.getUsersInGroup(), grouDetailsAjax.getGroupDetails(), groupMessagesAjax.getGroupMessages()]).then((res) => {
         console.log('Results are from Promise.all: ', res);
         let [usersInGroup, groupDetails, groupMessages] = res;
+
         ReactDOM.render(
-            <MainPage usersInGroup={usersInGroup} groupDetails={groupDetails} currentUser={user} > </MainPage>, document.getElementById('content')
+            <MainPage usersInGroup={usersInGroup} groupDetails={groupDetails} currentUser={user} groupMessages={groupMessages} > </MainPage>, document.getElementById('content')
         );
     }).catch((error) => console.log(error));
 }

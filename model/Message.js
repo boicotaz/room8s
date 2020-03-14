@@ -17,7 +17,7 @@ let MessageModelDefinition = {
     },
     userId: {
         type: Sequelize.INTEGER,
-        allowNull: false, 
+        allowNull: false,
         references: {
             model: 'user',
             key: 'id'
@@ -62,8 +62,17 @@ MessageModel.prototype.getTimeSent = function () {
 }
 
 MessageModel.getGroupMessages = function (groupId) {
-    return this.findAll({where: {groupId: groupId }});
+    return this.findAll({ where: { groupId: groupId }, attributes: { exclude: ['id', 'groupId'] } });
 };
+
+MessageModel.storeNewGroupMessage = function (newMsg) {
+    // console.log(options.createdAt);
+    this.create(newMsg).then((message) => {
+        console.log(message);
+    })
+}
+
+// MessageModel.storeMessaege({ groupId: 1, userId: 8, messageText: "another message" })
 
 
 module.exports = MessageModel;

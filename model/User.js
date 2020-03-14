@@ -65,11 +65,11 @@ UserModel.prototype.getUserId = function getUserId() {
     return this.getDataValue('id');
 }
 
-UserModel.prototype.getUserFirstName = function getUserName(){
+UserModel.prototype.getUserFirstName = function getUserName() {
     return this.getDataValue('firstName');
 }
 
-UserModel.prototype.getUserLastName = function getUserName(){
+UserModel.prototype.getUserLastName = function getUserName() {
     return this.getDataValue('lastName');
 }
 
@@ -93,15 +93,15 @@ UserModel.getUserIdbyEmail = async function (email) {
     return this.findOne({ where: { email: email } }).then((user) => { console.log(user.getUserId()); return user.getUserId() })
 
 }
-UserModel.getUserIdbyName = async function(name) {
-    return this.findOne({ where: { firstName: name[0], lastName: name[1] } }).then((user) => { console.log(user.getUserId()); return user.getUserId() })
+UserModel.getUserIdbyName = async function (name) {
+    return this.findOne({ where: { firstName: name[0], lastName: name[1] }, attributes: { exclude: ['password'] } }).then((user) => { console.log(user.getUserId()); return user.getUserId() })
 }
 
 UserModel.getAllUsers = async function () {
-     return await UserModel.findAll().then((users) => {
-         let userNamesAndIds = users.map( (user) => {return [user.firstName + " " + user.lastName, user.id] }  );
-         return userNamesAndIds
-     });
+    return await UserModel.findAll({ attributes: { exclude: ['password'] } }).then((users) => {
+        let userNamesAndIds = users.map((user) => { return [user.firstName + " " + user.lastName, user.id] });
+        return userNamesAndIds
+    });
 }
 
 

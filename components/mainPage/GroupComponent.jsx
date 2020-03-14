@@ -12,16 +12,16 @@ export default class Group extends React.Component {
         document.addEventListener('LoggedOffStatus', e => {
             console.log("In group component the logged of userId is_____________________ ", e.detail);
             let loggedOffUserId = e.detail;
-            if (this.state.loggedInMembersId){
-                if(this.state.loggedInMembersId.includes(loggedOffUserId)){
+            if (this.state.loggedInMembersId) {
+                if (this.state.loggedInMembersId.includes(loggedOffUserId)) {
                     let loggedInMembersId = [];
-                    
-                    loggedInMembersId = this.state.loggedInMembersId.filter(userId=> {
-                        if (userId != loggedOffUserId){
+
+                    loggedInMembersId = this.state.loggedInMembersId.filter(userId => {
+                        if (userId != loggedOffUserId) {
                             return userId;
                         }
                     });
-                    
+
                     this.setState({ loggedInMembersId: loggedInMembersId })
                 }
             }
@@ -42,7 +42,7 @@ export default class Group extends React.Component {
     render() {
         console.log("I should be rerendered since a new user in group connected...");
         return (
-            <div id="group-dashboard" className="jumbotron col-3 ml-5 mt-3">
+            <div id="group-dashboard" className="jumbotron col-3 ml-5">
                 <h1 className="display-6"> <i className="fa fa-home"> </i> {this.state.groupDetails.groupName} </h1>
                 <hr className="my-4" />
                 <p className="lead"> Users in group </p>

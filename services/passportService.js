@@ -8,7 +8,7 @@ function passportConfigure(passport) {
   });
   passport.deserializeUser((id, done) => {
     console.log("deserialize routine with key: " + id);
-    User.findOne({ where: { id: id } }).then(user => done(null, user));
+    User.findOne({ where: { id: id }, attributes: { exclude: ['password'] } }).then(user => done(null, user));
   });
   passport.use(
     "local",

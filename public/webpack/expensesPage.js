@@ -82,24 +82,20 @@ var expensesPageExport =
 /******/
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 5);
+/******/ 	return __webpack_require__(__webpack_require__.s = 16);
 /******/ })
 /************************************************************************/
-/******/ ([
-/* 0 */,
-/* 1 */,
-/* 2 */,
-/* 3 */,
-/* 4 */,
-/* 5 */
+/******/ ({
+
+/***/ 16:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getExpensesPage", function() { return getExpensesPage; });
-/* harmony import */ var _components_expensesPage_ExpensesPageComponent_jsx__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(6);
-/* harmony import */ var _components_expensesPage_ExpensesFormComponent_jsx__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(8);
-/* harmony import */ var _ajax_expensesAjax_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(7);
+/* harmony import */ var _components_expensesPage_ExpensesPageComponent_jsx__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(17);
+/* harmony import */ var _components_expensesPage_ExpensesFormComponent_jsx__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(19);
+/* harmony import */ var _ajax_expensesAjax_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(18);
 function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _nonIterableRest(); }
 
 function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance"); }
@@ -172,13 +168,14 @@ var processUserNames = function processUserNames(userNames) {
 
 
 /***/ }),
-/* 6 */
+
+/***/ 17:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return ExpensesPage; });
-/* harmony import */ var _ajax_expensesAjax__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(7);
+/* harmony import */ var _ajax_expensesAjax__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(18);
 function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _nonIterableSpread(); }
 
 function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance"); }
@@ -486,7 +483,8 @@ function (_React$Component2) {
 }(React.Component);
 
 /***/ }),
-/* 7 */
+
+/***/ 18:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -634,13 +632,14 @@ expensesAjax.processData = processData;
 
 
 /***/ }),
-/* 8 */
+
+/***/ 19:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return ExpensesForm; });
-/* harmony import */ var _ajax_expensesAjax_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(7);
+/* harmony import */ var _ajax_expensesAjax_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(18);
 function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _nonIterableSpread(); }
 
 function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance"); }
@@ -1291,4 +1290,5 @@ function (_React$Component4) {
 }(React.Component);
 
 /***/ })
-/******/ ]);
+
+/******/ });

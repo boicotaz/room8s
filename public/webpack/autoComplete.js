@@ -82,55 +82,12 @@ var autoCompleteExport =
 /******/
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 9);
+/******/ 	return __webpack_require__(__webpack_require__.s = 20);
 /******/ })
 /************************************************************************/
 /******/ ({
 
-/***/ 10:
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "userAjax", function() { return userAjax; });
-var getAllUsers = function getAllUsers() {
-  return new Promise(function (resolve, reject) {
-    $.ajax({
-      url: '/api/get-users',
-      type: "GET",
-      success: function success(returnedData) {
-        resolve(returnedData);
-      },
-      error: function error(_error) {
-        reject(_error);
-      }
-    });
-  });
-};
-
-var getCurrentUser = function getCurrentUser() {
-  return new Promise(function (resolve, reject) {
-    $.ajax({
-      url: '/api/get-current-user',
-      type: 'GET',
-      success: function success(currentUser) {
-        resolve(currentUser);
-      },
-      error: function error(_error2) {
-        reject(_error2);
-      }
-    });
-  });
-};
-
-var userAjax = {};
-userAjax.getAllUsers = getAllUsers;
-userAjax.getCurrentUser = getCurrentUser;
-
-
-/***/ }),
-
-/***/ 3:
+/***/ 15:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -179,13 +136,13 @@ grouDetailsAjax.getUsersInGroup = getUsersInGroup;
 
 /***/ }),
 
-/***/ 9:
+/***/ 20:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _ajax_userAjax__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(10);
-/* harmony import */ var _ajax_groupDetailsAjax__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(3);
+/* harmony import */ var _ajax_userAjax__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(21);
+/* harmony import */ var _ajax_groupDetailsAjax__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(15);
 function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _nonIterableRest(); }
 
 function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance"); }
@@ -298,6 +255,49 @@ var groupUserAutocomplete = function groupUserAutocomplete(userAjax, groupAjax, 
 //         }
 //     });
 // });
+
+/***/ }),
+
+/***/ 21:
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "userAjax", function() { return userAjax; });
+var getAllUsers = function getAllUsers() {
+  return new Promise(function (resolve, reject) {
+    $.ajax({
+      url: '/api/get-users',
+      type: "GET",
+      success: function success(returnedData) {
+        resolve(returnedData);
+      },
+      error: function error(_error) {
+        reject(_error);
+      }
+    });
+  });
+};
+
+var getCurrentUser = function getCurrentUser() {
+  return new Promise(function (resolve, reject) {
+    $.ajax({
+      url: '/api/get-current-user',
+      type: 'GET',
+      success: function success(currentUser) {
+        resolve(currentUser);
+      },
+      error: function error(_error2) {
+        reject(_error2);
+      }
+    });
+  });
+};
+
+var userAjax = {};
+userAjax.getAllUsers = getAllUsers;
+userAjax.getCurrentUser = getCurrentUser;
+
 
 /***/ })
 

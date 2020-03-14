@@ -6,39 +6,43 @@
     <script> var loggedInUser = <%- JSON.stringify(user) %> </script>
     <script src="socket.io/socket.io.js"></script>
     <script type="text/babel" src="../public/webpack/expensesPage.js"></script>
-    <script>        
+    <script>
         if (socket === undefined) {
-        var socket = io.connect();
-        // socket = io.connect('http://localhost:8082/expenses');
-        // console.log('user logged in is=========',user.id);
-        socket.emit('user_connected', loggedInUser);
-        document.addEventListener('LoggedInStatus', function (e) {
-            console.log('EVENT FOR LOG STATUS CAUGHT SUCCESSFULLY with user', e.detail);
-            let RequestFromUser = e.detail;
-            socket.emit('get_logged_in_users', RequestFromUser);
-        });
-        socket.on('sent_logged_in_users', function (loggedInUsersId) {
-            console.log('ABOUT TO INFORM HOME COMPONENT', loggedInUsersId);
-            var getUserLoggedStatusEventReply = new CustomEvent('LoggedInStatusReply', { detail: loggedInUsersId });
-            document.dispatchEvent(getUserLoggedStatusEventReply);
-        })
-        socket.on('user_in_my_group_connected', function (loggedInUsersId) {
-            console.log("caught socket event user_in_my_group_connected____________________________", loggedInUsersId);
-            let getUserLoggedStatusEventReply = new CustomEvent('LoggedInStatusReply', { detail: loggedInUsersId });
-            document.dispatchEvent(getUserLoggedStatusEventReply);
-        });
+            var socket = io.connect();
+            // socket = io.connect('http://localhost:8082/expenses');
+            // console.log('user logged in is=========',user.id);
+            socket.emit('user_connected', loggedInUser);
+            document.addEventListener('LoggedInStatus', function (e) {
+                console.log('EVENT FOR LOG STATUS CAUGHT SUCCESSFULLY with user', e.detail);
+                let RequestFromUser = e.detail;
+                socket.emit('get_logged_in_users', RequestFromUser);
+            });
+            socket.on('sent_logged_in_users', function (loggedInUsersId) {
+                console.log('ABOUT TO INFORM HOME COMPONENT', loggedInUsersId);
+                var getUserLoggedStatusEventReply = new CustomEvent('LoggedInStatusReply', { detail: loggedInUsersId });
+                document.dispatchEvent(getUserLoggedStatusEventReply);
+            })
+            socket.on('newGroupMessageReceived', function (newMsg) {
+                let notifyGroupForNewMsgEvent = new CustomEvent('newGroupMessageReceived', { detail: newMsg });
+                document.dispatchEvent(notifyGroupForNewMsgEvent);
+            });
+            socket.on('user_in_my_group_connected', function (loggedInUsersId) {
+                console.log("caught socket event user_in_my_group_connected____________________________", loggedInUsersId);
+                let getUserLoggedStatusEventReply = new CustomEvent('LoggedInStatusReply', { detail: loggedInUsersId });
+                document.dispatchEvent(getUserLoggedStatusEventReply);
+            });
 
-        socket.on('user_in_my_group_added_expense', function (expenseData) {
-            console.log('i received the event change in expense table');
-            let createEvent = new CustomEvent('new-expense', { detail: expenseData });
-            document.dispatchEvent(createEvent);
-        })
-        socket.on('user_in_my_group_disconnected', function (disconnectedUserId) {
-            console.log('disconnect event received by client', disconnectedUserId);
-            let userLoggedOffEvent = new CustomEvent('LoggedOffStatus', { detail: disconnectedUserId });
-            document.dispatchEvent(userLoggedOffEvent);
-        });
-    }
+            socket.on('user_in_my_group_added_expense', function (expenseData) {
+                console.log('i received the event change in expense table');
+                let createEvent = new CustomEvent('new-expense', { detail: expenseData });
+                document.dispatchEvent(createEvent);
+            })
+            socket.on('user_in_my_group_disconnected', function (disconnectedUserId) {
+                console.log('disconnect event received by client', disconnectedUserId);
+                let userLoggedOffEvent = new CustomEvent('LoggedOffStatus', { detail: disconnectedUserId });
+                document.dispatchEvent(userLoggedOffEvent);
+            });
+        }
     </script>
     <script src="../public/client/client.js"></script>
     <script src="../public/client/worker.js"></script>
@@ -48,25 +52,25 @@
             /* the minimum width */
         }
     </style>
-    <script id ="mainPageScript" type="text/babel" src = "../public/webpack/mainPage.js" ></script>
-    <script type="text/javascript" src = "../public/webpack/autoComplete.js"></script>
+    <script id="mainPageScript" type="text/babel" src="../public/webpack/mainPage.js"></script>
+    <script type="text/javascript" src="../public/webpack/autoComplete.js"></script>
     <link rel="stylesheet" type="text/css" href="../public/css/main.css">
 
     <title>Room8s</title>
 
     <!-- To script για να λειτουργεί το Show-hide button -->
     <script type="text/javascript">
-            function showHideDiv(ele) {
-                var srcElement = document.getElementById(ele);
-                if (srcElement != null) {
-                    if (srcElement.style.display == "block") {
-                        srcElement.style.display = 'none';
-                    } else {
-                        srcElement.style.display = 'block';
-                    }
-                    return false;
+        function showHideDiv(ele) {
+            var srcElement = document.getElementById(ele);
+            if (srcElement != null) {
+                if (srcElement.style.display == "block") {
+                    srcElement.style.display = 'none';
+                } else {
+                    srcElement.style.display = 'block';
                 }
+                return false;
             }
+        }
 
     </script>
 
@@ -196,7 +200,6 @@
     </div>
     <% } %>
     <div id='CreateFormContent'> </div>
-    <%- include("chat.html") %>
 </body>
 
 </html>
