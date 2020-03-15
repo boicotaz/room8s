@@ -1,7 +1,7 @@
 import { v4 as uuidv4 } from 'uuid';
 // import regeneratorRuntime from "regenerator-runtime";
-import {groupMessagesAjax} from "../../ajax/groupMessagesAjax"
-// import moment from "moment";
+import { groupMessagesAjax } from "../../ajax/groupMessagesAjax"
+import Message from "./MessageComponent.jsx"
 
 export default class GroupChat extends React.Component {
 
@@ -12,25 +12,22 @@ export default class GroupChat extends React.Component {
         this.state.currentUser = props.currentUser;
         this.state.groupMessages = props.groupMessages;
         this.state.groupDetails = props.groupDetails;
-        // this.state.scrollToBottom = false;
-        // console.log("I am called many times or no?");
 
         document.addEventListener('newGroupMessageCreated', e => {
-            // console.log("NEW MSG IS_____________________________", e.detail);
             socket.emit("broadcastNewGroupMessage", e.detail);
         });
 
         document.addEventListener('newGroupMessageReceived', e => {
-            // console.log("NEW MSG IS_____________________________", e.detail);
-            // socket.emit("broadcastNewGroupMessage", e.detail);
             let newMsg = e.detail;
-            this.setState({groupMessages:[...this.state.groupMessages, newMsg]});
+            this.setState({ groupMessages: [...this.state.groupMessages, newMsg] });
+
         });
 
-
+        // $("#newMessageSound").load("../public/eventually.mp3");   
     }
+
     submitMessageEnterKey = (e) => {
-        
+
         if (e.keyCode === 13) {
             console.log("enter key pressed_______--");
             if ($('#searchText').val() != "") {
@@ -38,14 +35,13 @@ export default class GroupChat extends React.Component {
                 console.log($('#searchText').val());
                 $('#searchText').val("");
                 this.renderNewMessage(messageText);
-                // this.storeNewMessage(messageText);
             }
         }
 
     }
 
     submitMessageClickKey = (e) => {
-        
+
         if ($('#searchText').val() != "") {
             console.log("click pressed_______--");
             let messageText = $('#searchText').val();
@@ -63,18 +59,16 @@ export default class GroupChat extends React.Component {
 
 
     renderNewMessage = (msgText) => {
-        let newMsg = {};
         let date = new Date();
-        // "dd/MM/yyyy hh:mm TT"
+        let newMsg = {};
         newMsg.userId = this.state.currentUser.id;
         newMsg.messageText = msgText;
-        newMsg.timeSent = date.toLocaleString().replace(",","").replace(/:.. /," ");
-        // this.state.scrollToBottom = true;
+        newMsg.timeSent = date.toLocaleString().replace(",", "").replace(/:.. /, " ");
         this.broadcastMessage(newMsg);
 
         this.setState({ groupMessages: [...this.state.groupMessages, newMsg] });
 
-        newMsg.timeSent =date.toMysqlFormat();
+        newMsg.timeSent = date.toMysqlFormat();
         this.storeNewMessage(newMsg);
 
     }
@@ -113,15 +107,14 @@ export default class GroupChat extends React.Component {
 
     componentDidMount() {
         document.getElementById("searchText").addEventListener("keydown", this.submitMessageEnterKey, false);
-        // document.getElementById("submitButton").addEventListener("onclick", this.submitMessage, false);
+
+        let groupChatBody = document.getElementById("groupChatBody");
+        groupChatBody.scrollTop = groupChatBody.scrollHeight;
     }
 
     componentDidUpdate() {
-        // if (this.state.scrollToBottom == true) {
-            let groupChatBody = document.getElementById("groupChatBody");
-            groupChatBody.scrollTop = groupChatBody.scrollHeight;
-            // this.state.scrollToBottom = false;
-        // }
+        let groupChatBody = document.getElementById("groupChatBody");
+        groupChatBody.scrollTop = groupChatBody.scrollHeight;
     }
 
 
@@ -129,15 +122,13 @@ export default class GroupChat extends React.Component {
         document.getElementById("searchText").removeEventListener("keydown", this.submitMessageEnterKey, false);
         document.removeEventListener('newGroupMessageCreated');
         document.removeEventListener('newGroupMessageReceived');
-        // document.getElementById("submitButton").removeEventListener("onclick", this.submitMessage, false);
     }
 
     render() {
-        console.log("Group messages are__________________________________________", this.state.groupMessages);
-        console.log("Group Details are__________________________________________", this.state.groupDetails);
-        console.log("Group Users are__________________________________________", this.state.usersInGroup);
-        // this.state.usersInGroup
-        // let messages = 
+        // console.log("Group messages are__________________________________________", this.state.groupMessages);
+        // console.log("Group Details are__________________________________________", this.state.groupDetails);
+        // console.log("Group Users are__________________________________________", this.state.usersInGroup);
+
         let groupChat = <React.Fragment>
             <div className="container" style={{ height: '516px' }}>
                 <div className="row" style={{ height: '15%' }}>
@@ -177,63 +168,12 @@ export default class GroupChat extends React.Component {
 }
 
 
-class Message extends React.Component {
-    constructor(props) {
-        super(props);
-        this.state = {};
-        this.state.message = props.message;
-        this.state.currentUser = props.currentUser;
-        this.state.groupDetails = props.groupDetails;
-        this.state.usersInGroup = props.usersInGroup;
-    }
-    processUsersInGroup = (usersInGroup) => {
-        let [firstName, lastName, userId] = usersInGroup;
-        let userNames = new Map();
-
-        usersInGroup.forEach(userName => {
-            userNames.set(userName[2], userName[0] + " " + userName[1]);
-        })
-
-        return userNames;
-    }
-
-    render() {
-        let message = this.state.message;
-        let currentUser = this.state.currentUser;
-        let renderedMessage;
-        // let date = new Date(message.timeSent).toDateString();
-        let date = new Date(message.timeSent).toLocaleString().replace(",","").replace(/:.. /," ");
-        let userNames = this.processUsersInGroup(this.state.usersInGroup);
-        let popUpText = userNames.get(message.userId) + " - " + date;
-
-        if (message.userId == currentUser.id) {
-            renderedMessage =
-                (<div className="row mt-2 mb-2">
-                    <p style={{ width: '60%' }} data-toggle="tooltip" data-placement="right" data-html="false"
-                        title={popUpText} className="text-light bg-primary rounded p-3 offset-6">
-                        {message.messageText}
-                    </p>
-                </div>);
-        }
-        else {
-            renderedMessage =
-                (<div className="row mt-2 mb-2">
-                    <img src="/public/info.png" data-toggle="tooltip" data-placement="right" data-html="false"
-                        title={popUpText} className="mr-2 ml-2" style={{ width: '4%', height: '4%' }} alt="UserImg" />
-                    <p style={{ width: '60%' }} className="text-light bg-dark rounded p-3">{message.messageText}</p>
-                </div>);
-        }
-        return (<React.Fragment> {renderedMessage} </React.Fragment>)
-
-    }
-}
-
 var twoDigits = (d) => {
-    if(0 <= d && d < 10) return "0" + d.toString();
-    if(-10 < d && d < 0) return "-0" + (-1*d).toString();
+    if (0 <= d && d < 10) return "0" + d.toString();
+    if (-10 < d && d < 0) return "-0" + (-1 * d).toString();
     return d.toString()
 }
 
-Date.prototype.toMysqlFormat = function() {
+Date.prototype.toMysqlFormat = function () {
     return this.getUTCFullYear() + "-" + twoDigits(1 + this.getUTCMonth()) + "-" + twoDigits(this.getUTCDate()) + " " + twoDigits(this.getUTCHours()) + ":" + twoDigits(this.getUTCMinutes()) + ":" + twoDigits(this.getUTCSeconds());
 };

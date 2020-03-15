@@ -2,13 +2,21 @@
 <html>
 
 <head>
+    
     <%- include("headers.ejs") %>
     <script> var loggedInUser = <%- JSON.stringify(user) %> </script>
+    
     <script src="socket.io/socket.io.js"></script>
     <script type="text/babel" src="../public/webpack/expensesPage.js"></script>
     <script>
         if (socket === undefined) {
             var socket = io.connect();
+
+            document.addEventListener('triggerNewMessageSound', e => {
+                // socket.emit("broadcastNewGroupMessage", e.detail);
+                let details = e.detail;
+                document.getElementById(details.id).play();
+            });
             // socket = io.connect('http://localhost:8082/expenses');
             // console.log('user logged in is=========',user.id);
             socket.emit('user_connected', loggedInUser);
@@ -25,6 +33,9 @@
             socket.on('newGroupMessageReceived', function (newMsg) {
                 let notifyGroupForNewMsgEvent = new CustomEvent('newGroupMessageReceived', { detail: newMsg });
                 document.dispatchEvent(notifyGroupForNewMsgEvent);
+
+                let newMessageSoundEvent = new CustomEvent('triggerNewMessageSound', { detail: {id : "newMessageSound" } });
+                document.dispatchEvent(newMessageSoundEvent);
             });
             socket.on('user_in_my_group_connected', function (loggedInUsersId) {
                 console.log("caught socket event user_in_my_group_connected____________________________", loggedInUsersId);
@@ -200,6 +211,7 @@
     </div>
     <% } %>
     <div id='CreateFormContent'> </div>
+    <audio id="newMessageSound" src="../public/eventually.mp3" preload = 'auto' ></audio> 
 </body>
 
 </html>
