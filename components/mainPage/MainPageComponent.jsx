@@ -32,7 +32,16 @@ export default class MainPage extends React.Component {
             console.log(usersInGroupMap.get(key));
         }
     }
+    componentDidMount(){
+        $("#content-container").fadeIn('slow');
+        let groupChatBody = document.getElementById("groupChatBody");
+        groupChatBody.scrollTop = groupChatBody.scrollHeight;
+    }
 
+    componentWillMount(){
+        // console.log("I AM UNMOUNTED!!!!");
+        $("#content-container").css("display", "none");
+    }
     render() {
 
         return (<React.Fragment>

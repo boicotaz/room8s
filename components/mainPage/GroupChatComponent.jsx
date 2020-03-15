@@ -104,12 +104,10 @@ export default class GroupChat extends React.Component {
         document.dispatchEvent(broadcastMessageEvent);
 
     }
-
+    
     componentDidMount() {
         document.getElementById("searchText").addEventListener("keydown", this.submitMessageEnterKey, false);
-
-        let groupChatBody = document.getElementById("groupChatBody");
-        groupChatBody.scrollTop = groupChatBody.scrollHeight;
+        console.log("I was mounted_________________", document.getElementById("groupChatBody"));
     }
 
     componentDidUpdate() {
@@ -130,7 +128,7 @@ export default class GroupChat extends React.Component {
         // console.log("Group Users are__________________________________________", this.state.usersInGroup);
 
         let groupChat = <React.Fragment>
-            <div className="container" style={{ height: '516px' }}>
+            <div className="container" id="groupChat" style={{ height: '516px'}}>
                 <div className="row" style={{ height: '15%' }}>
                     <div className="col-12 bg-dark rounded">
                         <div className="row mt-3 justify-content-center">

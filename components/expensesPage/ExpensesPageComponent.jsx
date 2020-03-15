@@ -14,6 +14,13 @@ export default class ExpensesPage extends React.Component {
         this.state.totals = props.totals;
         this.state.userNamesInGroup = props.userNamesInGroup;
     }
+    componentDidMount(){
+        $("#content-container").fadeIn('slow');
+    }
+
+    componentWillMount(){
+        $("#content-container").css("display", "none");
+    }
 
     toggleView = () => {
         // console.log(this.state.view, this.state.totals);
