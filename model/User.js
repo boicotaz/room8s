@@ -97,6 +97,10 @@ UserModel.getUserIdbyName = async function (name) {
     return this.findOne({ where: { firstName: name[0], lastName: name[1] }, attributes: { exclude: ['password'] } }).then((user) => { console.log(user.getUserId()); return user.getUserId() })
 }
 
+UserModel.getUserById = function (userId) {
+    return this.findOne({ where: { id: userId }, attributes: { exclude: ['password'] } });
+}
+
 UserModel.getAllUsers = async function () {
     return await UserModel.findAll({ attributes: { exclude: ['password'] } }).then((users) => {
         let userNamesAndIds = users.map((user) => { return [user.firstName + " " + user.lastName, user.id] });

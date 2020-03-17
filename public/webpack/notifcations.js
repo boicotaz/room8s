@@ -158,30 +158,52 @@ function (_React$Component) {
           width: "400px"
         },
         "aria-labelledby": "navbarDropdownMenuLink"
-      }, React.createElement("a", {
-        className: "dropdown-item",
-        href: "#"
-      }, "Notification 1 "), React.createElement("a", {
-        className: "dropdown-item",
-        href: "#"
-      }, "Notification 2 "), React.createElement("a", {
-        className: "dropdown-item",
-        href: "#"
-      }, "Notification 3 "), React.createElement("div", {
-        className: "dropdown-item container"
       }, React.createElement("div", {
-        className: "row"
+        className: "dropdown-item pl-0 pr-0 border-top border-dark"
+      }, React.createElement("div", {
+        "class": "container h-100"
+      }, React.createElement("div", {
+        className: "row mt-1 h-100"
+      }, React.createElement("div", {
+        className: "col-2 ml-0 pl-0"
       }, React.createElement("img", {
         src: "/public/info.png",
-        className: "mr-2 ml-2",
-        style: {
-          width: '10%',
-          height: '10%'
-        },
         alt: "UserImg"
-      }), React.createElement("p", {
-        className: "text-light bg-dark rounded p-3"
-      }, "Notification 4")))));
+      })), React.createElement("div", {
+        className: "col-10"
+      }, React.createElement("p", {
+        className: "text-light rounded",
+        style: {
+          width: '100%',
+          overflowWrap: "break-word",
+          whiteSpace: "pre-line"
+        }
+      }, "Notify Notify Notify Notify Notify Notify Notify Notify Notify Notify Notify Notify Notify Notify Notify"))))), React.createElement("div", {
+        className: "dropdown-item pl-0 pr-0 border-top border-dark"
+      }, React.createElement("div", {
+        "class": "container h-100"
+      }, React.createElement("div", {
+        className: "row mt-1 h-100"
+      }, React.createElement("div", {
+        className: "col-2 ml-0 pl-0"
+      }, React.createElement("img", {
+        src: "/public/_MG_2496.jpg",
+        alt: "UserImg",
+        "class": "rounded",
+        style: {
+          height: "50%",
+          width: "50%"
+        }
+      })), React.createElement("div", {
+        className: "col-10"
+      }, React.createElement("p", {
+        className: "text-light rounded",
+        style: {
+          width: '100%',
+          overflowWrap: "break-word",
+          whiteSpace: "pre-line"
+        }
+      }, "Notify Notify Notify Notify Notify Notify Notify Notify Notify Notify Notify Notify Notify Notify Notify")))))));
       return notifications;
     }
   }]);

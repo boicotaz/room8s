@@ -1,4 +1,5 @@
 const LocalStrategy = require("passport-local").Strategy;
+const RememberMeStrategy = require('passport-remember-me').Strategy;
 var User = require("./../model/User.js");
 
 function passportConfigure(passport) {
@@ -40,6 +41,8 @@ function passportConfigure(passport) {
       }
     )
   );
+
+  return passport;
 }
 
 function authValidation(req, res, next) {

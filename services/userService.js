@@ -32,8 +32,11 @@ class UserService {
         return this.userModel.getUserIdbyEmail(email);
     }
 
+    getUserById(userId) {
+        return this.userModel.getUserById(userId);
+    }
+
     async getUserIdbyName(name) {
-        // console.log(name.split(" "));
         return this.userModel.getUserIdbyName(name.split(" "));
     }
 
@@ -41,9 +44,9 @@ class UserService {
         return this.userModel.getAllUsers();
     }
 
-    createFullNameIdArray(users){
+    createFullNameIdArray(users) {
         return users.map(user => {
-            return {id: user.getUserId(), fullname: user.getUserFirstName() + " " + user.getUserLastName()}
+            return { id: user.getUserId(), fullname: user.getUserFirstName() + " " + user.getUserLastName() }
         });
     }
 }

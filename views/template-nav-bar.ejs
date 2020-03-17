@@ -4,6 +4,7 @@
 <!-- <script src="../public/js/template-nav-bar.js"></script> -->
 <!-- <script type="text/babel" src="../public/webpack/expensesPage.js"></script> -->
 <link rel="stylesheet" type="text/css" href="../public/css/template-nav-bar.css">
+<script type="text/babel" src="../public/webpack/notifcations.js"></script>
 
 <nav class="navbar navbar-expand-md navbar-dark  bg-dark fixed-top" style="height: 60px;">
     <a id="home-page" class="navbar-brand" onclick = mainPageExport.getMainPage(loggedInUser) href="#" ><img src="../public/room8s_logo.png" alt="logo" style="width:60px;"></a>
@@ -14,8 +15,8 @@
         <li class="nav-item">
             <a class="nav-link" href="#">Chores</a>
         </li>
-        <li class="nav-item">
-            <a class="nav-link" href="#">Notifications</a>
+        <li id ="notifications" class="nav-item dropdown mr-3">
+            
         </li>
     </ul>
     <ul class="navbar-nav ml-auto">

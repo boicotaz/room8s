@@ -14,13 +14,14 @@ var cors = require("cors");
 var passport = require("passport");
 var morgan = require("morgan");
 const session = require("express-session");
-const sessionStore = new session.MemoryStore();
+
 const passportService = require("./services/passportService");
 const signUpController = require("./controllers/signUpController");
 const signOutController = require("./controllers/signOutController");
 const expensesController = require("./controllers/expensesController");
 const homeController = require('./controllers/homeContoller');
 const apiController = require('./controllers/apiController');
+const rootController = require('./controllers/rootController');
 
 // Initialize server
 server.listen(process.env.PORT || 8082, '192.168.1.14', () => {
@@ -39,31 +40,54 @@ app.use(cors());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
+// Add Express Cookie parser
+const cookieParser = require('cookie-parser');
+app.use(cookieParser());
 // Create Session to be used by passport
+
+// Add Sql Session MemoryStore
+const MySQLStore = require('express-mysql-session')(session);
+
+
+let sqlOptions = {
+  host: '192.168.1.7',
+  port: 3306,
+  user: 'root',
+  password: 'tolis',
+  database: 'home_site'
+}
+let sessionStore = new MySQLStore(sqlOptions);
+
 app.use(
   session({
-    secret: "sdfsdfasdfasdfasdfsdaasdasdfasd",
-    resave: true,
-    saveUninitialized: true,
-    key: "express.sid",
+    key: 'session_cookie_name',
+    secret: "session_cookie_secret",
+    resave: false,
+    saveUninitialized: false,
     store: sessionStore,
-    expires: new Date(Date.now() + (120 * 60 * 1000))
+    cookie: {
+      secure: true,
+      httpOnly: true,
+      // expires: true,
+      // maxAge: 5000
+    }
+
   })
 );
 
-// Init the passport.
+// Init the passport...
 app.use(passport.initialize());
 app.use(passport.session());
 passportService.passportConfigure(passport);
 
+
 // Set render engine
 app.engine("html", require("ejs").renderFile);
 app.set("view engine", "ejs");
+let User = require('./model/User');
 
-//Sign-In page
-app.get("/", (req, res) => {
-  res.render("sign-in-room8s.ejs", { user: null, userAlreadyExists: null, mail: null });
-});
+//Log-in page
+app.use("/", rootController);
 
 //Home page
 app.use("/home", homeController);
@@ -103,20 +127,6 @@ app.post("/add-user-in-group", function (req, res, next) {
 })
 
 
-app.post('/validate', function (req, res, next) {
-  passport.authenticate('local', function (err, user, info) {
-    if (err) { return next(err); }
-    if (!user) {
-      return res.render("sign-in-room8s.ejs", { user: false, userAlreadyExists: null, mail: null });
-    }
-    req.logIn(user, function (err) {
-      if (err) { return next(err); }
-      return res.redirect('/home');
-    });
-  })(req, res, next);
-});
-
-
 const webpush = require('web-push');
 
 const publicVapidKey = 'BMKMaCxQjf2NtwfODDDx5wCBW51kMsomozcyvFK_O1NUjyS8xspuZDPoKOEMXZoPxS3g5dAvFNxUNpWkvBRqjV4'
@@ -137,3 +147,4 @@ app.post('/subscribe', (req, res) => {
   //Pass object into SendNotification
   webpush.sendNotification(subscription, payload).catch(error => console.error(error))
 })
+
