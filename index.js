@@ -21,7 +21,7 @@ const signOutController = require("./controllers/signOutController");
 const expensesController = require("./controllers/expensesController");
 const homeController = require('./controllers/homeContoller');
 const apiController = require('./controllers/apiController');
-const rootController = require('./controllers/rootController');
+const logInController = require('./controllers/logInController');
 
 // Initialize server
 server.listen(process.env.PORT || 8082, '192.168.1.14', () => {
@@ -87,7 +87,7 @@ app.set("view engine", "ejs");
 let User = require('./model/User');
 
 //Log-in page
-app.use("/", rootController);
+app.use("/", logInController);
 
 //Home page
 app.use("/home", homeController);

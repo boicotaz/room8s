@@ -1,6 +1,8 @@
 var io = require('socket.io');
 const groupService = require('./groupService')();
 var sequenceNumberByClient = [];
+const SessionService = require('../services/sessionService');
+const sessionService = new SessionService();
 
 function socketInit(server) {
   let serverSocket = io(server);
@@ -64,7 +66,7 @@ function socketInit(server) {
       }
 
     });
-    
+
     socket.on('new-expense', function (data) {
       console.log('XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXx yeaaah new expense happened: XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX', data);
       console.log('And users registered as online are: ', sequenceNumberByClient);
@@ -92,6 +94,10 @@ function socketInit(server) {
       for (const [client, userInLoggedInList] of sequenceNumberByClient) {
         if (socket.id == client.id) {
           let disconnectedClient = client;
+          let disconnectedUser = userInLoggedInList;
+
+          cleanUpUserSessions(disconnectedUser, sessionService);
+
           groupService.findGroupByUserId(userInLoggedInList.id).then((group) => {
             if (!group) return;
             groupService.findUsersInGroup(group.getGroupId()).then((users) => {
@@ -121,6 +127,26 @@ function socketInit(server) {
 
   });
   return serverSocket;
+}
+
+let cleanUpUserSessions = async function (disconnectedUser, sessionService) {
+  let persistsFlag = false;
+  sessionService.findSessionsByPersists(persistsFlag).then(sessions => {
+
+    sessions.forEach(session => {
+      let sessionDataJsonString = session.getSessionData();
+      let sessionData = JSON.parse(sessionDataJsonString);
+      let sessionUserId = sessionData.passport.user;
+      let disconnectedUserId = disconnectedUser.id;
+
+      let sessionId = session.getSessionId();
+      if (sessionUserId == disconnectedUserId) {
+        sessionService.deleteSessionById(sessionId);
+      }
+
+    })
+  })
+
 }
 
 module.exports = socketInit;
