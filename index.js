@@ -1,11 +1,12 @@
 const express = require("express");
 const app = express();
+require('dotenv').config();
 // const server = require("http").createServer(app);
 
 const fs = require('fs');
 const options = {
-  key: fs.readFileSync("/home/tolis/Desktop/dev/Home-Site/server.key"),
-  cert: fs.readFileSync("/home/tolis/Desktop/dev/Home-Site/server.cert")
+  key: fs.readFileSync(process.env.SERVER_KEY),
+  cert: fs.readFileSync(process.env.SERVER_CERT)
 };
 const server = require("https").createServer(options, app);
 var io = require("./services/socketService")(server);
@@ -24,7 +25,7 @@ const apiController = require('./controllers/apiController');
 const logInController = require('./controllers/logInController');
 
 // Initialize server
-server.listen(process.env.PORT || 8082, '192.168.1.14', () => {
+server.listen(process.env.PORT || 8082, process.env.SERVER_IP, () => {
   console.log(`app is now listening to port ${process.env.PORT || 8082}`);
   console.log(__dirname);
 });
@@ -50,18 +51,19 @@ const MySQLStore = require('express-mysql-session')(session);
 
 
 let sqlOptions = {
-  host: '192.168.1.7',
-  port: 3306,
-  user: 'root',
-  password: 'tolis',
-  database: 'home_site'
+  host: process.env.SQL_HOST,
+  port: process.env.SQL_PORT,
+  user: process.env.SQL_USER,
+  password: process.env.SQL_USER_PASSWORD,
+  database: process.env.SQL_DATABASE
 }
+
 let sessionStore = new MySQLStore(sqlOptions);
 
 app.use(
   session({
-    key: 'session_cookie_name',
-    secret: "session_cookie_secret",
+    key: process.env.EXPRESS_SESSION_KEY,
+    secret: process.env.EXPRESS_SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
     store: sessionStore,
