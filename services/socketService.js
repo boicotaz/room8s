@@ -91,38 +91,37 @@ function socketInit(server) {
 
     socket.on('disconnect', () => {
       console.log('user disconnected with socket id: ', socket.id);
+      // each socket is per tab so we need to dinstiguish bettween close tab and user logout
+      let socketsCountForMaybeDisconnectedUser = 0;
       for (const [client, userInLoggedInList] of sequenceNumberByClient) {
-        if (socket.id == client.id) {
+        console.log(client.id, userInLoggedInList.id);
+        if (socket.id == client.id) { // we found the disconnected socket id 
           let disconnectedClient = client;
           let disconnectedUser = userInLoggedInList;
 
-          cleanUpUserSessions(disconnectedUser, sessionService);
+          for (const [innerClient, innerUserLoggedInList] of sequenceNumberByClient) {
+            if (innerUserLoggedInList.id == disconnectedUser.id) {
+              socketsCountForMaybeDisconnectedUser++;
+              if (socketsCountForMaybeDisconnectedUser > 1) break;
+            }
+          }
 
-          groupService.findGroupByUserId(userInLoggedInList.id).then((group) => {
-            if (!group) return;
-            groupService.findUsersInGroup(group.getGroupId()).then((users) => {
-              usersIdInGroup = users.map(user => user.id);
+          sequenceNumberByClient = sequenceNumberByClient.filter((elem) => {
+            let thisSocket = elem[0];
+            if (thisSocket.id != disconnectedClient.id)
+              return elem;
+          });
 
-              for (const [clientNested, userInLoggedInListNested] of sequenceNumberByClient) {
-
-                if (usersIdInGroup.includes(userInLoggedInListNested.id)) {
-                  clientNested.emit("user_in_my_group_disconnected", userInLoggedInList.id);
-                }
-              }
-
-              sequenceNumberByClient = sequenceNumberByClient.filter((elem) => {
-                let thisSocket = elem[0];
-                if (thisSocket.id != disconnectedClient.id)
-                  return elem;
-              })
-
-            });
-          })
-
+          if (socketsCountForMaybeDisconnectedUser == 1) {
+            // user had only one client socket. So he did disconnect.
+            disconnectUser(disconnectedUser)
+          }
+          break;
         }
+
       }
 
-    })
+    });
 
 
   });
@@ -149,4 +148,25 @@ let cleanUpUserSessions = async function (disconnectedUser, sessionService) {
 
 }
 
+let disconnectUser = function (disconnectedUser) {
+
+  cleanUpUserSessions(disconnectedUser, sessionService);
+
+  groupService.findGroupByUserId(disconnectedUser.id).then((group) => {
+    if (!group) return;
+    groupService.findUsersInGroup(group.getGroupId()).then((users) => {
+      usersIdInGroup = users.map(user => user.id);
+
+      for (const [clientSocket, clientSocketAttachedUser] of sequenceNumberByClient) {
+
+        if (usersIdInGroup.includes(clientSocketAttachedUser.id)) {
+          clientSocket.emit("user_in_my_group_disconnected", disconnectedUser.id);
+        }
+      }
+
+    });
+  });
+}
+
 module.exports = socketInit;
+
