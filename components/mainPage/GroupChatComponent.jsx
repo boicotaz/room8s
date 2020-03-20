@@ -8,10 +8,10 @@ export default class GroupChat extends React.Component {
     constructor(props) {
         super(props);
         this.state = {};
-        this.state.usersInGroup = props.usersInGroup;
-        this.state.currentUser = props.currentUser;
-        this.state.groupMessages = props.groupMessages;
-        this.state.groupDetails = props.groupDetails;
+        this.state.usersInGroup = this.props.usersInGroup;
+        this.state.currentUser = this.props.currentUser;
+        this.state.groupMessages = this.props.groupMessages;
+        this.state.groupDetails = this.props.groupDetails;
 
         document.addEventListener('newGroupMessageCreated', e => {
             socket.emit("broadcastNewGroupMessage", e.detail);
@@ -104,7 +104,7 @@ export default class GroupChat extends React.Component {
         document.dispatchEvent(broadcastMessageEvent);
 
     }
-    
+
     componentDidMount() {
         document.getElementById("searchText").addEventListener("keydown", this.submitMessageEnterKey, false);
         console.log("I was mounted_________________", document.getElementById("groupChatBody"));
@@ -128,12 +128,12 @@ export default class GroupChat extends React.Component {
         // console.log("Group Users are__________________________________________", this.state.usersInGroup);
 
         let groupChat = <React.Fragment>
-            <div className="container" id="groupChat" style={{ height: '516px'}}>
+            <div className="container col-4" id="groupChat" style={{ height: '516px' }}>
                 <div className="row" style={{ height: '15%' }}>
                     <div className="col-12 bg-dark rounded">
-                        <div className="row mt-3 justify-content-center">
-                            <img src="/public/room8s_logo.png" className="col-1" />
-                            <h1 className="text-warning"> {this.state.groupDetails.groupName + " Chat"} </h1>
+                        <div className="row justify-content-start">
+                            <img src="/public/room8s_logo.png" className="col-3 mb-3 img-circle" />
+                            <p className="text-warning text-center"> {this.state.groupDetails.groupName + " Chat"} </p>
                         </div>
                     </div>
                 </div>
@@ -147,14 +147,14 @@ export default class GroupChat extends React.Component {
                 </div>
 
                 <div className="row" style={{ height: '15%' }}>
-                    <div className="col-12 bg-secondary rounded d-flex align-items-center">
-                        <div className="input-group offset-2">
-                            <input id="searchText" placeholder="Type le Message..." type="text" className="bg-light text-dark col-10">
-                            </input>
-                            <div className="input-group-append">
+                    <div className="col-12 p-0 bg-secondary rounded d-flex align-items-center">
+                        {/* <div className="input-group offset-2"> */}
+                        <input id="searchText" placeholder="Type le Message..." type="text" className="bg-light text-dark col-12 w-100 h-100">
+                        </input>
+                        {/* <div className="input-group-append">
                                 <button onClick={this.submitMessageClickKey} className="btn btn-success" type="button">Send</button>
-                            </div>
-                        </div>
+                            </div> */}
+                        {/* </div> */}
                     </div>
                 </div>
 

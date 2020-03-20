@@ -70,6 +70,7 @@ logInController.post('/validate', function (req, res, next) {
                         res.clearCookie('remember_me');
                     }
                     res.cookie('remember_me', req.sessionID, { path: '/', httpOnly: true, maxAge: 604800000, secure: true }); // TO DO: sortain the age
+                    // console.log("Session Id is ______________________________________________")
                     sessionService.updatePersistsById(req.sessionID);
                 }
                 else {

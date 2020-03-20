@@ -239,10 +239,10 @@ function (_React$Component) {
       totals: {},
       view: ""
     };
-    _this.state.view = props.view;
-    _this.state.expenses = props.expenses;
-    _this.state.totals = props.totals;
-    _this.state.userNamesInGroup = props.userNamesInGroup;
+    _this.state.view = _this.props.view;
+    _this.state.expenses = _this.props.expenses;
+    _this.state.totals = _this.props.totals;
+    _this.state.userNamesInGroup = _this.props.userNamesInGroup;
     return _this;
   }
 
@@ -335,10 +335,10 @@ function (_React$Component2) {
       totals: {}
     });
 
-    _this2.state.expenses = props.expenses;
-    _this2.state.totals = props.totals;
-    _this2.state.view = props.view;
-    _this2.state.userNamesInGroup = props.userNamesInGroup; // console.log("is the constructor called each time tho?");
+    _this2.state.expenses = _this2.props.expenses;
+    _this2.state.totals = _this2.props.totals;
+    _this2.state.view = _this2.props.view;
+    _this2.state.userNamesInGroup = _this2.props.userNamesInGroup; // console.log("is the constructor called each time tho?");
 
     document.addEventListener('new-expense', function (e) {
       console.log("THE DATA ARE!!!", e.detail);
@@ -951,7 +951,7 @@ function (_React$Component2) {
     });
 
     _this2.state.debtors = [{
-      usersInGroup: props.usersInGroup,
+      usersInGroup: _this2.props.usersInGroup,
       id: 0
     }];
     _this2.state.evenly = true;

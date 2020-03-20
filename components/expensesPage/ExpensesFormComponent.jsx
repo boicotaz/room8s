@@ -96,7 +96,7 @@ export default class ExpensesForm extends React.Component {
         });
 
         console.log("THE NEW EXPENSE IS:", newExpense);
-        expensesAjax.storeNewExpense(postFormData, newExpense, socket );
+        expensesAjax.storeNewExpense(postFormData, newExpense, socket);
     }
 
 
@@ -166,7 +166,7 @@ export default class ExpensesForm extends React.Component {
 
     constructor(props) {
         super(props);
-        this.state.debtors = [{ usersInGroup: props.usersInGroup, id: 0 }]
+        this.state.debtors = [{ usersInGroup: this.props.usersInGroup, id: 0 }]
         this.state.evenly = true;
         this.state.credit = 0;
     }

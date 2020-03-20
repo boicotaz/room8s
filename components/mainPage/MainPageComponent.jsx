@@ -17,10 +17,10 @@ export default class MainPage extends React.Component {
     constructor(props) {
         super(props);
         this.state = {}
-        this.state.usersInGroup = props.usersInGroup;
-        this.state.groupDetails = props.groupDetails;
-        this.state.currentUser = props.currentUser;
-        this.state.groupMessages = props.groupMessages;
+        this.state.usersInGroup = this.props.usersInGroup;
+        this.state.groupDetails = this.props.groupDetails;
+        this.state.currentUser = this.props.currentUser;
+        this.state.groupMessages = this.props.groupMessages;
 
         let usersInGroupMap = new Map();
 
@@ -32,13 +32,13 @@ export default class MainPage extends React.Component {
             console.log(usersInGroupMap.get(key));
         }
     }
-    componentDidMount(){
+    componentDidMount() {
         $("#content-container").fadeIn('slow');
         let groupChatBody = document.getElementById("groupChatBody");
         groupChatBody.scrollTop = groupChatBody.scrollHeight;
     }
 
-    componentWillMount(){
+    componentWillMount() {
         // console.log("I AM UNMOUNTED!!!!");
         $("#content-container").css("display", "none");
     }

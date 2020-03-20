@@ -189,10 +189,10 @@ function (_React$Component) {
 
     _this = _possibleConstructorReturn(this, _getPrototypeOf(MainPage).call(this, props));
     _this.state = {};
-    _this.state.usersInGroup = props.usersInGroup;
-    _this.state.groupDetails = props.groupDetails;
-    _this.state.currentUser = props.currentUser;
-    _this.state.groupMessages = props.groupMessages;
+    _this.state.usersInGroup = _this.props.usersInGroup;
+    _this.state.groupDetails = _this.props.groupDetails;
+    _this.state.currentUser = _this.props.currentUser;
+    _this.state.groupMessages = _this.props.groupMessages;
     var usersInGroupMap = new Map();
     props.usersInGroup.forEach(function (user) {
       usersInGroupMap.set(user[2], "".concat(user[0], " ").concat(user[1]));
@@ -305,11 +305,13 @@ function (_React$Component) {
 
     _this = _possibleConstructorReturn(this, _getPrototypeOf(Group).call(this, props));
     _this.state = {};
-    _this.state.usersInGroup = props.usersInGroup;
-    _this.state.groupDetails = props.groupDetails;
-    var usersInGroupId = props.usersInGroup.map(function (elem) {
+    _this.state.usersInGroup = _this.props.usersInGroup;
+    _this.state.groupDetails = _this.props.groupDetails;
+
+    var usersInGroupId = _this.props.usersInGroup.map(function (elem) {
       return elem[2];
     });
+
     console.log("The log status event is: ", getUserLoggedStatusEvent);
     document.addEventListener('LoggedOffStatus', function (e) {
       console.log("In group component the logged of userId is_____________________ ", e.detail);
@@ -334,7 +336,7 @@ function (_React$Component) {
     if (getUserLoggedStatusEvent == undefined) {
       var getUserLoggedStatusEvent = new CustomEvent('LoggedInStatus', {
         detail: {
-          currentUserId: props.currentUser.id,
+          currentUserId: _this.props.currentUser.id,
           usersInGroupId: usersInGroupId
         }
       });
@@ -601,10 +603,10 @@ function (_React$Component) {
     });
 
     _this.state = {};
-    _this.state.usersInGroup = props.usersInGroup;
-    _this.state.currentUser = props.currentUser;
-    _this.state.groupMessages = props.groupMessages;
-    _this.state.groupDetails = props.groupDetails;
+    _this.state.usersInGroup = _this.props.usersInGroup;
+    _this.state.currentUser = _this.props.currentUser;
+    _this.state.groupMessages = _this.props.groupMessages;
+    _this.state.groupDetails = _this.props.groupDetails;
     document.addEventListener('newGroupMessageCreated', function (e) {
       socket.emit("broadcastNewGroupMessage", e.detail);
     });
@@ -647,7 +649,7 @@ function (_React$Component) {
       // console.log("Group Details are__________________________________________", this.state.groupDetails);
       // console.log("Group Users are__________________________________________", this.state.usersInGroup);
       var groupChat = React.createElement(React.Fragment, null, React.createElement("div", {
-        className: "container",
+        className: "container col-4",
         id: "groupChat",
         style: {
           height: '516px'
@@ -660,12 +662,12 @@ function (_React$Component) {
       }, React.createElement("div", {
         className: "col-12 bg-dark rounded"
       }, React.createElement("div", {
-        className: "row mt-3 justify-content-center"
+        className: "row justify-content-start"
       }, React.createElement("img", {
         src: "/public/room8s_logo.png",
-        className: "col-1"
-      }), React.createElement("h1", {
-        className: "text-warning"
+        className: "col-3 mb-3 img-circle"
+      }), React.createElement("p", {
+        className: "text-warning text-center"
       }, " ", this.state.groupDetails.groupName + " Chat", " ")))), React.createElement("div", {
         className: "row scrollbar scrollbar-primary",
         id: "groupChatBody",
@@ -689,21 +691,13 @@ function (_React$Component) {
           height: '15%'
         }
       }, React.createElement("div", {
-        className: "col-12 bg-secondary rounded d-flex align-items-center"
-      }, React.createElement("div", {
-        className: "input-group offset-2"
+        className: "col-12 p-0 bg-secondary rounded d-flex align-items-center"
       }, React.createElement("input", {
         id: "searchText",
         placeholder: "Type le Message...",
         type: "text",
-        className: "bg-light text-dark col-10"
-      }), React.createElement("div", {
-        className: "input-group-append"
-      }, React.createElement("button", {
-        onClick: this.submitMessageClickKey,
-        className: "btn btn-success",
-        type: "button"
-      }, "Send")))))));
+        className: "bg-light text-dark col-12 w-100 h-100"
+      })))));
       return groupChat;
     }
   }]);
@@ -1458,10 +1452,10 @@ function (_React$Component) {
     });
 
     _this.state = {};
-    _this.state.message = props.message;
-    _this.state.currentUser = props.currentUser;
-    _this.state.groupDetails = props.groupDetails;
-    _this.state.usersInGroup = props.usersInGroup;
+    _this.state.message = _this.props.message;
+    _this.state.currentUser = _this.props.currentUser;
+    _this.state.groupDetails = _this.props.groupDetails;
+    _this.state.usersInGroup = _this.props.usersInGroup;
     return _this;
   }
 

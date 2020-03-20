@@ -9,16 +9,16 @@ export default class ExpensesPage extends React.Component {
             totals: {},
             view: ""
         }
-        this.state.view = props.view;
-        this.state.expenses = props.expenses;
-        this.state.totals = props.totals;
-        this.state.userNamesInGroup = props.userNamesInGroup;
+        this.state.view = this.props.view;
+        this.state.expenses = this.props.expenses;
+        this.state.totals = this.props.totals;
+        this.state.userNamesInGroup = this.props.userNamesInGroup;
     }
-    componentDidMount(){
+    componentDidMount() {
         $("#content-container").fadeIn('slow');
     }
 
-    componentWillMount(){
+    componentWillMount() {
         $("#content-container").css("display", "none");
     }
 
@@ -84,10 +84,10 @@ class ExpensesTable extends React.Component {
     constructor(props) {
         console.log("i")
         super(props);
-        this.state.expenses = props.expenses;
-        this.state.totals = props.totals;
-        this.state.view = props.view;
-        this.state.userNamesInGroup = props.userNamesInGroup;
+        this.state.expenses = this.props.expenses;
+        this.state.totals = this.props.totals;
+        this.state.view = this.props.view;
+        this.state.userNamesInGroup = this.props.userNamesInGroup;
         // console.log("is the constructor called each time tho?");
         document.addEventListener('new-expense', e => {
             console.log("THE DATA ARE!!!", e.detail);

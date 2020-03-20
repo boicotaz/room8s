@@ -2,10 +2,10 @@ export default class Message extends React.Component {
     constructor(props) {
         super(props);
         this.state = {};
-        this.state.message = props.message;
-        this.state.currentUser = props.currentUser;
-        this.state.groupDetails = props.groupDetails;
-        this.state.usersInGroup = props.usersInGroup;
+        this.state.message = this.props.message;
+        this.state.currentUser = this.props.currentUser;
+        this.state.groupDetails = this.props.groupDetails;
+        this.state.usersInGroup = this.props.usersInGroup;
     }
     processUsersInGroup = (usersInGroup) => {
         let [firstName, lastName, userId] = usersInGroup;

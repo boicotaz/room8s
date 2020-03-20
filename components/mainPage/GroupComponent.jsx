@@ -4,10 +4,10 @@ export default class Group extends React.Component {
     constructor(props) {
         super(props);
         this.state = {}
-        this.state.usersInGroup = props.usersInGroup;
+        this.state.usersInGroup = this.props.usersInGroup;
 
-        this.state.groupDetails = props.groupDetails;
-        let usersInGroupId = props.usersInGroup.map(elem => elem[2]);
+        this.state.groupDetails = this.props.groupDetails;
+        let usersInGroupId = this.props.usersInGroup.map(elem => elem[2]);
         console.log("The log status event is: ", getUserLoggedStatusEvent);
         document.addEventListener('LoggedOffStatus', e => {
             console.log("In group component the logged of userId is_____________________ ", e.detail);
@@ -28,7 +28,7 @@ export default class Group extends React.Component {
         })
 
         if (getUserLoggedStatusEvent == undefined) {
-            var getUserLoggedStatusEvent = new CustomEvent('LoggedInStatus', { detail: { currentUserId: props.currentUser.id, usersInGroupId: usersInGroupId } });
+            var getUserLoggedStatusEvent = new CustomEvent('LoggedInStatus', { detail: { currentUserId: this.props.currentUser.id, usersInGroupId: usersInGroupId } });
 
             document.addEventListener('LoggedInStatusReply', e => {
                 console.log("i am in GROUP Compenent the user's ID online are", e.detail);
