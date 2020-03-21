@@ -129,11 +129,11 @@ export default class GroupChat extends React.Component {
 
         let groupChat = <React.Fragment>
             <div className="container col-4" id="groupChat" style={{ height: '516px' }}>
-                <div className="row" style={{ height: '15%' }}>
-                    <div className="col-12 bg-dark rounded">
+                <div className="row">
+                    <div className="col-12 bg-dark rounded-top rounded-right rounded-left border-bottom"  >
                         <div className="row justify-content-start">
-                            <img src="/public/room8s_logo.png" className="col-3 mb-3 img-circle" />
-                            <p className="text-warning text-center"> {this.state.groupDetails.groupName + " Chat"} </p>
+                            <img src="/public/room8s_logo.png" className="col-2" />
+                            <span className="text-warning mb-0" style={{ fontSize: "20px" }}> {this.state.groupDetails.groupName + " Chat"} </span>
                         </div>
                     </div>
                 </div>
@@ -149,7 +149,7 @@ export default class GroupChat extends React.Component {
                 <div className="row" style={{ height: '15%' }}>
                     <div className="col-12 p-0 bg-secondary rounded d-flex align-items-center">
                         {/* <div className="input-group offset-2"> */}
-                        <input id="searchText" placeholder="Type le Message..." type="text" className="bg-light text-dark col-12 w-100 h-100">
+                        <input autocomplete="off" id="searchText" placeholder="Type le Message..." type="text" className="bg-light text-dark col-12 w-100 h-100">
                         </input>
                         {/* <div className="input-group-append">
                                 <button onClick={this.submitMessageClickKey} className="btn btn-success" type="button">Send</button>

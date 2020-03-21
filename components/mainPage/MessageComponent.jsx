@@ -33,17 +33,16 @@ export default class Message extends React.Component {
             renderedMessage =
 
                 (<React.Fragment>
-                    <p style={{ overflow: "auto", wordWrap: "break-word" }} data-toggle="tooltip" data-placement="right" data-html="false"
-                        title={popUpText} className="text-light bg-primary rounded p-3 offset-6">
-                        {message.messageText}
-                    </p> </React.Fragment >);
+                    <div className="row mt-2 mb-2 justify-content-end">
+                        <p style={{ display: "inline-block", maxWidth: "70%", overflow: "auto", wordWrap: "break-word" }} className="text-light bg-primary rounded p-2 mr-2">{message.messageText}</p>
+                    </div></React.Fragment >);
         }
         else {
             renderedMessage =
                 (<div className="row mt-2 mb-2">
                     <img src="/public/info.png" data-toggle="tooltip" data-placement="right" data-html="false"
-                        title={popUpText} className="mr-2 ml-2" style={{ width: '4%', height: '4%' }} alt="UserImg" />
-                    <p style={{ width: '40%', overflow: "auto", wordWrap: "break-word" }} className="text-light bg-dark rounded p-3">{message.messageText}</p>
+                        title={popUpText} className="mr-2 ml-2" style={{ width: '8%', height: '8%' }} alt="UserImg" />
+                    <p style={{ display: "inline-block", maxWidth: "70%", overflow: "auto", wordWrap: "break-word" }} className="text-light bg-dark rounded  p-2">{message.messageText}</p>
                 </div>);
         }
         return (<React.Fragment> {renderedMessage} </React.Fragment>)
