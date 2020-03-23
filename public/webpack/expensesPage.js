@@ -82,27 +82,363 @@ var expensesPageExport =
 /******/
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 17);
+/******/ 	return __webpack_require__(__webpack_require__.s = 12);
 /******/ })
 /************************************************************************/
-/******/ ({
+/******/ ([
+/* 0 */,
+/* 1 */,
+/* 2 */,
+/* 3 */,
+/* 4 */
+/***/ (function(module, exports, __webpack_require__) {
 
-/***/ 17:
+var v1 = __webpack_require__(5);
+var v4 = __webpack_require__(8);
+
+var uuid = v4;
+uuid.v1 = v1;
+uuid.v4 = v4;
+
+module.exports = uuid;
+
+
+/***/ }),
+/* 5 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var rng = __webpack_require__(6);
+var bytesToUuid = __webpack_require__(7);
+
+// **`v1()` - Generate time-based UUID**
+//
+// Inspired by https://github.com/LiosK/UUID.js
+// and http://docs.python.org/library/uuid.html
+
+var _nodeId;
+var _clockseq;
+
+// Previous uuid creation time
+var _lastMSecs = 0;
+var _lastNSecs = 0;
+
+// See https://github.com/uuidjs/uuid for API details
+function v1(options, buf, offset) {
+  var i = buf && offset || 0;
+  var b = buf || [];
+
+  options = options || {};
+  var node = options.node || _nodeId;
+  var clockseq = options.clockseq !== undefined ? options.clockseq : _clockseq;
+
+  // node and clockseq need to be initialized to random values if they're not
+  // specified.  We do this lazily to minimize issues related to insufficient
+  // system entropy.  See #189
+  if (node == null || clockseq == null) {
+    var seedBytes = rng();
+    if (node == null) {
+      // Per 4.5, create and 48-bit node id, (47 random bits + multicast bit = 1)
+      node = _nodeId = [
+        seedBytes[0] | 0x01,
+        seedBytes[1], seedBytes[2], seedBytes[3], seedBytes[4], seedBytes[5]
+      ];
+    }
+    if (clockseq == null) {
+      // Per 4.2.2, randomize (14 bit) clockseq
+      clockseq = _clockseq = (seedBytes[6] << 8 | seedBytes[7]) & 0x3fff;
+    }
+  }
+
+  // UUID timestamps are 100 nano-second units since the Gregorian epoch,
+  // (1582-10-15 00:00).  JSNumbers aren't precise enough for this, so
+  // time is handled internally as 'msecs' (integer milliseconds) and 'nsecs'
+  // (100-nanoseconds offset from msecs) since unix epoch, 1970-01-01 00:00.
+  var msecs = options.msecs !== undefined ? options.msecs : new Date().getTime();
+
+  // Per 4.2.1.2, use count of uuid's generated during the current clock
+  // cycle to simulate higher resolution clock
+  var nsecs = options.nsecs !== undefined ? options.nsecs : _lastNSecs + 1;
+
+  // Time since last uuid creation (in msecs)
+  var dt = (msecs - _lastMSecs) + (nsecs - _lastNSecs)/10000;
+
+  // Per 4.2.1.2, Bump clockseq on clock regression
+  if (dt < 0 && options.clockseq === undefined) {
+    clockseq = clockseq + 1 & 0x3fff;
+  }
+
+  // Reset nsecs if clock regresses (new clockseq) or we've moved onto a new
+  // time interval
+  if ((dt < 0 || msecs > _lastMSecs) && options.nsecs === undefined) {
+    nsecs = 0;
+  }
+
+  // Per 4.2.1.2 Throw error if too many uuids are requested
+  if (nsecs >= 10000) {
+    throw new Error('uuid.v1(): Can\'t create more than 10M uuids/sec');
+  }
+
+  _lastMSecs = msecs;
+  _lastNSecs = nsecs;
+  _clockseq = clockseq;
+
+  // Per 4.1.4 - Convert from unix epoch to Gregorian epoch
+  msecs += 12219292800000;
+
+  // `time_low`
+  var tl = ((msecs & 0xfffffff) * 10000 + nsecs) % 0x100000000;
+  b[i++] = tl >>> 24 & 0xff;
+  b[i++] = tl >>> 16 & 0xff;
+  b[i++] = tl >>> 8 & 0xff;
+  b[i++] = tl & 0xff;
+
+  // `time_mid`
+  var tmh = (msecs / 0x100000000 * 10000) & 0xfffffff;
+  b[i++] = tmh >>> 8 & 0xff;
+  b[i++] = tmh & 0xff;
+
+  // `time_high_and_version`
+  b[i++] = tmh >>> 24 & 0xf | 0x10; // include version
+  b[i++] = tmh >>> 16 & 0xff;
+
+  // `clock_seq_hi_and_reserved` (Per 4.2.2 - include variant)
+  b[i++] = clockseq >>> 8 | 0x80;
+
+  // `clock_seq_low`
+  b[i++] = clockseq & 0xff;
+
+  // `node`
+  for (var n = 0; n < 6; ++n) {
+    b[i + n] = node[n];
+  }
+
+  return buf ? buf : bytesToUuid(b);
+}
+
+module.exports = v1;
+
+
+/***/ }),
+/* 6 */
+/***/ (function(module, exports) {
+
+// Unique ID creation requires a high quality random # generator.  In the
+// browser this is a little complicated due to unknown quality of Math.random()
+// and inconsistent support for the `crypto` API.  We do the best we can via
+// feature-detection
+
+// getRandomValues needs to be invoked in a context where "this" is a Crypto
+// implementation. Also, find the complete implementation of crypto on IE11.
+var getRandomValues = (typeof(crypto) != 'undefined' && crypto.getRandomValues && crypto.getRandomValues.bind(crypto)) ||
+                      (typeof(msCrypto) != 'undefined' && typeof window.msCrypto.getRandomValues == 'function' && msCrypto.getRandomValues.bind(msCrypto));
+
+if (getRandomValues) {
+  // WHATWG crypto RNG - http://wiki.whatwg.org/wiki/Crypto
+  var rnds8 = new Uint8Array(16); // eslint-disable-line no-undef
+
+  module.exports = function whatwgRNG() {
+    getRandomValues(rnds8);
+    return rnds8;
+  };
+} else {
+  // Math.random()-based (RNG)
+  //
+  // If all else fails, use Math.random().  It's fast, but is of unspecified
+  // quality.
+  var rnds = new Array(16);
+
+  module.exports = function mathRNG() {
+    for (var i = 0, r; i < 16; i++) {
+      if ((i & 0x03) === 0) r = Math.random() * 0x100000000;
+      rnds[i] = r >>> ((i & 0x03) << 3) & 0xff;
+    }
+
+    return rnds;
+  };
+}
+
+
+/***/ }),
+/* 7 */
+/***/ (function(module, exports) {
+
+/**
+ * Convert array of 16 byte values to UUID string format of the form:
+ * XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX
+ */
+var byteToHex = [];
+for (var i = 0; i < 256; ++i) {
+  byteToHex[i] = (i + 0x100).toString(16).substr(1);
+}
+
+function bytesToUuid(buf, offset) {
+  var i = offset || 0;
+  var bth = byteToHex;
+  // join used to fix memory issue caused by concatenation: https://bugs.chromium.org/p/v8/issues/detail?id=3175#c4
+  return ([
+    bth[buf[i++]], bth[buf[i++]],
+    bth[buf[i++]], bth[buf[i++]], '-',
+    bth[buf[i++]], bth[buf[i++]], '-',
+    bth[buf[i++]], bth[buf[i++]], '-',
+    bth[buf[i++]], bth[buf[i++]], '-',
+    bth[buf[i++]], bth[buf[i++]],
+    bth[buf[i++]], bth[buf[i++]],
+    bth[buf[i++]], bth[buf[i++]]
+  ]).join('');
+}
+
+module.exports = bytesToUuid;
+
+
+/***/ }),
+/* 8 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var rng = __webpack_require__(6);
+var bytesToUuid = __webpack_require__(7);
+
+function v4(options, buf, offset) {
+  var i = buf && offset || 0;
+
+  if (typeof(options) == 'string') {
+    buf = options === 'binary' ? new Array(16) : null;
+    options = null;
+  }
+  options = options || {};
+
+  var rnds = options.random || (options.rng || rng)();
+
+  // Per 4.4, set bits for version and `clock_seq_hi_and_reserved`
+  rnds[6] = (rnds[6] & 0x0f) | 0x40;
+  rnds[8] = (rnds[8] & 0x3f) | 0x80;
+
+  // Copy bytes to buffer, if provided
+  if (buf) {
+    for (var ii = 0; ii < 16; ++ii) {
+      buf[i + ii] = rnds[ii];
+    }
+  }
+
+  return buf || bytesToUuid(rnds);
+}
+
+module.exports = v4;
+
+
+/***/ }),
+/* 9 */,
+/* 10 */,
+/* 11 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "grouDetailsAjax", function() { return grouDetailsAjax; });
+function _createForOfIteratorHelper(o) { if (typeof Symbol === "undefined" || o[Symbol.iterator] == null) { if (Array.isArray(o) || (o = _unsupportedIterableToArray(o))) { var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var it, normalCompletion = true, didErr = false, err; return { s: function s() { it = o[Symbol.iterator](); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(n); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
+var evt = new CustomEvent('buttons-created', {
+  state: "done"
+});
+
+var getGroupDetails = function getGroupDetails() {
+  return new Promise(function (resolve, reject) {
+    $.ajax({
+      url: '/api/get-group-details',
+      type: 'GET',
+      success: function success(groupDetails) {
+        resolve(groupDetails);
+      },
+      error: function error(_error) {
+        reject(_error);
+      }
+    });
+  });
+};
+/**
+ * @typedef userDetails 
+ * @type {Object}
+ * @param {String} userDetails.firstName 
+ * @param {String} userDetails.lastName
+ * @param {Boolean} userDetails.profImgExists 
+ * @param {Integer} userDetails.userId
+ */
+
+/**
+ * @typedef groupUsersDetails
+ * @type {Map<Integer:userDetails>}
+ * Key is userId
+ */
+
+/**
+ * @return {Promise<groupUsersDetails>}
+ */
+
+
+var getUsersInGroupDetails = function getUsersInGroupDetails() {
+  return new Promise(function (resolve, reject) {
+    $.ajax({
+      url: '/api/get-users-in-group',
+      type: 'POST',
+      success: function success(usersInGroupData) {
+        window.dispatchEvent(evt);
+        usersInGroupData = JSON.parse(usersInGroupData);
+        var groupUsersDetails = new Map();
+
+        var _iterator = _createForOfIteratorHelper(usersInGroupData),
+            _step;
+
+        try {
+          for (_iterator.s(); !(_step = _iterator.n()).done;) {
+            var userData = _step.value;
+            groupUsersDetails.set(userData[0], userData[1]);
+          }
+        } catch (err) {
+          _iterator.e(err);
+        } finally {
+          _iterator.f();
+        }
+
+        resolve(groupUsersDetails);
+      },
+      error: function error(_error2) {
+        reject(_error2);
+      }
+    });
+  });
+};
+
+var grouDetailsAjax = {};
+grouDetailsAjax.getGroupDetails = getGroupDetails;
+grouDetailsAjax.getUsersInGroupDetails = getUsersInGroupDetails;
+
+
+/***/ }),
+/* 12 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getExpensesPage", function() { return getExpensesPage; });
-/* harmony import */ var _components_expensesPage_ExpensesPageComponent_jsx__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(18);
-/* harmony import */ var _components_expensesPage_ExpensesFormComponent_jsx__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(20);
-/* harmony import */ var _ajax_expensesAjax_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(19);
-function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _nonIterableRest(); }
+/* harmony import */ var _components_expensesPage_ExpensesPageComponent_jsx__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(13);
+/* harmony import */ var _components_expensesPage_ExpensesFormComponent_jsx__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(15);
+/* harmony import */ var _ajax_expensesAjax_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(14);
+/* harmony import */ var _ajax_groupDetailsAjax__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(11);
+function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest(); }
 
-function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance"); }
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
 
-function _iterableToArrayLimit(arr, i) { if (!(Symbol.iterator in Object(arr) || Object.prototype.toString.call(arr) === "[object Arguments]")) { return; } var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(n); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
+function _iterableToArrayLimit(arr, i) { if (typeof Symbol === "undefined" || !(Symbol.iterator in Object(arr))) return; var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
 
 function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
+
 
 
 
@@ -111,80 +447,52 @@ function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 var getExpensesPage = function getExpensesPage() {
   $("#content").remove();
   $("#content-container").append("<div id = 'content'></div>");
-  Promise.all([_ajax_expensesAjax_js__WEBPACK_IMPORTED_MODULE_2__["expensesAjax"].getGroupInfoAjax(), _ajax_expensesAjax_js__WEBPACK_IMPORTED_MODULE_2__["expensesAjax"].getExpenseDataAjax(), _ajax_expensesAjax_js__WEBPACK_IMPORTED_MODULE_2__["expensesAjax"].getExpenseTotalsDataAjax()]).then(function (res) {
+  Promise.all([_ajax_groupDetailsAjax__WEBPACK_IMPORTED_MODULE_3__["grouDetailsAjax"].getUsersInGroupDetails(), _ajax_expensesAjax_js__WEBPACK_IMPORTED_MODULE_2__["expensesAjax"].getExpenseDataAjax(), _ajax_expensesAjax_js__WEBPACK_IMPORTED_MODULE_2__["expensesAjax"].getExpenseTotalsDataAjax()]).then(function (res) {
     var _res = _slicedToArray(res, 3),
-        userNames = _res[0],
+        usersInGroupDetails = _res[0],
         expenseData = _res[1],
         expensesTotals = _res[2]; // console.log("Promise.all for expenses are_____________", userNames, expenseData, expensesTotals);
 
 
-    var processedData = _ajax_expensesAjax_js__WEBPACK_IMPORTED_MODULE_2__["expensesAjax"].processData(expenseData, userNames);
-    ReactDOM.render(React.createElement(_components_expensesPage_ExpensesPageComponent_jsx__WEBPACK_IMPORTED_MODULE_0__["default"], {
+    var processedData = _ajax_expensesAjax_js__WEBPACK_IMPORTED_MODULE_2__["expensesAjax"].processData(expenseData, usersInGroupDetails);
+    ReactDOM.render( /*#__PURE__*/React.createElement(_components_expensesPage_ExpensesPageComponent_jsx__WEBPACK_IMPORTED_MODULE_0__["default"], {
       view: "eachExpense",
       expenses: processedData,
       totals: expensesTotals,
-      userNamesInGroup: userNames
-    }, "  "), document.getElementById('content'));
-    var processedUserNames = processUserNames(userNames);
-    ReactDOM.render(React.createElement(_components_expensesPage_ExpensesFormComponent_jsx__WEBPACK_IMPORTED_MODULE_1__["default"], {
-      usersInGroup: processedUserNames
+      usersInGroupDetails: usersInGroupDetails
+    }, "  "), document.getElementById('content')); // let processedUserNames = processUserNames(userNames);
+
+    ReactDOM.render( /*#__PURE__*/React.createElement(_components_expensesPage_ExpensesFormComponent_jsx__WEBPACK_IMPORTED_MODULE_1__["default"], {
+      usersInGroup: usersInGroupDetails
     }), document.getElementById('CreateFormContent'));
   })["catch"](function (error) {
     return console.log(error);
   });
 };
-/**
- * @typedef proccessedUserNames
- * @type {object}
- * @property {object} userId 
- * @property {string} userId.firstName
- * @property {string} userId.lastName
- * @example - {'1':{firstName:"Tolis",lastName:"Gerodimos"}}
- * 
- */
-
-/**
- * 
- * @param {import("../ajax/expensesAjax.js").userNames} userNames
- * @returns {proccessedUserNames} 
- */
-
-
-var processUserNames = function processUserNames(userNames) {
-  var proccessedUserNames = {};
-  userNames.forEach(function (userNameTuple) {
-    var _userNameTuple = _slicedToArray(userNameTuple, 3),
-        firstName = _userNameTuple[0],
-        lastName = _userNameTuple[1],
-        userId = _userNameTuple[2];
-
-    proccessedUserNames[userId] = {};
-    proccessedUserNames[userId].firstName = firstName;
-    proccessedUserNames[userId].lastName = lastName;
-  });
-  return proccessedUserNames;
-};
 
 
 
 /***/ }),
-
-/***/ 18:
+/* 13 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return ExpensesPage; });
-/* harmony import */ var _ajax_expensesAjax__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(19);
-function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _nonIterableSpread(); }
+/* harmony import */ var _ajax_expensesAjax__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(14);
+function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread(); }
 
-function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance"); }
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
 
-function _iterableToArray(iter) { if (Symbol.iterator in Object(iter) || Object.prototype.toString.call(iter) === "[object Arguments]") return Array.from(iter); }
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(n); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
 
-function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = new Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } }
+function _iterableToArray(iter) { if (typeof Symbol !== "undefined" && Symbol.iterator in Object(iter)) return Array.from(iter); }
 
-function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) return _arrayLikeToArray(arr); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
+function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -192,11 +500,15 @@ function _defineProperties(target, props) { for (var i = 0; i < props.length; i+
 
 function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
 
+function _createSuper(Derived) { return function () { var Super = _getPrototypeOf(Derived), result; if (_isNativeReflectConstruct()) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
+
 function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
 
-function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
-
 function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Date.prototype.toString.call(Reflect.construct(Date, [], function () {})); return true; } catch (e) { return false; } }
+
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
 
@@ -206,17 +518,17 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
 
 
-var ExpensesPage =
-/*#__PURE__*/
-function (_React$Component) {
+var ExpensesPage = /*#__PURE__*/function (_React$Component) {
   _inherits(ExpensesPage, _React$Component);
+
+  var _super = _createSuper(ExpensesPage);
 
   function ExpensesPage(props) {
     var _this;
 
     _classCallCheck(this, ExpensesPage);
 
-    _this = _possibleConstructorReturn(this, _getPrototypeOf(ExpensesPage).call(this, props));
+    _this = _super.call(this, props);
 
     _defineProperty(_assertThisInitialized(_this), "toggleView", function () {
       // console.log(this.state.view, this.state.totals);
@@ -242,7 +554,8 @@ function (_React$Component) {
     _this.state.view = _this.props.view;
     _this.state.expenses = _this.props.expenses;
     _this.state.totals = _this.props.totals;
-    _this.state.userNamesInGroup = _this.props.userNamesInGroup;
+    _this.state.usersInGroupDetails = _this.props.usersInGroupDetails;
+    console.log('current expense is ___', _this.state.expenses);
     return _this;
   }
 
@@ -267,47 +580,48 @@ function (_React$Component) {
         buttonText = "View All Expenses";
       }
 
-      var expensePage = React.createElement("div", {
+      var expensePage = /*#__PURE__*/React.createElement("div", {
         id: "expenses-content",
         className: "container",
         style: {
           marginTop: '250px'
         }
-      }, React.createElement("div", {
+      }, /*#__PURE__*/React.createElement("div", {
         className: "row",
         id: "buttons-row"
-      }, React.createElement("div", {
+      }, /*#__PURE__*/React.createElement("div", {
         className: "col-12"
-      }, React.createElement("div", {
+      }, /*#__PURE__*/React.createElement("div", {
         className: "btn-group btn-group-md",
         role: "group",
         "aria-label": "Basic example"
-      }, React.createElement("button", {
+      }, /*#__PURE__*/React.createElement("button", {
         type: "button",
         className: "btn btn-secondary",
         "data-toggle": "modal",
         "data-target": "#darkModalForm"
-      }, "Create Expense"), React.createElement("button", {
+      }, "Create Expense"), /*#__PURE__*/React.createElement("button", {
         type: "button",
         onClick: this.toggleView,
         className: "btn btn-secondary"
-      }, buttonText)))), React.createElement("div", {
+      }, buttonText)))), /*#__PURE__*/React.createElement("div", {
         id: "expense-table-id",
         className: "row"
-      }, React.createElement("div", {
+      }, /*#__PURE__*/React.createElement("div", {
         className: "col-12 pr-0"
-      }, React.createElement("table", {
+      }, /*#__PURE__*/React.createElement("table", {
         id: "expenses-table",
         className: "table table-hover table-dark "
-      }, React.createElement(ExpensesTable, {
+      }, /*#__PURE__*/React.createElement(ExpensesTable, {
         expenses: this.state.expenses,
         totals: this.state.totals,
         userNamesInGroup: this.state.userNamesInGroup,
+        usersInGroupDetails: this.state.usersInGroupDetails,
         view: this.state.view
-      })))), React.createElement("div", {
+      })))), /*#__PURE__*/React.createElement("div", {
         id: "modals-container"
       }));
-      return React.createElement(React.Fragment, null, "  ", expensePage, " ");
+      return /*#__PURE__*/React.createElement(React.Fragment, null, "  ", expensePage, " ");
     }
   }]);
 
@@ -317,10 +631,10 @@ function (_React$Component) {
 
 
 
-var ExpensesTable =
-/*#__PURE__*/
-function (_React$Component2) {
+var ExpensesTable = /*#__PURE__*/function (_React$Component2) {
   _inherits(ExpensesTable, _React$Component2);
+
+  var _super2 = _createSuper(ExpensesTable);
 
   function ExpensesTable(props) {
     var _this2;
@@ -328,7 +642,7 @@ function (_React$Component2) {
     _classCallCheck(this, ExpensesTable);
 
     console.log("i");
-    _this2 = _possibleConstructorReturn(this, _getPrototypeOf(ExpensesTable).call(this, props));
+    _this2 = _super2.call(this, props);
 
     _defineProperty(_assertThisInitialized(_this2), "state", {
       expenses: [],
@@ -338,12 +652,13 @@ function (_React$Component2) {
     _this2.state.expenses = _this2.props.expenses;
     _this2.state.totals = _this2.props.totals;
     _this2.state.view = _this2.props.view;
-    _this2.state.userNamesInGroup = _this2.props.userNamesInGroup; // console.log("is the constructor called each time tho?");
+    _this2.state.userNamesInGroup = _this2.props.userNamesInGroup;
+    _this2.state.usersInGroupDetails = _this2.props.usersInGroupDetails; // console.log("is the constructor called each time tho?");
 
     document.addEventListener('new-expense', function (e) {
       console.log("THE DATA ARE!!!", e.detail);
       _ajax_expensesAjax__WEBPACK_IMPORTED_MODULE_0__["expensesAjax"].getExpenseTotalsDataAjax().then(function (totalDebtsForEachUser) {
-        var newExpense = _ajax_expensesAjax__WEBPACK_IMPORTED_MODULE_0__["expensesAjax"].processData(e.detail, _this2.state.userNamesInGroup);
+        var newExpense = _ajax_expensesAjax__WEBPACK_IMPORTED_MODULE_0__["expensesAjax"].processData(e.detail, _this2.state.usersInGroupDetails);
         console.log("the processsed new Expense is_______________________________", newExpense);
 
         _this2.setState({
@@ -381,31 +696,31 @@ function (_React$Component2) {
           sum += entry.debtorFullName + text + Math.abs(entry.debt) + "$" + "<br>";
           return sum;
         }, "");
-        return React.createElement("tr", null, React.createElement("td", null, expense[0].creditorFullName), React.createElement("td", null, expense[0].when), React.createElement("td", null, expense[0].description), React.createElement("td", null, expense[0].credit, " $"), React.createElement("td", null, React.createElement("a", {
+        return /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("td", null, expense[0].creditorFullName), /*#__PURE__*/React.createElement("td", null, expense[0].when), /*#__PURE__*/React.createElement("td", null, expense[0].description), /*#__PURE__*/React.createElement("td", null, expense[0].credit, " $"), /*#__PURE__*/React.createElement("td", null, /*#__PURE__*/React.createElement("a", {
           href: "#",
           "data-toggle": "tooltip",
           "data-placement": "right",
           sanitize: "false",
           "data-html": "true",
           title: tranactionsData
-        }, React.createElement("img", {
+        }, /*#__PURE__*/React.createElement("img", {
           src: "/public/info.png",
           alt: "Info IMG",
           height: "42",
           width: "42"
         }))));
       });
-      return React.createElement(React.Fragment, null, " ", React.createElement("thead", null, React.createElement("tr", null, React.createElement("th", {
+      return /*#__PURE__*/React.createElement(React.Fragment, null, " ", /*#__PURE__*/React.createElement("thead", null, /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("th", {
         scope: "col"
-      }, "Creditor"), React.createElement("th", {
+      }, "Creditor"), /*#__PURE__*/React.createElement("th", {
         scope: "col"
-      }, "When"), React.createElement("th", {
+      }, "When"), /*#__PURE__*/React.createElement("th", {
         scope: "col"
-      }, "Description"), React.createElement("th", {
+      }, "Description"), /*#__PURE__*/React.createElement("th", {
         scope: "col"
-      }, "Credit"), React.createElement("th", {
+      }, "Credit"), /*#__PURE__*/React.createElement("th", {
         scope: "col"
-      }, "Info")), _toConsumableArray(data)), React.createElement("tbody", null), " ");
+      }, "Info")), _toConsumableArray(data)), /*#__PURE__*/React.createElement("tbody", null), " ");
     }
     /**
      * @typedef TotalDebts
@@ -448,18 +763,18 @@ function (_React$Component2) {
           debtsSumInfo = "Owes " + Math.abs(totals[key].debtSum) + "$";
         }
 
-        var row = React.createElement(React.Fragment, null, " ", React.createElement("tr", null, React.createElement("td", null, totals[key].fullname), React.createElement("td", {
+        var row = /*#__PURE__*/React.createElement(React.Fragment, null, " ", /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("td", null, totals[key].fullname), /*#__PURE__*/React.createElement("td", {
           style: {
             color: color
           }
-        }, debtsSumInfo), React.createElement("td", null, React.createElement("a", {
+        }, debtsSumInfo), /*#__PURE__*/React.createElement("td", null, /*#__PURE__*/React.createElement("a", {
           href: "#",
           "data-toggle": "tooltip",
           "data-placement": "right",
           sanitize: "false",
           "data-html": "true",
           title: debtsInfo
-        }, React.createElement("img", {
+        }, /*#__PURE__*/React.createElement("img", {
           src: "/public/info.png",
           alt: "Info IMG",
           height: "42",
@@ -467,13 +782,13 @@ function (_React$Component2) {
         })))));
         data.push(row);
       });
-      return React.createElement(React.Fragment, null, " ", React.createElement("thead", null, React.createElement("tr", null, React.createElement("th", {
+      return /*#__PURE__*/React.createElement(React.Fragment, null, " ", /*#__PURE__*/React.createElement("thead", null, /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("th", {
         scope: "col"
-      }, "Member"), React.createElement("th", {
+      }, "Member"), /*#__PURE__*/React.createElement("th", {
         scope: "col"
-      }, "Sum"), React.createElement("th", {
+      }, "Sum"), /*#__PURE__*/React.createElement("th", {
         scope: "col"
-      }, "Info"))), React.createElement("tbody", null, [].concat(data)), "  ");
+      }, "Info"))), /*#__PURE__*/React.createElement("tbody", null, [].concat(data)), "  ");
     }
   }, {
     key: "render",
@@ -493,8 +808,7 @@ function (_React$Component2) {
 }(React.Component);
 
 /***/ }),
-
-/***/ 19:
+/* 14 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -512,47 +826,6 @@ var getExpenseDataAjax = function getExpenseDataAjax(userNames, skip) {
       },
       error: function error(_error) {
         reject(_error);
-      }
-    });
-  });
-};
-/**
- * @typedef userNameTuple
- * @type {array}
- * @property {string} 0 - firstName
- * @property {string} 1 - lastName
- * @property {number} 2 - userId
- */
-
-/**
- * @typedef userNames
- * @type {array<userNameTuple>}
- */
-
-/**
- * @return {Promise<userNames>}
- */
-
-
-var getGroupInfoAjax = function getGroupInfoAjax() {
-  return new Promise(function (resolve, reject) {
-    $.ajax({
-      url: '/api/get-current-user',
-      type: "GET",
-      success: function success(user) {
-        $.ajax({
-          url: '/api/get-users-in-group',
-          type: "POST",
-          data: user,
-          dataType: "json",
-          success: function success(userNames) {
-            resolve(userNames);
-          },
-          error: function error(err) {
-            console.log(err);
-            reject(err);
-          }
-        });
       }
     });
   });
@@ -586,17 +859,20 @@ var storeNewExpense = function storeNewExpense(postData, newExpense, clientSocke
     contentType: "application/json",
     // contentType: "application/json",
     success: function success(result) {
-      $("#alert-success").show(function () {
+      $("#created-expense-success").show(function () {
         new Promise(function (resolve, reject) {
           setTimeout(function () {
-            $('#alert-success').hide(800);
+            $('#created-expense-success').hide(800);
+            $('#darkModalForm').modal('toggle');
+            var clearExpenseFormEvent = new CustomEvent('clear-expense-form');
+            document.dispatchEvent(clearExpenseFormEvent);
             resolve({
               msg: 'ok'
             });
-          }, 5000);
+          }, 3000);
         });
-      });
-      document.getElementById('expense-form').reset();
+      }); // $("#alert-success").;
+
       clientSocket.emit('new-expense', newExpense);
     },
     error: function error(_error3) {
@@ -606,63 +882,55 @@ var storeNewExpense = function storeNewExpense(postData, newExpense, clientSocke
 }; // Creates the expense table by using the ExpensesTable Component
 
 
-var processData = function processData(data, userNames) {
-  // console.log("in processData__________________", data, userNames)
-  var userNamesMap = new Map();
-  userNames.forEach(function (user) {
-    userNamesMap.set(parseInt(user[2], 10), "".concat(user[0], " ").concat(user[1]));
-  });
+var processData = function processData(expenses, usersInGroupDetails) {
+  console.log("in  process data", expenses, usersInGroupDetails);
 
-  if (Array.isArray(data)) {
-    data.forEach(function (expense) {
+  if (Array.isArray(expenses)) {
+    expenses.forEach(function (expense) {
       if (Array.isArray(expense)) {
         expense.forEach(function (transaction) {
-          transaction.creditorFullName = userNamesMap.get(parseInt(transaction.creditor, 10));
-          transaction.debtorFullName = userNamesMap.get(parseInt(transaction.debtor, 10));
+          transaction.creditorFullName = usersInGroupDetails.get(parseInt(transaction.creditor, 10)).firstName + " " + usersInGroupDetails.get(parseInt(transaction.creditor, 10)).lastName;
+          transaction.debtorFullName = usersInGroupDetails.get(parseInt(transaction.debtor, 10)).firstName + " " + usersInGroupDetails.get(parseInt(transaction.debtor, 10)).lastName;
         });
       } else {
-        expense.creditorFullName = userNamesMap.get(parseInt(expense.creditor, 10));
-        expense.debtorFullName = userNamesMap.get(parseInt(expense.debtor, 10));
+        expense.creditorFullName = usersInGroupDetails.get(parseInt(expense.creditor, 10)).firstName + " " + usersInGroupDetails.get(parseInt(expense.creditor, 10)).lastName;
+        expense.debtorFullName = usersInGroupDetails.get(parseInt(expense.debtor, 10)).firstName + " " + usersInGroupDetails.get(parseInt(expense.debtor, 10)).lastName;
       }
     });
   } else {
-    data.creditorFullName = userNamesMap.get(parseInt(data.creditor, 10));
-    data.debtorFullName = userNamesMap.get(parseInt(data.debtor, 10));
+    expenses.creditorFullName = usersInGroupDetails.get(parseInt(expenses.creditor, 10)).firstName + " " + usersInGroupDetails.get(parseInt(expenses.creditor, 10)).lastName;
+    expenses.debtorFullName = usersInGroupDetails.get(parseInt(expenses.debtor, 10)).firstName + " " + usersInGroupDetails.get(parseInt(expenses.debtor, 10)).lastName;
   }
 
-  return data;
+  return expenses;
 };
 
 var expensesAjax = {};
 expensesAjax.storeNewExpense = storeNewExpense;
 expensesAjax.getExpenseTotalsDataAjax = getExpenseTotalsDataAjax;
-expensesAjax.getGroupInfoAjax = getGroupInfoAjax;
 expensesAjax.getExpenseDataAjax = getExpenseDataAjax;
 expensesAjax.processData = processData;
 
 
 /***/ }),
-
-/***/ 20:
+/* 15 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return ExpensesForm; });
-/* harmony import */ var _ajax_expensesAjax_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(19);
-function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _nonIterableSpread(); }
+/* harmony import */ var _ajax_expensesAjax_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(14);
+/* harmony import */ var _User_drop_down_listComponent_jsx__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(16);
+/* harmony import */ var _DebtorComponent_jsx__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(18);
+/* harmony import */ var uuid__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(4);
+/* harmony import */ var uuid__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(uuid__WEBPACK_IMPORTED_MODULE_3__);
+function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
-function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance"); }
+function _createForOfIteratorHelper(o) { if (typeof Symbol === "undefined" || o[Symbol.iterator] == null) { if (Array.isArray(o) || (o = _unsupportedIterableToArray(o))) { var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var it, normalCompletion = true, didErr = false, err; return { s: function s() { it = o[Symbol.iterator](); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
 
-function _iterableToArray(iter) { if (Symbol.iterator in Object(iter) || Object.prototype.toString.call(iter) === "[object Arguments]") return Array.from(iter); }
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(n); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
 
-function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = new Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } }
-
-function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
-
-function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
-
-function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -670,11 +938,15 @@ function _defineProperties(target, props) { for (var i = 0; i < props.length; i+
 
 function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
 
+function _createSuper(Derived) { return function () { var Super = _getPrototypeOf(Derived), result; if (_isNativeReflectConstruct()) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
+
 function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
 
-function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
-
 function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Date.prototype.toString.call(Reflect.construct(Date, [], function () {})); return true; } catch (e) { return false; } }
+
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
 
@@ -683,135 +955,34 @@ function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || func
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
  // import { clientSocket } from "../../js/socketClient";
-// React Component to create the debtors row in the create expense form 
-// depends on User_drop_down_list and User_drop_down_item
 
-var Debtor =
-/*#__PURE__*/
-function (_React$Component) {
-  _inherits(Debtor, _React$Component);
 
-  function Debtor() {
-    var _getPrototypeOf2;
 
-    var _this;
 
-    _classCallCheck(this, Debtor);
 
-    for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
-      args[_key] = arguments[_key];
-    }
+var ExpensesForm = /*#__PURE__*/function (_React$Component) {
+  _inherits(ExpensesForm, _React$Component);
 
-    _this = _possibleConstructorReturn(this, (_getPrototypeOf2 = _getPrototypeOf(Debtor)).call.apply(_getPrototypeOf2, [this].concat(args)));
+  var _super = _createSuper(ExpensesForm);
 
-    _defineProperty(_assertThisInitialized(_this), "removeDeptor", function (e) {
-      _this.props.removeDeptor(_this.props.id);
-    });
+  /**
+   * @param {number}  dropDownId - it corresponds to userId
+   * @param {number} debtorComponentId - it corresponds to debtor component id, which is a uuidv4
+   */
 
-    _defineProperty(_assertThisInitialized(_this), "onChange", function (e) {
-      console.log('event fired', e); // this.props.debt = 4444;
-    });
-
-    _defineProperty(_assertThisInitialized(_this), "selectDebtor", function (dropDownId) {
-      _this.props.selectDebtor(dropDownId, _this.props.id);
-    });
-
-    return _this;
-  }
-
-  _createClass(Debtor, [{
-    key: "render",
-    value: function render() {
-      var isDebtorSelected;
-      var debtorName;
-
-      if (this.props.debtorSelected === undefined) {
-        isDebtorSelected = false;
-      } else {
-        var userNamesInGroup = this.props.usersInGroup;
-
-        for (var _i = 0, _Object$keys = Object.keys(userNamesInGroup); _i < _Object$keys.length; _i++) {
-          var key = _Object$keys[_i];
-
-          if (key == this.props.debtorSelected) {
-            debtorName = userNamesInGroup[key].firstName;
-            isDebtorSelected = true;
-          }
-        }
-      }
-
-      return React.createElement(React.Fragment, null, React.createElement("div", {
-        className: "md-form mb-4"
-      }, React.createElement("div", {
-        className: "input-group form-group"
-      }, React.createElement("div", {
-        className: "input-group-prepend"
-      }, React.createElement("div", {
-        className: "input-group-prepend"
-      }, React.createElement("button", {
-        className: "btn btn-dark dropdown-toggle btn-block",
-        type: "button",
-        "data-toggle": "dropdown",
-        "aria-haspopup": "true",
-        "aria-expanded": "false"
-      }, "Debtor"), React.createElement("div", {
-        className: "dropdown-menu"
-      }, React.createElement(User_drop_down_list, {
-        users: this.props.usersInGroup,
-        selectDebtor: this.selectDebtor,
-        selectMethod: "Debtor"
-      })))), React.createElement("input", {
-        readOnly: true,
-        name: "debtor",
-        type: "text",
-        className: "form-control",
-        placeholder: "Bitch",
-        value: this.props.isDebtorSelected === undefined ? debtorName : "Bitch"
-      }), React.createElement("input", {
-        type: "number",
-        className: "form-control",
-        name: "debt",
-        onChange: this.onChange,
-        readOnly: this.props.evenly,
-        value: this.props.evenly == true ? this.props.debt.toFixed(2) : console.log('hey'),
-        placeholder: "Debt"
-      }), React.createElement("input", {
-        type: "hidden",
-        name: "debtorId",
-        value: this.props.debtorSelected === undefined ? null : this.props.debtorSelected
-      }), React.createElement("div", null, React.createElement("a", {
-        href: "#"
-      }, "  ", React.createElement("i", {
-        className: "fa fa-times ml-2 mt-2",
-        onClick: this.removeDeptor,
-        "aria-hidden": "true",
-        style: {
-          color: 'black'
-        }
-      }), " ")))), " ");
-    }
-  }]);
-
-  return Debtor;
-}(React.Component);
-
-var ExpensesForm =
-/*#__PURE__*/
-function (_React$Component2) {
-  _inherits(ExpensesForm, _React$Component2);
-
+  /**
+   * @param {number} debtorComponentId - it corresponds to debtor component id, which is a uuidv4
+   */
   function ExpensesForm(props) {
-    var _this2;
+    var _this;
 
     _classCallCheck(this, ExpensesForm);
 
-    _this2 = _possibleConstructorReturn(this, _getPrototypeOf(ExpensesForm).call(this, props));
+    _this = _super.call(this, props);
 
-    _defineProperty(_assertThisInitialized(_this2), "counter", 0);
+    _defineProperty(_assertThisInitialized(_this), "state", {});
 
-    _defineProperty(_assertThisInitialized(_this2), "state", {});
-
-    _defineProperty(_assertThisInitialized(_this2), "submitForm", function (e) {
+    _defineProperty(_assertThisInitialized(_this), "submitForm", function (e) {
       e.preventDefault();
       var formData = $('#expense-form').serializeArray();
       console.log(formData);
@@ -858,20 +1029,13 @@ function (_React$Component2) {
       _ajax_expensesAjax_js__WEBPACK_IMPORTED_MODULE_0__["expensesAjax"].storeNewExpense(postFormData, newExpense, socket);
     });
 
-    _defineProperty(_assertThisInitialized(_this2), "selectCreditor", function (dropDownId) {
+    _defineProperty(_assertThisInitialized(_this), "selectCreditor", function (dropDownId) {
       var creditorName, creditorId;
-      var userNamesInGroup = _this2.props.usersInGroup;
+      var usersInGroup = _this.state.usersInGroup;
+      creditorName = usersInGroup.get(dropDownId).firstName;
+      creditorId = dropDownId;
 
-      for (var _i2 = 0, _Object$keys2 = Object.keys(userNamesInGroup); _i2 < _Object$keys2.length; _i2++) {
-        var key = _Object$keys2[_i2];
-
-        if (key == dropDownId) {
-          creditorName = userNamesInGroup[key].firstName;
-          creditorId = key;
-        }
-      }
-
-      _this2.setState({
+      _this.setState({
         creditor: {
           creditorName: creditorName,
           creditorId: creditorId
@@ -879,32 +1043,27 @@ function (_React$Component2) {
       });
     });
 
-    _defineProperty(_assertThisInitialized(_this2), "selectDebtor", function (dropDownId, debtorId) {
-      var debtors = _this2.state.debtors.map(function (elem, index) {
-        if (elem.id == debtorId) {
-          return _objectSpread({}, elem, {
-            debtorSelected: dropDownId
-          });
-        } else {
-          return elem;
-        }
-      });
+    _defineProperty(_assertThisInitialized(_this), "selectDebtor", function (dropDownId, debtorComponentId) {
+      var debtors = _this.state.debtors;
+      var debtorDetails = debtors.get(debtorComponentId);
+      debtorDetails.debtorSelected = dropDownId;
+      debtors.set(debtorComponentId, debtorDetails);
 
-      _this2.setState({
+      _this.setState({
         debtors: debtors
       });
     });
 
-    _defineProperty(_assertThisInitialized(_this2), "updateCreditField", function () {
-      if (_this2.state.evenly) _this2.updateDebtorFields();
+    _defineProperty(_assertThisInitialized(_this), "updateCreditField", function () {
+      if (_this.state.evenly) _this.updateDebtorFields();
     });
 
-    _defineProperty(_assertThisInitialized(_this2), "updateDebtorFields", function () {
-      if (!_this2.state.evenly) {
-        _this2.setState({
-          debtors: _this2.state.debtors,
-          evenly: _this2.state.evenly,
-          credit: _this2.state.credit
+    _defineProperty(_assertThisInitialized(_this), "updateDebtorFields", function () {
+      if (!_this.state.evenly) {
+        _this.setState({
+          debtors: _this.state.debtors,
+          evenly: _this.state.evenly,
+          credit: _this.state.credit
         });
 
         return;
@@ -912,59 +1071,96 @@ function (_React$Component2) {
 
       var credit = document.getElementById('credit').value;
 
-      _this2.setState({
-        debtors: _this2.state.debtors,
-        evenly: _this2.state.evenly,
+      _this.setState({
+        debtors: _this.state.debtors,
+        evenly: _this.state.evenly,
         credit: parseFloat(credit)
       });
     });
 
-    _defineProperty(_assertThisInitialized(_this2), "addDropdown", function (e) {
-      counter++;
+    _defineProperty(_assertThisInitialized(_this), "addDropdown", function (e) {
+      var debtors = _this.state.debtors;
+      debtors.set(Object(uuid__WEBPACK_IMPORTED_MODULE_3__["v4"])(), {});
 
-      _this2.setState({
-        debtors: [].concat(_toConsumableArray(_this2.state.debtors), [{
-          usersInGroup: _this2.props.usersInGroup,
-          id: counter
-        }]),
-        evenly: _this2.state.evenly,
-        credit: _this2.state.credit
+      _this.setState({
+        debtors: debtors
       });
     });
 
-    _defineProperty(_assertThisInitialized(_this2), "changeSplitMethod", function (e) {
+    _defineProperty(_assertThisInitialized(_this), "changeSplitMethod", function (e) {
       if (e.target.innerText == "Evenly") {
-        _this2.state.evenly = true;
-      } else _this2.state.evenly = false;
+        _this.state.evenly = true;
+      } else _this.state.evenly = false;
 
-      _this2.updateDebtorFields();
+      _this.updateDebtorFields();
     });
 
-    _defineProperty(_assertThisInitialized(_this2), "removeDeptor", function (id) {
-      _this2.setState({
-        credit: _this2.state.credit,
-        evenly: _this2.state.evenly,
-        debtors: _this2.state.debtors.filter(function (debtor) {
-          if (debtor.id != id) return debtor;
-        })
+    _defineProperty(_assertThisInitialized(_this), "removeDeptor", function (debtorComponentId) {
+      var debtors = _this.state.debtors;
+      debtors["delete"](debtorComponentId);
+
+      _this.setState(debtors);
+    });
+
+    _this.state.debtors = new Map();
+
+    _this.state.debtors.set(Object(uuid__WEBPACK_IMPORTED_MODULE_3__["v4"])(), {});
+
+    _this.state.usersInGroup = _this.props.usersInGroup;
+    _this.state.evenly = true;
+    _this.state.credit = 0;
+    document.addEventListener('clear-expense-form', function (e) {
+      // let state = {};
+      $("#expense-form")[0].reset();
+      var debtors = new Map();
+      debtors.set(Object(uuid__WEBPACK_IMPORTED_MODULE_3__["v4"])(), {});
+      var usersInGroup = _this.state.usersInGroup;
+      var evenly = true;
+      var credit = 0;
+      console.log(" let clear the form");
+
+      _this.setState({
+        debtors: debtors,
+        credit: credit,
+        evenly: evenly,
+        usersInGroup: usersInGroup,
+        creditor: undefined
       });
     });
-
-    _this2.state.debtors = [{
-      usersInGroup: _this2.props.usersInGroup,
-      id: 0
-    }];
-    _this2.state.evenly = true;
-    _this2.state.credit = 0;
-    return _this2;
+    return _this;
   }
 
   _createClass(ExpensesForm, [{
     key: "render",
     value: function render() {
-      var _this3 = this;
+      var debtorFields = [];
 
-      return (// <!-- Modal -->
+      var _iterator = _createForOfIteratorHelper(this.state.debtors.keys()),
+          _step;
+
+      try {
+        for (_iterator.s(); !(_step = _iterator.n()).done;) {
+          var key = _step.value;
+          debtorFields.push( /*#__PURE__*/React.createElement(_DebtorComponent_jsx__WEBPACK_IMPORTED_MODULE_2__["default"], {
+            selectDebtor: this.selectDebtor,
+            evenly: this.state.evenly,
+            usersInGroup: this.state.usersInGroup,
+            debtorSelected: this.state.debtors.get(key).debtorSelected,
+            id: key,
+            key: key,
+            debt: this.state.credit / this.state.debtors.size,
+            removeDeptor: this.removeDeptor
+          }, " "));
+        }
+      } catch (err) {
+        _iterator.e(err);
+      } finally {
+        _iterator.f();
+      }
+
+      return (
+        /*#__PURE__*/
+        // <!-- Modal -->
         React.createElement("div", {
           className: "modal fade",
           id: "darkModalForm",
@@ -972,204 +1168,194 @@ function (_React$Component2) {
           role: "dialog",
           "aria-labelledby": "myModalLabel",
           "aria-hidden": "true"
-        }, React.createElement("div", {
+        }, /*#__PURE__*/React.createElement("div", {
           className: "modal-dialog form-dark",
           role: "document"
-        }, React.createElement("div", {
+        }, /*#__PURE__*/React.createElement("div", {
           className: "modal-content card card-image",
           style: {
             backgroundColor: 'burlywood'
           }
-        }, React.createElement("div", {
+        }, /*#__PURE__*/React.createElement("div", {
           className: "text-white rgba-stylish-strong py-5 px-5 z-depth-4"
-        }, React.createElement("div", {
+        }, /*#__PURE__*/React.createElement("div", {
           className: "modal-header text-center pb-4"
-        }, React.createElement("h3", {
+        }, /*#__PURE__*/React.createElement("h3", {
           className: "modal-title w-100 white-text font-weight-bold",
           id: "myModalLabel"
-        }, React.createElement("strong", null, "Create Expense")), React.createElement("button", {
+        }, /*#__PURE__*/React.createElement("strong", null, "Create Expense")), /*#__PURE__*/React.createElement("button", {
           type: "button",
           className: "close white-text",
           "data-dismiss": "modal",
           "aria-label": "Close"
-        }, React.createElement("span", {
+        }, /*#__PURE__*/React.createElement("span", {
           "aria-hidden": "true"
-        }, "\xD7"))), React.createElement("div", {
+        }, "\xD7"))), /*#__PURE__*/React.createElement("div", {
           className: "modal-body"
-        }, React.createElement("form", {
+        }, /*#__PURE__*/React.createElement("form", {
           id: "expense-form",
           method: "POST",
           onSubmit: this.submitForm
-        }, React.createElement("div", {
+        }, /*#__PURE__*/React.createElement("div", {
           className: "md-form mb-4"
-        }, React.createElement("div", {
+        }, /*#__PURE__*/React.createElement("div", {
           className: "input-group form-group"
-        }, React.createElement("div", {
+        }, /*#__PURE__*/React.createElement("div", {
           className: "input-group-prepend"
-        }, React.createElement("button", {
+        }, /*#__PURE__*/React.createElement("button", {
           className: "btn btn-dark dropdown-toggle btn-block",
           type: "button",
           "data-toggle": "dropdown",
           "aria-haspopup": "true",
           "aria-expanded": "false"
-        }, "Creditor"), React.createElement("div", {
+        }, "Creditor"), /*#__PURE__*/React.createElement("div", {
           className: "dropdown-menu"
-        }, React.createElement(User_drop_down_list, {
+        }, /*#__PURE__*/React.createElement(_User_drop_down_listComponent_jsx__WEBPACK_IMPORTED_MODULE_1__["default"], {
           users: this.props.usersInGroup,
           selectCreditor: this.selectCreditor,
           selectMethod: "Creditor"
-        }))), React.createElement("input", {
+        }))), /*#__PURE__*/React.createElement("input", {
           readOnly: true,
           name: "creditor",
           id: "creditor-field",
           type: "text",
           className: "form-control",
           "aria-label": "Text input with dropdown button",
-          value: this.state.creditor !== undefined ? this.state.creditor.creditorName : console.log('no creditor selected'),
+          value: this.state.creditor !== undefined ? this.state.creditor.creditorName : '',
           placeholder: "Creditor"
-        }), React.createElement("input", {
+        }), /*#__PURE__*/React.createElement("input", {
           type: "hidden",
           id: "creditor-id",
           name: "creditorId",
           value: this.state.creditor === undefined ? "Creditor" : this.state.creditor.creditorId
-        }))), React.createElement("div", {
+        }))), /*#__PURE__*/React.createElement("div", {
           className: "md-form mb-4"
-        }, React.createElement("div", {
+        }, /*#__PURE__*/React.createElement("div", {
           className: "input-group form-group"
-        }, React.createElement("div", {
+        }, /*#__PURE__*/React.createElement("div", {
           className: "input-group-prepend"
-        }, React.createElement("button", {
+        }, /*#__PURE__*/React.createElement("button", {
           className: "btn btn-dark btn-block",
           type: "button"
-        }, "Credit")), React.createElement("input", {
+        }, "Credit")), /*#__PURE__*/React.createElement("input", {
           id: "credit",
           autoComplete: "off",
           name: "credit",
           onChange: this.updateCreditField,
+          value: this.state.credit == 0 ? '' : this.state.credit,
           type: "number",
           step: "0.01",
           className: "form-control",
           placeholder: "$$$"
-        }))), React.createElement("div", {
+        }))), /*#__PURE__*/React.createElement("div", {
           className: "md-form mb-4"
-        }, React.createElement("div", {
+        }, /*#__PURE__*/React.createElement("div", {
           className: "input-group form-group"
-        }, React.createElement("div", {
+        }, /*#__PURE__*/React.createElement("div", {
           className: "input-group-prepend"
-        }, React.createElement("button", {
+        }, /*#__PURE__*/React.createElement("button", {
           className: "btn btn-dark dropdown-toggle btn-block",
           type: "button",
           "data-toggle": "dropdown",
           "aria-haspopup": "true",
           "aria-expanded": "false"
-        }, "Method"), React.createElement("div", {
+        }, "Method"), /*#__PURE__*/React.createElement("div", {
           id: "method-payment-dropdown",
           className: "dropdown-menu"
-        }, React.createElement("a", {
+        }, /*#__PURE__*/React.createElement("a", {
           id: "split-evenly",
           onClick: this.changeSplitMethod,
           className: "dropdown-item"
-        }, "Evenly"), React.createElement("a", {
+        }, "Evenly"), /*#__PURE__*/React.createElement("a", {
           id: "split-manual",
           onClick: this.changeSplitMethod,
           className: "dropdown-item"
-        }, "Manual"))), React.createElement("input", {
+        }, "Manual"))), /*#__PURE__*/React.createElement("input", {
           readOnly: true,
           value: this.state.evenly == true ? "Evenly" : "Manual",
           id: "method-payment-field",
           type: "text",
           className: "form-control",
           "aria-label": "Text input with dropdown button"
-        }), React.createElement("div", {
+        }), /*#__PURE__*/React.createElement("div", {
           id: "link-div"
-        }, React.createElement("a", {
+        }, /*#__PURE__*/React.createElement("a", {
           id: "add-debtor-link",
           href: "#"
-        }, " ", React.createElement("i", {
+        }, " ", /*#__PURE__*/React.createElement("i", {
           className: "fa fa-user-plus ml-2 mt-2 ",
           onClick: this.addDropdown,
           style: {
             color: 'black'
           }
-        }), " ")))), React.createElement("div", {
+        }), " ")))), /*#__PURE__*/React.createElement("div", {
           id: "debtors-group"
-        }, this.state.debtors.map(function (elem, index) {
-          return React.createElement(Debtor, {
-            selectDebtor: _this3.selectDebtor,
-            evenly: _this3.state.evenly,
-            usersInGroup: elem.usersInGroup,
-            debtorSelected: elem.debtorSelected,
-            id: elem.id,
-            key: elem.id,
-            debt: _this3.state.credit / _this3.state.debtors.length,
-            removeDeptor: _this3.removeDeptor
-          }, " ");
-        })), React.createElement("div", {
+        }, debtorFields), /*#__PURE__*/React.createElement("div", {
           className: "mb-4"
-        }, React.createElement("div", {
+        }, /*#__PURE__*/React.createElement("div", {
           className: "input-group form-group"
-        }, React.createElement("div", {
+        }, /*#__PURE__*/React.createElement("div", {
           className: "input-group-prepend"
-        }, React.createElement("button", {
+        }, /*#__PURE__*/React.createElement("button", {
           className: "btn btn-dark btn-block",
           type: "button"
-        }, "Date")), React.createElement("input", {
+        }, "Date")), /*#__PURE__*/React.createElement("input", {
           name: "date",
           type: "date",
           className: "form-control",
           onFocus: "(this.type='date')",
           placeholder: "When"
-        }))), React.createElement("div", {
+        }))), /*#__PURE__*/React.createElement("div", {
           className: "mb-5"
-        }, React.createElement("div", {
+        }, /*#__PURE__*/React.createElement("div", {
           className: "input-group form-group"
-        }, React.createElement("div", {
+        }, /*#__PURE__*/React.createElement("div", {
           className: "input-group-prepend"
-        }, React.createElement("button", {
+        }, /*#__PURE__*/React.createElement("button", {
           className: "btn btn-dark btn-block",
           type: "button"
-        }, "Info")), React.createElement("input", {
+        }, "Info")), /*#__PURE__*/React.createElement("input", {
           name: "desc",
           type: "text",
           className: "form-control",
           autoComplete: "off",
           placeholder: "Description"
-        }))), React.createElement("div", {
+        }))), /*#__PURE__*/React.createElement("div", {
           className: "row d-flex align-items-center mb-4"
-        }, React.createElement("div", {
+        }, /*#__PURE__*/React.createElement("div", {
           className: "text-center mb-3 col-md-12"
-        }, React.createElement("button", {
+        }, /*#__PURE__*/React.createElement("button", {
           type: "submit",
           className: "btn btn-success btn-block btn-rounded z-depth-1"
-        }, "Confirm")))))), React.createElement("div", {
+        }, "Confirm")))))), /*#__PURE__*/React.createElement("div", {
           id: "alert-warning",
           style: {
             display: 'none'
           },
           className: "modal-footer"
-        }, React.createElement("div", {
+        }, /*#__PURE__*/React.createElement("div", {
           className: "alert alert-warning col-12",
           role: "alert",
           style: {
             paddingBottom: 0
           }
-        }, React.createElement("p", {
+        }, /*#__PURE__*/React.createElement("p", {
           className: "text-center "
-        }, React.createElement("strong", null, "Warning!"), " you dont need any more debtors, trust me! ;)"))), React.createElement("div", {
-          id: "alert-success",
+        }, /*#__PURE__*/React.createElement("strong", null, "Warning!"), " you dont need any more debtors, trust me! ;)"))), /*#__PURE__*/React.createElement("div", {
+          id: "created-expense-success",
           style: {
             display: 'none'
           },
           className: "modal-footer"
-        }, React.createElement("div", {
+        }, /*#__PURE__*/React.createElement("div", {
           className: "alert alert-success col-12",
           role: "alert",
           style: {
             paddingBottom: 0
           }
-        }, React.createElement("p", {
+        }, /*#__PURE__*/React.createElement("p", {
           className: "text-center "
-        }, React.createElement("strong", null, "Success"), " Expense created! Hooray!"))))))
+        }, /*#__PURE__*/React.createElement("strong", null, "Success"), " Expense created! Hooray!"))))))
       ); // {/* <!-- Modal -->) */}
     }
   }]);
@@ -1179,85 +1365,71 @@ function (_React$Component2) {
 
 
 
-var User_drop_down_item =
-/*#__PURE__*/
-function (_React$Component3) {
-  _inherits(User_drop_down_item, _React$Component3);
+/***/ }),
+/* 16 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
 
-  function User_drop_down_item() {
-    var _getPrototypeOf3;
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return User_drop_down_list; });
+/* harmony import */ var _User_drop_down_itemComponent_jsx__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(17);
+function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
-    var _this4;
+function _createForOfIteratorHelper(o) { if (typeof Symbol === "undefined" || o[Symbol.iterator] == null) { if (Array.isArray(o) || (o = _unsupportedIterableToArray(o))) { var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var it, normalCompletion = true, didErr = false, err; return { s: function s() { it = o[Symbol.iterator](); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
 
-    _classCallCheck(this, User_drop_down_item);
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(n); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
 
-    for (var _len2 = arguments.length, args = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
-      args[_key2] = arguments[_key2];
-    }
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
 
-    _this4 = _possibleConstructorReturn(this, (_getPrototypeOf3 = _getPrototypeOf(User_drop_down_item)).call.apply(_getPrototypeOf3, [this].concat(args)));
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-    _defineProperty(_assertThisInitialized(_this4), "selectDebtor", function () {
-      _this4.props.selectDebtor(_this4.props.itemId);
-    });
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
 
-    _defineProperty(_assertThisInitialized(_this4), "selectCreditor", function () {
-      _this4.props.selectCreditor(_this4.props.itemId);
-    });
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
 
-    return _this4;
-  }
+function _createSuper(Derived) { return function () { var Super = _getPrototypeOf(Derived), result; if (_isNativeReflectConstruct()) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
 
-  _createClass(User_drop_down_item, [{
-    key: "render",
-    value: function render() {
-      var onClickFunc;
+function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
 
-      if (this.props.selectDebtor) {
-        onClickFunc = this.selectDebtor;
-      } else if (this.props.selectCreditor) {
-        onClickFunc = this.selectCreditor;
-      } // map={this.props.mapping}
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Date.prototype.toString.call(Reflect.construct(Date, [], function () {})); return true; } catch (e) { return false; } }
+
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
+
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
 
-      return React.createElement("a", {
-        className: "dropdown-item",
-        onClick: onClickFunc,
-        href: "#"
-      }, this.props.userFirstName);
-    }
-  }]);
 
-  return User_drop_down_item;
-}(React.Component);
+var User_drop_down_list = /*#__PURE__*/function (_React$Component) {
+  _inherits(User_drop_down_list, _React$Component);
 
-var User_drop_down_list =
-/*#__PURE__*/
-function (_React$Component4) {
-  _inherits(User_drop_down_list, _React$Component4);
+  var _super = _createSuper(User_drop_down_list);
 
   function User_drop_down_list() {
-    var _getPrototypeOf4;
-
-    var _this5;
+    var _this;
 
     _classCallCheck(this, User_drop_down_list);
 
-    for (var _len3 = arguments.length, args = new Array(_len3), _key3 = 0; _key3 < _len3; _key3++) {
-      args[_key3] = arguments[_key3];
+    for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+      args[_key] = arguments[_key];
     }
 
-    _this5 = _possibleConstructorReturn(this, (_getPrototypeOf4 = _getPrototypeOf(User_drop_down_list)).call.apply(_getPrototypeOf4, [this].concat(args)));
+    _this = _super.call.apply(_super, [this].concat(args));
 
-    _defineProperty(_assertThisInitialized(_this5), "selectDebtor", function (dropDownId) {
-      _this5.props.selectDebtor(dropDownId);
+    _defineProperty(_assertThisInitialized(_this), "selectDebtor", function (dropDownId) {
+      _this.props.selectDebtor(dropDownId);
     });
 
-    _defineProperty(_assertThisInitialized(_this5), "selectCreditor", function (dropDownId) {
-      _this5.props.selectCreditor(dropDownId);
+    _defineProperty(_assertThisInitialized(_this), "selectCreditor", function (dropDownId) {
+      _this.props.selectCreditor(dropDownId);
     });
 
-    return _this5;
+    return _this;
   }
 
   _createClass(User_drop_down_list, [{
@@ -1274,31 +1446,266 @@ function (_React$Component4) {
         select = "selectCreditor";
       }
 
-      var userNamesInGroup = this.props.users;
-      var dropDownList = [];
+      var usersInGroup = this.props.users;
+      var dropDownList = []; // for (let key of Object.keys(userNamesInGroup)) {
+      //     // mapping={index} 
+      //     let dropDownItem = <User_drop_down_item selectDebtor={select == "selectDebtor" ? onClickFunc : null} selectCreditor={select == "selectCreditor" ? onClickFunc : null} userFirstName={userNamesInGroup[key].firstName} key={key} itemId={key} inputFieldId={this.props.inputFieldId} hiddenId={this.props.hiddenId} />
+      //     dropDownList.push(dropDownItem);
+      // }
 
-      for (var _i3 = 0, _Object$keys3 = Object.keys(userNamesInGroup); _i3 < _Object$keys3.length; _i3++) {
-        var key = _Object$keys3[_i3];
-        // mapping={index} 
-        var dropDownItem = React.createElement(User_drop_down_item, {
-          selectDebtor: select == "selectDebtor" ? onClickFunc : null,
-          selectCreditor: select == "selectCreditor" ? onClickFunc : null,
-          userFirstName: userNamesInGroup[key].firstName,
-          key: key,
-          itemId: key,
-          inputFieldId: this.props.inputFieldId,
-          hiddenId: this.props.hiddenId
-        });
-        dropDownList.push(dropDownItem);
+      var _iterator = _createForOfIteratorHelper(usersInGroup.keys()),
+          _step;
+
+      try {
+        for (_iterator.s(); !(_step = _iterator.n()).done;) {
+          var key = _step.value;
+          dropDownList.push( /*#__PURE__*/React.createElement(_User_drop_down_itemComponent_jsx__WEBPACK_IMPORTED_MODULE_0__["default"], {
+            selectDebtor: select == "selectDebtor" ? onClickFunc : null,
+            selectCreditor: select == "selectCreditor" ? onClickFunc : null,
+            userFirstName: usersInGroup.get(key).firstName,
+            key: key,
+            itemId: key
+          }));
+        } // inputFieldId={this.props.inputFieldId} hiddenId={this.props.hiddenId}
+
+      } catch (err) {
+        _iterator.e(err);
+      } finally {
+        _iterator.f();
       }
 
-      return React.createElement(React.Fragment, null, " ", dropDownList, " ");
+      return /*#__PURE__*/React.createElement(React.Fragment, null, " ", dropDownList, " ");
     }
   }]);
 
   return User_drop_down_list;
 }(React.Component);
 
-/***/ })
 
-/******/ });
+
+/***/ }),
+/* 17 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return User_drop_down_item; });
+function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+function _createSuper(Derived) { return function () { var Super = _getPrototypeOf(Derived), result; if (_isNativeReflectConstruct()) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
+
+function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
+
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Date.prototype.toString.call(Reflect.construct(Date, [], function () {})); return true; } catch (e) { return false; } }
+
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
+
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+var User_drop_down_item = /*#__PURE__*/function (_React$Component) {
+  _inherits(User_drop_down_item, _React$Component);
+
+  var _super = _createSuper(User_drop_down_item);
+
+  function User_drop_down_item() {
+    var _this;
+
+    _classCallCheck(this, User_drop_down_item);
+
+    for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+      args[_key] = arguments[_key];
+    }
+
+    _this = _super.call.apply(_super, [this].concat(args));
+
+    _defineProperty(_assertThisInitialized(_this), "selectDebtor", function () {
+      _this.props.selectDebtor(_this.props.itemId);
+    });
+
+    _defineProperty(_assertThisInitialized(_this), "selectCreditor", function () {
+      _this.props.selectCreditor(_this.props.itemId);
+    });
+
+    return _this;
+  }
+
+  _createClass(User_drop_down_item, [{
+    key: "render",
+    value: function render() {
+      var onClickFunc;
+
+      if (this.props.selectDebtor) {
+        onClickFunc = this.selectDebtor;
+      } else if (this.props.selectCreditor) {
+        onClickFunc = this.selectCreditor;
+      } // map={this.props.mapping}
+
+
+      return /*#__PURE__*/React.createElement("a", {
+        className: "dropdown-item",
+        onClick: onClickFunc,
+        href: "#"
+      }, this.props.userFirstName);
+    }
+  }]);
+
+  return User_drop_down_item;
+}(React.Component);
+
+
+
+/***/ }),
+/* 18 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return Debtor; });
+/* harmony import */ var _User_drop_down_listComponent_jsx__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(16);
+function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+function _createSuper(Derived) { return function () { var Super = _getPrototypeOf(Derived), result; if (_isNativeReflectConstruct()) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
+
+function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
+
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Date.prototype.toString.call(Reflect.construct(Date, [], function () {})); return true; } catch (e) { return false; } }
+
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
+
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+// React Component to create the debtors row in the create expense form 
+// depends on User_drop_down_list and User_drop_down_item
+
+
+var Debtor = /*#__PURE__*/function (_React$Component) {
+  _inherits(Debtor, _React$Component);
+
+  var _super = _createSuper(Debtor);
+
+  function Debtor() {
+    var _this;
+
+    _classCallCheck(this, Debtor);
+
+    for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+      args[_key] = arguments[_key];
+    }
+
+    _this = _super.call.apply(_super, [this].concat(args));
+
+    _defineProperty(_assertThisInitialized(_this), "removeDeptor", function (e) {
+      _this.props.removeDeptor(_this.props.id);
+    });
+
+    _defineProperty(_assertThisInitialized(_this), "onChange", function (e) {
+      console.log('event fired', e); // this.props.debt = 4444;
+    });
+
+    _defineProperty(_assertThisInitialized(_this), "selectDebtor", function (dropDownId) {
+      _this.props.selectDebtor(dropDownId, _this.props.id);
+    });
+
+    return _this;
+  }
+
+  _createClass(Debtor, [{
+    key: "render",
+    value: function render() {
+      var isDebtorSelected;
+      var debtorName;
+
+      if (this.props.debtorSelected === undefined) {
+        isDebtorSelected = false;
+      } else {
+        var usersInGroup = this.props.usersInGroup;
+        debtorName = usersInGroup.get(this.props.debtorSelected).firstName;
+
+        if (debtorName != undefined) {
+          isDebtorSelected = true;
+        }
+      }
+
+      return /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+        className: "md-form mb-4"
+      }, /*#__PURE__*/React.createElement("div", {
+        className: "input-group form-group"
+      }, /*#__PURE__*/React.createElement("div", {
+        className: "input-group-prepend"
+      }, /*#__PURE__*/React.createElement("div", {
+        className: "input-group-prepend"
+      }, /*#__PURE__*/React.createElement("button", {
+        className: "btn btn-dark dropdown-toggle btn-block",
+        type: "button",
+        "data-toggle": "dropdown",
+        "aria-haspopup": "true",
+        "aria-expanded": "false"
+      }, "Debtor"), /*#__PURE__*/React.createElement("div", {
+        className: "dropdown-menu"
+      }, /*#__PURE__*/React.createElement(_User_drop_down_listComponent_jsx__WEBPACK_IMPORTED_MODULE_0__["default"], {
+        users: this.props.usersInGroup,
+        selectDebtor: this.selectDebtor,
+        selectMethod: "Debtor"
+      })))), /*#__PURE__*/React.createElement("input", {
+        readOnly: true,
+        name: "debtor",
+        type: "text",
+        className: "form-control",
+        placeholder: "Bitch",
+        value: this.props.isDebtorSelected === undefined ? debtorName : "Bitch"
+      }), /*#__PURE__*/React.createElement("input", {
+        type: "number",
+        className: "form-control",
+        name: "debt",
+        onChange: this.onChange,
+        readOnly: this.props.evenly,
+        value: this.props.evenly == true ? this.props.debt.toFixed(2) : console.log('hey'),
+        placeholder: "Debt"
+      }), /*#__PURE__*/React.createElement("input", {
+        type: "hidden",
+        name: "debtorId",
+        value: this.props.debtorSelected === undefined ? null : this.props.debtorSelected
+      }), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("a", {
+        href: "#"
+      }, "  ", /*#__PURE__*/React.createElement("i", {
+        className: "fa fa-times ml-2 mt-2",
+        onClick: this.removeDeptor,
+        "aria-hidden": "true",
+        style: {
+          color: 'black'
+        }
+      }), " ")))), " ");
+    }
+  }]);
+
+  return Debtor;
+}(React.Component);
+
+
+
+/***/ })
+/******/ ]);

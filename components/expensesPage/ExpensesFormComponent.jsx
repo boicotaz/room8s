@@ -2,67 +2,13 @@
 
 import { expensesAjax } from "../../ajax/expensesAjax.js";
 // import { clientSocket } from "../../js/socketClient";
+import User_drop_down_list from "./User_drop_down_listComponent.jsx"
+import Debtor from "./DebtorComponent.jsx"
+import { v4 as uuidv4 } from 'uuid';
 
-// React Component to create the debtors row in the create expense form 
-// depends on User_drop_down_list and User_drop_down_item
-class Debtor extends React.Component {
-
-    removeDeptor = (e) => {
-        this.props.removeDeptor(this.props.id);
-    }
-
-    onChange = (e) => {
-        console.log('event fired', e);
-        // this.props.debt = 4444;
-    }
-
-    selectDebtor = (dropDownId) => {
-        this.props.selectDebtor(dropDownId, this.props.id);
-    }
-
-    render() {
-        let isDebtorSelected;
-        let debtorName;
-        if (this.props.debtorSelected === undefined) {
-            isDebtorSelected = false;
-        }
-        else {
-            let userNamesInGroup = this.props.usersInGroup;
-
-            for (let key of Object.keys(userNamesInGroup)) {
-                if (key == this.props.debtorSelected) {
-                    debtorName = userNamesInGroup[key].firstName;
-                    isDebtorSelected = true;
-                }
-            }
-
-        }
-
-        return (<React.Fragment>
-            <div className="md-form mb-4">
-                <div className="input-group form-group">
-                    <div className="input-group-prepend">
-                        <div className="input-group-prepend">
-                            <button className="btn btn-dark dropdown-toggle btn-block" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Debtor</button>
-                            <div className="dropdown-menu">
-                                <User_drop_down_list users={this.props.usersInGroup} selectDebtor={this.selectDebtor} selectMethod={"Debtor"} />
-                            </div>
-                        </div>
-                    </div>
-                    <input readOnly={true} name="debtor" type="text" className="form-control" placeholder="Bitch" value={this.props.isDebtorSelected === undefined ? debtorName : "Bitch"} />
-                    <input type="number" className="form-control" name="debt" onChange={this.onChange} readOnly={this.props.evenly} value={this.props.evenly == true ? this.props.debt.toFixed(2) : console.log('hey')} placeholder="Debt" />
-                    <input type="hidden" name="debtorId" value={this.props.debtorSelected === undefined ? null : this.props.debtorSelected} />
-                    <div >
-                        <a href="#">  <i className="fa fa-times ml-2 mt-2" onClick={this.removeDeptor} aria-hidden="true" style={{ color: 'black' }} ></i> </a>
-                    </div>
-                </div>
-            </div> </React.Fragment>)
-    }
-
-}
 
 export default class ExpensesForm extends React.Component {
-    counter = 0;
+
     state = {
     }
 
@@ -97,35 +43,32 @@ export default class ExpensesForm extends React.Component {
 
         console.log("THE NEW EXPENSE IS:", newExpense);
         expensesAjax.storeNewExpense(postFormData, newExpense, socket);
+
     }
 
 
     selectCreditor = (dropDownId) => {
 
         let creditorName, creditorId;
-        let userNamesInGroup = this.props.usersInGroup;
+        let usersInGroup = this.state.usersInGroup;
 
-        for (let key of Object.keys(userNamesInGroup)) {
-            if (key == dropDownId) {
-                creditorName = userNamesInGroup[key].firstName;
-                creditorId = key;
-            }
-        }
+        creditorName = usersInGroup.get(dropDownId).firstName;
+        creditorId = dropDownId;
+
 
         this.setState({ creditor: { creditorName: creditorName, creditorId: creditorId } })
     }
 
-    selectDebtor = (dropDownId, debtorId) => {
+    /**
+     * @param {number}  dropDownId - it corresponds to userId
+     * @param {number} debtorComponentId - it corresponds to debtor component id, which is a uuidv4
+     */
+    selectDebtor = (dropDownId, debtorComponentId) => {
 
-        let debtors = this.state.debtors.map((elem, index) => {
-            if (elem.id == debtorId) {
-                return { ...elem, debtorSelected: dropDownId }
-            }
-            else {
-                return elem;
-            }
-
-        })
+        let debtors = this.state.debtors;
+        let debtorDetails = debtors.get(debtorComponentId);
+        debtorDetails.debtorSelected = dropDownId;
+        debtors.set(debtorComponentId, debtorDetails);
         this.setState({ debtors });
     }
 
@@ -143,8 +86,9 @@ export default class ExpensesForm extends React.Component {
 
     }
     addDropdown = (e) => {
-        counter++;
-        this.setState({ debtors: [...this.state.debtors, { usersInGroup: this.props.usersInGroup, id: counter }], evenly: this.state.evenly, credit: this.state.credit });
+        let debtors = this.state.debtors;
+        debtors.set(uuidv4(), {});
+        this.setState({ debtors: debtors });
     }
 
     changeSplitMethod = (e) => {
@@ -156,21 +100,43 @@ export default class ExpensesForm extends React.Component {
         this.updateDebtorFields();
     }
 
-    removeDeptor = (id) => {
-        this.setState({
-            credit: this.state.credit, evenly: this.state.evenly, debtors: this.state.debtors.filter(debtor => {
-                if (debtor.id != id) return debtor;
-            })
-        })
+    /**
+     * @param {number} debtorComponentId - it corresponds to debtor component id, which is a uuidv4
+     */
+    removeDeptor = (debtorComponentId) => {
+        let debtors = this.state.debtors;
+        debtors.delete(debtorComponentId);
+        this.setState(debtors);
     }
 
     constructor(props) {
         super(props);
-        this.state.debtors = [{ usersInGroup: this.props.usersInGroup, id: 0 }]
+        this.state.debtors = new Map();
+        this.state.debtors.set(uuidv4(), {});
+        this.state.usersInGroup = this.props.usersInGroup;
         this.state.evenly = true;
         this.state.credit = 0;
+
+        document.addEventListener('clear-expense-form', e => {
+            // let state = {};
+            $("#expense-form")[0].reset();
+            let debtors = new Map();
+            debtors.set(uuidv4(), {});
+            let usersInGroup = this.state.usersInGroup;
+            let evenly = true;
+            let credit = 0;
+            console.log(" let clear the form");
+            this.setState({ debtors: debtors, credit: credit, evenly: evenly, usersInGroup: usersInGroup, creditor: undefined });
+        });
+
+
     }
     render() {
+        let debtorFields = [];
+
+        for (let key of this.state.debtors.keys()) {
+            debtorFields.push(<Debtor selectDebtor={this.selectDebtor} evenly={this.state.evenly} usersInGroup={this.state.usersInGroup} debtorSelected={this.state.debtors.get(key).debtorSelected} id={key} key={key} debt={(this.state.credit / this.state.debtors.size)} removeDeptor={this.removeDeptor}> </Debtor>)
+        }
         return (
             // <!-- Modal -->
             <div className="modal fade" id="darkModalForm" tabIndex="-1" role="dialog" aria-labelledby="myModalLabel"
@@ -203,7 +169,7 @@ export default class ExpensesForm extends React.Component {
                                             </div>
                                             <input readOnly={true} name="creditor" id="creditor-field" type="text"
                                                 className="form-control" aria-label="Text input with dropdown button"
-                                                value={this.state.creditor !== undefined ? this.state.creditor.creditorName : console.log('no creditor selected')} placeholder="Creditor" />
+                                                value={this.state.creditor !== undefined ? this.state.creditor.creditorName : ''} placeholder="Creditor" />
                                             <input type="hidden" id="creditor-id" name="creditorId" value={this.state.creditor === undefined ? "Creditor" : this.state.creditor.creditorId} />
                                         </div>
                                     </div>
@@ -213,7 +179,7 @@ export default class ExpensesForm extends React.Component {
                                             <div className="input-group-prepend">
                                                 <button className="btn btn-dark btn-block" type="button">Credit</button>
                                             </div>
-                                            <input id="credit" autoComplete="off" name="credit" onChange={this.updateCreditField} type="number" step="0.01"
+                                            <input id="credit" autoComplete="off" name="credit" onChange={this.updateCreditField} value={this.state.credit == 0 ? '' : this.state.credit} type="number" step="0.01"
                                                 className="form-control" placeholder="$$$" />
                                         </div>
                                     </div>
@@ -242,7 +208,8 @@ export default class ExpensesForm extends React.Component {
                                     </div>
 
                                     <div id="debtors-group">
-                                        {this.state.debtors.map((elem, index) => { return <Debtor selectDebtor={this.selectDebtor} evenly={this.state.evenly} usersInGroup={elem.usersInGroup} debtorSelected={elem.debtorSelected} id={elem.id} key={elem.id} debt={(this.state.credit / this.state.debtors.length)} removeDeptor={this.removeDeptor}> </Debtor> })}
+                                        {debtorFields}
+
                                     </div>
 
                                     <div className="mb-4">
@@ -288,7 +255,7 @@ export default class ExpensesForm extends React.Component {
                             </div>
                         </div>
 
-                        <div id="alert-success" style={{ display: 'none' }} className="modal-footer">
+                        <div id="created-expense-success" style={{ display: 'none' }} className="modal-footer">
                             <div className="alert alert-success col-12" role="alert" style={{ paddingBottom: 0 }}>
                                 <p className='text-center '>
                                     <strong>Success</strong> Expense created! Hooray!
@@ -306,58 +273,4 @@ export default class ExpensesForm extends React.Component {
 }
 
 
-class User_drop_down_item extends React.Component {
-    render() {
-        let onClickFunc;
-        if (this.props.selectDebtor) {
-            onClickFunc = this.selectDebtor;
-        }
-        else if (this.props.selectCreditor) {
-            onClickFunc = this.selectCreditor;
-        }
-        // map={this.props.mapping}
-        return (<a className="dropdown-item" onClick={onClickFunc} href="#">{this.props.userFirstName}</a>);
-    }
 
-    selectDebtor = () => {
-        this.props.selectDebtor(this.props.itemId);
-    }
-
-    selectCreditor = () => {
-        this.props.selectCreditor(this.props.itemId);
-    }
-}
-
-class User_drop_down_list extends React.Component {
-    selectDebtor = (dropDownId) => {
-        this.props.selectDebtor(dropDownId);
-    }
-
-    selectCreditor = (dropDownId) => {
-        this.props.selectCreditor(dropDownId);
-    }
-
-    render() {
-
-        let onClickFunc;
-        let select;
-        if (this.props.selectMethod == "Creditor") {
-            onClickFunc = this.selectCreditor;
-            select = "selectDebtor";
-        }
-        else if (this.props.selectMethod == "Debtor") {
-            onClickFunc = this.selectDebtor;
-            select = "selectCreditor"
-        }
-
-        let userNamesInGroup = this.props.users;
-        let dropDownList = [];
-        for (let key of Object.keys(userNamesInGroup)) {
-            // mapping={index} 
-            let dropDownItem = <User_drop_down_item selectDebtor={select == "selectDebtor" ? onClickFunc : null} selectCreditor={select == "selectCreditor" ? onClickFunc : null} userFirstName={userNamesInGroup[key].firstName} key={key} itemId={key} inputFieldId={this.props.inputFieldId} hiddenId={this.props.hiddenId} />
-            dropDownList.push(dropDownItem);
-        }
-
-        return (<React.Fragment> {dropDownList} </React.Fragment>)
-    }
-}

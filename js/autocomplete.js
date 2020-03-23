@@ -58,11 +58,17 @@ let userAutocomplete = function (userAjax, matcherFunction) {
 
 let groupUserAutocomplete = function (userAjax, groupAjax, matcherFunction) {
     // create add user in group search bar
-    Promise.all([userAjax.getAllUsers(), groupAjax.getUsersInGroup()]).then(function (usersInfo) {
+    Promise.all([userAjax.getAllUsers(), grouDetailsAjax.getUsersInGroupDetails()]).then(function (usersInfo) {
 
-        let [allUsers, groupUsers] = usersInfo;
-
-        let idsInGroup = groupUsers.map(elem => elem[1]);
+        let [allUsers, groupUsersDetails] = usersInfo;
+        
+        console.log(groupUsersDetails);
+        let idsInGroup = [];
+        for (let key of groupUsersDetails.keys()){
+            let userDetails = groupUsersDetails.get(key);
+            idsInGroup.push(userDetails.userId);
+        }
+        // let idsInGroup = groupUsers.map(user => elem[1]);
 
         // suggest users that are not already in the group
         let correctUsers = allUsers.filter((elem) => {

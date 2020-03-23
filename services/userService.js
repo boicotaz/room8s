@@ -44,6 +44,10 @@ class UserService {
         return this.userModel.getAllUsers();
     }
 
+    updateProfImg(userId, profileImgFlag) {
+        return this.userModel.updateProfImg(userId, profileImgFlag);
+    }
+
     createFullNameIdArray(users) {
         return users.map(user => {
             return { id: user.getUserId(), fullname: user.getUserFirstName() + " " + user.getUserLastName() }

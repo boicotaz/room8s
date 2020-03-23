@@ -12,7 +12,8 @@ export default class ExpensesPage extends React.Component {
         this.state.view = this.props.view;
         this.state.expenses = this.props.expenses;
         this.state.totals = this.props.totals;
-        this.state.userNamesInGroup = this.props.userNamesInGroup;
+        this.state.usersInGroupDetails = this.props.usersInGroupDetails;
+        console.log('current expense is ___', this.state.expenses);
     }
     componentDidMount() {
         $("#content-container").fadeIn('slow');
@@ -60,7 +61,7 @@ export default class ExpensesPage extends React.Component {
             <div id="expense-table-id" className="row">
                 <div className='col-12 pr-0'>
                     <table id='expenses-table' className="table table-hover table-dark ">
-                        <ExpensesTable expenses={this.state.expenses} totals={this.state.totals} userNamesInGroup={this.state.userNamesInGroup} view={this.state.view}></ExpensesTable>
+                        <ExpensesTable expenses={this.state.expenses} totals={this.state.totals} userNamesInGroup={this.state.userNamesInGroup} usersInGroupDetails={this.state.usersInGroupDetails} view={this.state.view}></ExpensesTable>
                     </table>
                 </div>
             </div>
@@ -88,11 +89,12 @@ class ExpensesTable extends React.Component {
         this.state.totals = this.props.totals;
         this.state.view = this.props.view;
         this.state.userNamesInGroup = this.props.userNamesInGroup;
+        this.state.usersInGroupDetails = this.props.usersInGroupDetails;
         // console.log("is the constructor called each time tho?");
         document.addEventListener('new-expense', e => {
             console.log("THE DATA ARE!!!", e.detail);
             expensesAjax.getExpenseTotalsDataAjax().then(totalDebtsForEachUser => {
-                let newExpense = expensesAjax.processData(e.detail, this.state.userNamesInGroup);
+                let newExpense = expensesAjax.processData(e.detail, this.state.usersInGroupDetails);
                 console.log("the processsed new Expense is_______________________________", newExpense);
                 this.setState({ expenses: [...this.state.expenses, newExpense], totals: totalDebtsForEachUser });
             })

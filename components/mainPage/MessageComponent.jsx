@@ -1,3 +1,4 @@
+import { v4 as uuidv4 } from 'uuid';
 export default class Message extends React.Component {
     constructor(props) {
         super(props);
@@ -6,42 +7,45 @@ export default class Message extends React.Component {
         this.state.currentUser = this.props.currentUser;
         this.state.groupDetails = this.props.groupDetails;
         this.state.usersInGroup = this.props.usersInGroup;
+        this.state.userImageChanged = this.props.userImageChanged;
     }
-    processUsersInGroup = (usersInGroup) => {
-        let [firstName, lastName, userId] = usersInGroup;
-        let userNames = new Map();
 
-        usersInGroup.forEach(userName => {
-            userNames.set(userName[2], userName[0] + " " + userName[1]);
-        })
-
-        return userNames;
-    }
 
     render() {
+
+        console.log('message forced to rerender');
         let message = this.state.message;
         let currentUser = this.state.currentUser;
+        let usersDetails = this.state.usersInGroup;
         let renderedMessage;
-        // let date = new Date(message.timeSent).toDateString();
-        // let date = new Date(message.timeSent).toLocaleString().replace(",","").replace(/:.. /," ");
         let date = formatDate(new Date(message.timeSent));
 
-        let userNames = this.processUsersInGroup(this.state.usersInGroup);
-        let popUpText = userNames.get(message.userId) + " - " + date;
+        let popUpText = usersDetails.get(message.userId).firstName + " " + usersDetails.get(message.userId).lastName + " - " + date;
+        let imgPath;
+        if (usersDetails.get(message.userId).profImgExists) {
+            imgPath = "public/uploads/profImg_user" + message.userId + "_.png";
 
+            if (this.state.userImageChanged == message.userId) {
+                imgPath += "?v=" + uuidv4();
+            }
+
+        }
+        else {
+            imgPath = "public/info.png";
+        }
         if (message.userId == currentUser.id) {
             renderedMessage =
 
                 (<React.Fragment>
                     <div className="row mt-2 mb-2 justify-content-end">
-                        <p style={{ display: "inline-block", maxWidth: "70%", overflow: "auto", wordWrap: "break-word" }} className="text-light bg-primary rounded p-2 mr-2">{message.messageText}</p>
+                        <p data-toggle="tooltip" data-placement="right" data-html="false" title={popUpText} style={{ display: "inline-block", maxWidth: "70%", overflow: "auto", wordWrap: "break-word" }} className="text-light bg-primary rounded p-2 mr-2">{message.messageText}</p>
                     </div></React.Fragment >);
         }
         else {
             renderedMessage =
                 (<div className="row mt-2 mb-2">
-                    <img src="/public/info.png" data-toggle="tooltip" data-placement="right" data-html="false"
-                        title={popUpText} className="mr-2 ml-2" style={{ width: '8%', height: '8%' }} alt="UserImg" />
+                    <img src={imgPath} data-toggle="tooltip" data-placement="right" data-html="false"
+                        title={popUpText} className="mr-2 ml-2 img-thumbnail rounded-circle" style={{ width: '8%', height: '8%' }} alt="UserImg" />
                     <p style={{ display: "inline-block", maxWidth: "70%", overflow: "auto", wordWrap: "break-word" }} className="text-light bg-dark rounded  p-2">{message.messageText}</p>
                 </div>);
         }

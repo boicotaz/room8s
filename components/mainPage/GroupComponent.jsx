@@ -7,7 +7,12 @@ export default class Group extends React.Component {
         this.state.usersInGroup = this.props.usersInGroup;
 
         this.state.groupDetails = this.props.groupDetails;
-        let usersInGroupId = this.props.usersInGroup.map(elem => elem[2]);
+        let usersInGroupId = [];
+
+        for (let key of this.state.usersInGroup.keys() ) {
+            usersInGroupId.push(this.state.usersInGroup.get(key).userId);
+        }   
+
         console.log("The log status event is: ", getUserLoggedStatusEvent);
         document.addEventListener('LoggedOffStatus', e => {
             console.log("In group component the logged of userId is_____________________ ", e.detail);
@@ -40,17 +45,23 @@ export default class Group extends React.Component {
     }
 
     render() {
-        console.log("I should be rerendered since a new user in group connected...");
+        console.log("I should be rerendered since a new user in group connected..."); 
+        let groupComponents = [];
+        let usersInGroupDetails = this.state.usersInGroup;
+
+        for ( let key of usersInGroupDetails.keys()){
+            groupComponents.push(<GroupMember userDetails={usersInGroupDetails.get(key)} key={key} groupMemberId={key} loggedInMembersId={this.state.loggedInMembersId} />)
+        } 
+
         return (
+            
             <div id="group-dashboard" className="jumbotron col-3 ml-5">
                 <h1 className="display-6"> <i className="fa fa-home"> </i> {this.state.groupDetails.groupName} </h1>
                 <hr className="my-4" />
                 <p className="lead"> Users in group </p>
                 <div id='usersInGroup' className="lead">
                     {console.log("userInGroup var is_______________________________", this.state.usersInGroup)}
-                    {this.state.usersInGroup.map(user => {
-                        return <GroupMember user={user} key={user[1]} groupMemberId={user[1]} loggedInMembersId={this.state.loggedInMembersId} />
-                    })}
+                    {groupComponents}
                 </div>
                 <button id='add-user' type="button" data-toggle="modal" data-target="#addUserForm"
                     className="btn btn-secondary mt-5"> Add users in
@@ -61,13 +72,14 @@ export default class Group extends React.Component {
 
 class GroupMember extends React.Component {
     render() {
-        let [userFirstName, userLastName, userId] = this.props.user;
+        // let [userFirstName, userLastName, userId] = this.props.user;
+
         let loggedInStatus;
         if (this.props.loggedInMembersId === undefined) {
             loggedInStatus = "btn-danger";
         }
         else {
-            if (this.props.loggedInMembersId.includes(userId)) {
+            if (this.props.loggedInMembersId.includes(this.props.groupMemberId)) {
                 loggedInStatus = "btn-success";
             }
             else {
@@ -75,6 +87,6 @@ class GroupMember extends React.Component {
             }
         }
         // btn-danger
-        return (<a className={"btn btn-lg mr-1 mb-2 " + loggedInStatus} href="#" role="button">{this.props.user[0]}</a>);
+        return (<a className={"btn btn-lg mr-1 mb-2 " + loggedInStatus} href="#" role="button">{this.props.userDetails.firstName}</a>);
     }
 }

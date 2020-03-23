@@ -2,7 +2,7 @@
 <html>
 
 <head>
-    
+
     <%- include("headers.ejs") %>
     <script> var loggedInUser = <%- JSON.stringify(user) %> </script>
 
@@ -34,7 +34,7 @@
                 let notifyGroupForNewMsgEvent = new CustomEvent('newGroupMessageReceived', { detail: newMsg });
                 document.dispatchEvent(notifyGroupForNewMsgEvent);
 
-                let newMessageSoundEvent = new CustomEvent('triggerNewMessageSound', { detail: {id : "newMessageSound" } });
+                let newMessageSoundEvent = new CustomEvent('triggerNewMessageSound', { detail: { id: "newMessageSound" } });
                 document.dispatchEvent(newMessageSoundEvent);
             });
             socket.on('user_in_my_group_connected', function (loggedInUsersId) {
@@ -53,6 +53,11 @@
                 let userLoggedOffEvent = new CustomEvent('LoggedOffStatus', { detail: disconnectedUserId });
                 document.dispatchEvent(userLoggedOffEvent);
             });
+
+            socket.on('user_changed_photo', function (userDetails) {
+                let userChangedImgEvent = new CustomEvent('userChangedPhoto', { detail: userDetails });
+                document.dispatchEvent(userChangedImgEvent);
+            })
         }
     </script>
     <script src="../public/client/client.js"></script>
@@ -211,7 +216,7 @@
     </div>
     <% } %>
     <div id='CreateFormContent'> </div>
-    <audio id="newMessageSound" src="../public/eventually.mp3" preload = 'auto' ></audio> 
+    <audio id="newMessageSound" src="../public/eventually.mp3" preload='auto'></audio>
 </body>
 
 </html>

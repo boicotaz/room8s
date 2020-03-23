@@ -31,6 +31,9 @@ var userModelDefinition = {
     },
     gender: {
         type: Sequelize.STRING
+    },
+    profImgExists: {
+        type: Sequelize.BOOLEAN
     }
 };
 
@@ -108,5 +111,7 @@ UserModel.getAllUsers = async function () {
     });
 }
 
-
+UserModel.updateProfImg = function (userId, profileImgFlag) {
+    return this.update({ profImgExists: profileImgFlag }, { where: { id: userId } });
+}
 module.exports = UserModel;

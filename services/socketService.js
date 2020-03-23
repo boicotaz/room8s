@@ -89,6 +89,12 @@ function socketInit(server) {
 
     })
 
+    socket.on('userChangedPhoto', function (userDetails) {
+      console.log(" IMG CHANGED BY_______________________________-", userDetails.userId);
+      for (const [client, userInLoggedInList] of sequenceNumberByClient) {
+        client.emit('user_changed_photo', userDetails);
+      }
+    })
     socket.on('disconnect', () => {
       console.log('user disconnected with socket id: ', socket.id);
       // each socket is per tab so we need to dinstiguish bettween close tab and user logout

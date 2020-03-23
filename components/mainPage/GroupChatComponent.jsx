@@ -23,7 +23,14 @@ export default class GroupChat extends React.Component {
 
         });
 
-        // $("#newMessageSound").load("../public/eventually.mp3");   
+        document.addEventListener('userChangedPhoto', e => {
+            console.log("caught event change photo");
+            let userDetail = this.state.usersInGroup.get(e.detail.userId);
+            if (userDetail != undefined) {
+                this.state.userImageChanged = e.detail.userId;
+                this.forceUpdate();
+            }
+        });
     }
 
     submitMessageEnterKey = (e) => {
@@ -120,13 +127,14 @@ export default class GroupChat extends React.Component {
         document.getElementById("searchText").removeEventListener("keydown", this.submitMessageEnterKey, false);
         document.removeEventListener('newGroupMessageCreated');
         document.removeEventListener('newGroupMessageReceived');
+        this.state.userImageChanged = undefined;
     }
 
     render() {
         // console.log("Group messages are__________________________________________", this.state.groupMessages);
         // console.log("Group Details are__________________________________________", this.state.groupDetails);
         // console.log("Group Users are__________________________________________", this.state.usersInGroup);
-
+        console.log('group chat forced to rerender');
         let groupChat = <React.Fragment>
             <div className="container col-4" id="groupChat" style={{ height: '516px' }}>
                 <div className="row">
@@ -141,7 +149,7 @@ export default class GroupChat extends React.Component {
                 <div className="row scrollbar scrollbar-primary" id="groupChatBody" style={{ height: '70%', overflowY: 'scroll' }}>
                     <div className="col-12 bg-light rounded">
                         {this.state.groupMessages.map(message => {
-                            return <Message key={uuidv4()} message={message} currentUser={this.state.currentUser} groupDetails={this.state.groupDetails} usersInGroup={this.state.usersInGroup}></Message>
+                            return <Message key={uuidv4()} userImageChanged={this.state.userImageChanged} message={message} currentUser={this.state.currentUser} groupDetails={this.state.groupDetails} usersInGroup={this.state.usersInGroup}></Message>
                         })}
                     </div>
                 </div>
@@ -149,7 +157,7 @@ export default class GroupChat extends React.Component {
                 <div className="row" style={{ height: '15%' }}>
                     <div className="col-12 p-0 bg-secondary rounded d-flex align-items-center">
                         {/* <div className="input-group offset-2"> */}
-                        <input autocomplete="off" id="searchText" placeholder="Type le Message..." type="text" className="bg-light text-dark col-12 w-100 h-100">
+                        <input autoComplete="off" id="searchText" placeholder="Type le Message..." type="text" className="bg-light text-dark col-12 w-100 h-100">
                         </input>
                         {/* <div className="input-group-append">
                                 <button onClick={this.submitMessageClickKey} className="btn btn-success" type="button">Send</button>

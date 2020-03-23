@@ -24,13 +24,13 @@ export default class MainPage extends React.Component {
 
         let usersInGroupMap = new Map();
 
-        props.usersInGroup.forEach(user => {
-            usersInGroupMap.set(user[2], `${user[0]} ${user[1]}`);
-        });
+        // props.usersInGroup.forEach(user => {
+        //     usersInGroupMap.set(user[2], `${user[0]} ${user[1]}`);
+        // });
 
-        for (let key of usersInGroupMap.keys()) {
-            console.log(usersInGroupMap.get(key));
-        }
+        // for (let key of usersInGroupMap.keys()) {
+        //     console.log(usersInGroupMap.get(key));
+        // }
     }
     componentDidMount() {
         $("#content-container").fadeIn('slow');

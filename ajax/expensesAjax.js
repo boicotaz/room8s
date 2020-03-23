@@ -17,47 +17,6 @@ let getExpenseDataAjax = function (userNames, skip) {
 
 }
 
-/**
- * @typedef userNameTuple
- * @type {array}
- * @property {string} 0 - firstName
- * @property {string} 1 - lastName
- * @property {number} 2 - userId
- */
-
-/**
- * @typedef userNames
- * @type {array<userNameTuple>}
- */
-
-/**
- * @return {Promise<userNames>}
- */
-let getGroupInfoAjax = function () {
-    return new Promise((resolve, reject) => {
-        $.ajax({
-            url: '/api/get-current-user',
-            type: "GET",
-            success: function (user) {
-                $.ajax({
-                    url: '/api/get-users-in-group',
-                    type: "POST",
-                    data: user,
-                    dataType: "json",
-                    success: function (userNames) {
-                        resolve(userNames);
-                    },
-                    error: function (err) {
-                        console.log(err);
-                        reject(err);
-                    }
-                });
-            }
-        })
-    });
-}
-
-
 // Ajax request to retrieve the TOTALS data needed to create the expense TOTALS table
 let getExpenseTotalsDataAjax = function () {
     return new Promise((resolve, reject) => {
@@ -89,15 +48,19 @@ let storeNewExpense = function (postData, newExpense, clientSocket) {
         contentType: "application/json",
         // contentType: "application/json",
         success: function (result) {
-            $("#alert-success").show(function () {
+            $("#created-expense-success").show(function () {
                 new Promise(function (resolve, reject) {
                     setTimeout(function () {
-                        $('#alert-success').hide(800);
+                        $('#created-expense-success').hide(800);
+                        $('#darkModalForm').modal('toggle');
+                        let clearExpenseFormEvent = new CustomEvent('clear-expense-form');
+                        document.dispatchEvent(clearExpenseFormEvent);
                         resolve({ msg: 'ok' });
-                    }, 5000);
+                    }, 3000);
                 })
             })
-            document.getElementById('expense-form').reset();
+            // $("#alert-success").;
+
             clientSocket.emit('new-expense', newExpense);
         },
         error: function (error) {
@@ -108,35 +71,28 @@ let storeNewExpense = function (postData, newExpense, clientSocket) {
 }
 
 // Creates the expense table by using the ExpensesTable Component
-let processData = function (data, userNames) {
-    // console.log("in processData__________________", data, userNames)
-    let userNamesMap = new Map();
-
-    userNames.forEach(user => {
-        userNamesMap.set(parseInt(user[2],10), `${user[0]} ${user[1]}`);
-    });
-
-    if (Array.isArray(data)) {
-        data.forEach(expense => {
+let processData = function (expenses, usersInGroupDetails) {
+    console.log("in  process data", expenses, usersInGroupDetails);
+    if (Array.isArray(expenses)) {
+        expenses.forEach(expense => {
             if (Array.isArray(expense)) {
                 expense.forEach(transaction => {
-                    transaction.creditorFullName = userNamesMap.get(parseInt(transaction.creditor,10));
-                    transaction.debtorFullName = userNamesMap.get(parseInt(transaction.debtor,10));
+                    transaction.creditorFullName = usersInGroupDetails.get(parseInt(transaction.creditor, 10)).firstName + " " + usersInGroupDetails.get(parseInt(transaction.creditor, 10)).lastName;
+                    transaction.debtorFullName = usersInGroupDetails.get(parseInt(transaction.debtor, 10)).firstName + " " + usersInGroupDetails.get(parseInt(transaction.debtor, 10)).lastName;
                 })
             }
             else {
-                expense.creditorFullName = userNamesMap.get(parseInt(expense.creditor,10));
-                expense.debtorFullName = userNamesMap.get(parseInt(expense.debtor,10));
+                expense.creditorFullName = usersInGroupDetails.get(parseInt(expense.creditor, 10)).firstName + " " + usersInGroupDetails.get(parseInt(expense.creditor, 10)).lastName;
+                expense.debtorFullName = usersInGroupDetails.get(parseInt(expense.debtor, 10)).firstName + " " + usersInGroupDetails.get(parseInt(expense.debtor, 10)).lastName;
             }
         });
     }
     else {
-        data.creditorFullName = userNamesMap.get(parseInt(data.creditor,10));
-        data.debtorFullName = userNamesMap.get(parseInt(data.debtor,10));
+        expenses.creditorFullName = usersInGroupDetails.get(parseInt(expenses.creditor, 10)).firstName + " " + usersInGroupDetails.get(parseInt(expenses.creditor, 10)).lastName;
+        expenses.debtorFullName = usersInGroupDetails.get(parseInt(expenses.debtor, 10)).firstName + " " + usersInGroupDetails.get(parseInt(expenses.debtor, 10)).lastName;
     }
 
-
-    return data;
+    return expenses;
 
 }
 
@@ -144,7 +100,6 @@ let expensesAjax = {};
 
 expensesAjax.storeNewExpense = storeNewExpense;
 expensesAjax.getExpenseTotalsDataAjax = getExpenseTotalsDataAjax;
-expensesAjax.getGroupInfoAjax = getGroupInfoAjax;
 expensesAjax.getExpenseDataAjax = getExpenseDataAjax;
 expensesAjax.processData = processData;
 

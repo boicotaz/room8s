@@ -13,6 +13,7 @@ expensesController.get('/', authValidation, function (req, res, next) {
 expensesController.post('/create-expense', authValidation, function (req, res, next) {
 
     let { creditor, debtors, info } = req.body;
+    console.log("in create expense _____________________________", creditor, debtors, info);
     groupService.findGroupByUserId(creditor.id).then(group => expenseService.createExpense({ groupId: group.getGroupId(), description: info.desc, createdAt: info.date, sum: creditor.credit }, function (expense, isCreated) {
         if (isCreated) {
             // console.log(expense);

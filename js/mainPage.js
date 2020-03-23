@@ -18,7 +18,7 @@ var getMainPage = function (user) {
     $("#content-container").append("<div id = 'content'></div>")
     console.log("i was called__________________________________________________________________________");
 
-    Promise.all([grouDetailsAjax.getUsersInGroup(), grouDetailsAjax.getGroupDetails(), groupMessagesAjax.getGroupMessages()]).then((res) => {
+    Promise.all([grouDetailsAjax.getUsersInGroupDetails(), grouDetailsAjax.getGroupDetails(), groupMessagesAjax.getGroupMessages()]).then((res) => {
         console.log('Results are from Promise.all: ', res);
         let [usersInGroup, groupDetails, groupMessages] = res;
 
