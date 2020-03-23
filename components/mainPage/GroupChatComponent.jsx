@@ -80,29 +80,17 @@ export default class GroupChat extends React.Component {
 
     }
 
-
-    processUsersInGroup = (usersInGroup) => {
-        let [firstName, lastName, userId] = usersInGroup;
-        let userNames = new Map();
-
-        usersInGroup.forEach(userName => {
-            userNames.set(userName[2], userName[0] + " " + userName[1]);
-        })
-
-        return userNames;
-    }
-
     broadcastMessage = (newMsg) => {
 
         let newMsgDetails = {};
         newMsgDetails.message = newMsg;
 
-        let groupUsers = this.processUsersInGroup(this.state.usersInGroup);
-        groupUsers.delete(this.state.currentUser.id);
+        let groupUsers = this.state.usersInGroup;
 
         let groupUsersIds = [];
 
         for (let key of groupUsers.keys()) {
+            if ( key != this.state.currentUser.id)
             groupUsersIds.push(key);
         }
         newMsgDetails.groupUsersIds = groupUsersIds;
@@ -131,9 +119,6 @@ export default class GroupChat extends React.Component {
     }
 
     render() {
-        // console.log("Group messages are__________________________________________", this.state.groupMessages);
-        // console.log("Group Details are__________________________________________", this.state.groupDetails);
-        // console.log("Group Users are__________________________________________", this.state.usersInGroup);
         console.log('group chat forced to rerender');
         let groupChat = <React.Fragment>
             <div className="container col-4" id="groupChat" style={{ height: '516px' }}>
