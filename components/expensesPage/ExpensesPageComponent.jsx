@@ -17,6 +17,8 @@ export default class ExpensesPage extends React.Component {
     }
     componentDidMount() {
         $("#content-container").fadeIn('slow');
+        let expensesTable = document.getElementById("expenses-content");
+        expensesTable.scrollTop = expensesTable.scrollHeight;
     }
 
     componentWillMount() {
@@ -58,9 +60,9 @@ export default class ExpensesPage extends React.Component {
                 </div>
             </div>
             {/* style={{ color: 'black' }} */}
-            <div id="expense-table-id" className="row">
+            <div id="expense-table-id" className="row scrollbar scrollbar-primary" style={{ height: '600px', overflowY: 'scroll' }}> 
                 <div className='col-12 pr-0'>
-                    <table id='expenses-table' className="table table-hover table-dark ">
+                    <table id='expenses-table' className="table table-hover table-dark" >
                         <ExpensesTable expenses={this.state.expenses} totals={this.state.totals} userNamesInGroup={this.state.userNamesInGroup} usersInGroupDetails={this.state.usersInGroupDetails} view={this.state.view}></ExpensesTable>
                     </table>
                 </div>
