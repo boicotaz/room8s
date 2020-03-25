@@ -1,5 +1,7 @@
 const LocalStrategy = require("passport-local").Strategy;
+const GoogleStrategy = require('passport-google-oauth20').Strategy;
 var User = require("./../model/User.js");
+const userService = require('./userService')();
 
 function passportConfigure(passport) {
   passport.serializeUser((user, done) => {
@@ -40,7 +42,47 @@ function passportConfigure(passport) {
       }
     )
   );
+  const strategyOptions = {
+    clientID: process.env.GOOGLE_CLIENT_ID,
+    clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+    callbackURL: "/google-auth/callback"
+  }
+  const verifyCallback = async (accessToken, refreshToken, profile, done) => {
+    console.log(profile);
+    console.log("email is :___________-", profile.emails[0].value);
+    Promise.all([userService.getUserByGoogleId(profile.id), userService.getUserbyEmail( profile.emails[0].value)]).then((res) => {
+      let [userByGoogleId, userByEmail] = res;
+      if (userByGoogleId){
+        done(null, userByGoogleId);
+      }
+      else if (userByEmail){
+        userService.updateGoogleIdById(profile.id, userByEmail.id);
+        done(null,userByGoogleId);
+      }
+      else {
+        let options = {};
+        if (profile.name.givenName){
+          options.firstName = profile.name.givenName;
+        }
+        else {
+          options.firstName = 'NoFirstName';
+        }
 
+        if (profile.name.familyName){
+          options.lastName = profile.name.familyName;
+        }
+        else {
+          options.lastName = 'NoLastName';
+        }
+
+        options.googleId = profile.id;
+        options.email = profile.emails[0].value; 
+        userService.createUserWithGoogleAuth(options).then(newUser => done(null,newUser));
+      }
+    });
+
+  }
+  passport.use(new GoogleStrategy(strategyOptions, verifyCallback))
   return passport;
 }
 

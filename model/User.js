@@ -17,7 +17,8 @@ var userModelDefinition = {
     },
     password: {
         type: Sequelize.STRING,
-        allowNull: false
+        allowNull: true,
+        defaultValue: null 
     },
     email: {
         type: Sequelize.STRING,
@@ -34,6 +35,10 @@ var userModelDefinition = {
     },
     profImgExists: {
         type: Sequelize.BOOLEAN
+    },
+    googleId: {
+        type: Sequelize.STRING,
+        defaultValue: null
     }
 };
 
@@ -78,6 +83,7 @@ UserModel.prototype.getUserLastName = function getUserName() {
 
 // Hashes the password for a user object.
 function hashPassword(user) {
+    if (user.password == null) return null;
     if (user.changed('password')) {
         return bcrypt.hash(user.password, 10).then(function (password) {
             user.password = password;
@@ -114,4 +120,20 @@ UserModel.getAllUsers = async function () {
 UserModel.updateProfImg = function (userId, profileImgFlag) {
     return this.update({ profImgExists: profileImgFlag }, { where: { id: userId } });
 }
+
+UserModel.getUserByGoogleId = function (googleId) {
+    return this.findOne({ where: { googleId: googleId }, attributes: { exclude: ['password'] } });
+}
+UserModel.getUserbyEmail = function (email){
+    return this.findOne({ where: { email: email }, attributes: { exclude: ['password'] } });
+}
+
+UserModel.updateGoogleId = function (googleId, userId) {
+    return this.update({ googleId: googleId }, { where: { id: userId } });
+}
+
+UserModel.createUserWithGoogleAuth = function (options){
+    return this.create(options);
+}
+
 module.exports = UserModel;

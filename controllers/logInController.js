@@ -5,7 +5,38 @@ const sessionService = new SessionService();
 const userService = require('../services/userService')();
 
 logInController.get("/", async (req, res) => {
-    if (req.isAuthenticated()) {
+
+    if(req.cookies['google_auth_logged'] != undefined && req.isAuthenticated()){
+        if(req.cookies['google_auth_logged'] == 'yes'){
+            if (req.cookies['remember_me'] != undefined) {
+                sessionService.findSessionBySessionId(req.cookies['remember_me']).then(session => {
+                    if (Array.isArray(session) && session.length) {
+
+                        let sessionDataJsonString = session[0].getSessionData();
+                        let sessionData = JSON.parse(sessionDataJsonString);
+                        let userId = sessionData.passport.user;
+
+                        if (userId == req.user.id) {
+                            if (req.cookies['remember_me'] != req.sessionID) {
+                                sessionService.deleteSessionById(req.cookies['remember_me']);
+                                res.clearCookie('remember_me');
+                                res.cookie('remember_me', req.sessionID, { path: '/', httpOnly: true, maxAge: 604800000, secure: true }); // TO DO: sortain the age
+                                sessionService.updatePersistsById(req.sessionID);
+                                sessionService.deleteSessionById(req.cookies['remember_me']);
+                            }
+                        }
+                    }
+                })
+            }
+            else {
+                sessionService.updatePersistsById(req.sessionID);
+                res.cookie('remember_me', req.sessionID, { path: '/', httpOnly: true, maxAge: 604800000, secure: true }); // TO DO: sortain the age
+            }
+        }
+        res.clearCookie('google_auth_logged');
+        res.redirect('/home');
+    }
+    else if (req.isAuthenticated()) {
         res.redirect('/home');
     }
     else if (req.cookies['remember_me'] != undefined) {
@@ -55,6 +86,28 @@ logInController.get("/", async (req, res) => {
 
 });
 
+logInController.get('/google-auth', (req,res, next) => {
+
+    if(req.query.remember_me == 'yes'){
+        res.cookie('google_login_remember_me', 'yes', { path: '/google-auth/callback', httpOnly: true, maxAge: 604800, secure: true });
+    }
+    next();
+
+}, passport.authenticate('google', {
+    scope: ['profile', 'email']
+}));
+
+logInController.get('/google-auth/callback', passport.authenticate('google'), (req, res) => {
+    let remember_me = 'no' 
+    if(req.cookies['google_login_remember_me']){
+        remember_me = 'yes';
+        res.clearCookie('google_login_remember_me');
+    };
+    res.cookie('google_auth_logged', remember_me, { path: '/', httpOnly: true, maxAge: 604800000, secure: true }); // TO DO: sortain the age
+
+    res.redirect('/');
+});
+
 logInController.post('/validate', function (req, res, next) {
 
     passport.authenticate('local', function (err, user, info) {
@@ -70,7 +123,6 @@ logInController.post('/validate', function (req, res, next) {
                         res.clearCookie('remember_me');
                     }
                     res.cookie('remember_me', req.sessionID, { path: '/', httpOnly: true, maxAge: 604800000, secure: true }); // TO DO: sortain the age
-                    // console.log("Session Id is ______________________________________________")
                     sessionService.updatePersistsById(req.sessionID);
                 }
                 else {

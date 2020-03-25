@@ -36,6 +36,18 @@ class UserService {
         return this.userModel.getUserById(userId);
     }
 
+    createUserWithGoogleAuth(options){
+       return this.userModel.createUserWithGoogleAuth(options).then( () => { return this.getUserbyEmail(options.email)}  );
+    } 
+
+    getUserbyEmail(email){
+        return this.userModel.getUserbyEmail(email);
+    }
+
+    updateGoogleIdById(googleId, userId){
+        return this.userModel.updateGoogleId(googleId, userId);
+    }
+
     async getUserIdbyName(name) {
         return this.userModel.getUserIdbyName(name.split(" "));
     }
@@ -46,6 +58,10 @@ class UserService {
 
     updateProfImg(userId, profileImgFlag) {
         return this.userModel.updateProfImg(userId, profileImgFlag);
+    }
+
+    getUserByGoogleId(googleId) {
+        return this.userModel.getUserByGoogleId(googleId);
     }
 
     createFullNameIdArray(users) {
