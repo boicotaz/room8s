@@ -1,11 +1,11 @@
-
+import AddUserInGroupModal from "./AddUserInGroupModalCompenent.jsx";
 export default class Group extends React.Component {
 
     constructor(props) {
         super(props);
         this.state = {}
         this.state.usersInGroup = this.props.usersInGroup;
-
+        // {groupName: String, groupId: integer}
         this.state.groupDetails = this.props.groupDetails;
         let usersInGroupId = [];
 
@@ -62,6 +62,8 @@ export default class Group extends React.Component {
                 <div id='usersInGroup' className="lead">
                     {console.log("userInGroup var is_______________________________", this.state.usersInGroup)}
                     {groupComponents}
+                    <AddUserInGroupModal groupDetails={this.state.groupDetails}  /> 
+                    
                 </div>
                 <button id='add-user' type="button" data-toggle="modal" data-target="#addUserForm"
                     className="btn btn-secondary mt-5"> Add users in

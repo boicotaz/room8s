@@ -3,7 +3,7 @@ import { grouDetailsAjax } from "../ajax/groupDetailsAjax";
 
 $(document).ready(function () {
 
-    groupUserAutocomplete(userAjax, grouDetailsAjax, substringMatcher);
+    // groupUserAutocomplete(userAjax, grouDetailsAjax, substringMatcher);
     userAutocomplete(userAjax, substringMatcher);
 
 });
@@ -121,3 +121,5 @@ let groupUserAutocomplete = function (userAjax, groupAjax, matcherFunction) {
 //     });
 // });
 
+
+export {groupUserAutocomplete,substringMatcher} 

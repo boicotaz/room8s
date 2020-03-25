@@ -106,28 +106,6 @@ app.use("/home/expenses", expensesController);
 //get api services
 app.use('/api', apiController);
 
-const userService = require('./services/userService')();
-const groupService = require('./services/groupService')();
-
-app.post("/add-user-in-group", function (req, res, next) {
-  userService.getUserIdbyName(req.body.value).then((userToAddId) => {
-    let userInGroupId = req.body['user[id]'];
-    groupService.addUserToGroup(userToAddId, userInGroupId, function (wasCreated, groupUsers) {
-      if (wasCreated) {
-        console.log('create group ok');
-        groupUsers.then(group => res.json({ group: group }));
-
-      }
-      else {
-        console.log('create group fail');
-      }
-    });
-
-  });
-
-
-})
-
 
 const webpush = require('web-push');
 
