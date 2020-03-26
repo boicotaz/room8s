@@ -4,11 +4,29 @@ import { grouDetailsAjax } from "../../ajax/groupDetailsAjax";
 
 export default class AddUserInGroupModal extends React.Component{
 
-
+    constructor(props) {
+        super(props);
+        this.state = {};
+        // console.log(props);
+        this.state.groupDetails = this.props.groupDetails;
+        this.state.usersInGroup = this.props.usersInGroup;
+    }
     componentDidMount() {
         groupUserAutocomplete(userAjax, grouDetailsAjax, substringMatcher);
     }
 
+    AddUserInGroupFormSubmitHandler = (e) => {
+        e.preventDefault();
+        let formData = $('#add-user-in-group-form').serializeArray();
+        let submitData = {};
+        formData.forEach( input => {
+            // submitData.set(input.name, input.value);
+            submitData[input.name] = input.value;
+        });
+        grouDetailsAjax.addUserInGroup(submitData,this.state.groupDetails,this.state.usersInGroup);
+        console.log(formData);
+
+    }
     render() {
         let modal = <React.Fragment> <div className="modal fade" id="addUserForm" tabIndex="-1" role="dialog" aria-labelledby="myModalLabel"
         aria-hidden="true">
@@ -24,7 +42,7 @@ export default class AddUserInGroupModal extends React.Component{
                         </button>
                     </div>
                     <div className="modal-body">
-                        <form id='add-user-form' action="/home/add-user-in-group" autoComplete="off" method="post">
+                        <form id='add-user-in-group-form' onSubmit={this.AddUserInGroupFormSubmitHandler} autoComplete="off" method="post">
                             <div className="md-form mb-4">
                                 <div className="input-group form-group">
                                     <div className="input-group-prepend">

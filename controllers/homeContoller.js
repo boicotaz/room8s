@@ -28,19 +28,12 @@ homeController.get("/", passportService.authValidation, async (req, res, next) =
 });
 
 homeController.post("/add-user-in-group", function (req, res, next) {
-    userService.getUserIdbyName(req.body.fullName).then((userToAddId) => {
-      let userInGroupId = req.user.id;
-      groupService.addUserToGroup(userToAddId, userInGroupId, function (wasCreated, groupUsers) {
-        if (wasCreated) {
-          console.log('create group ok');
-          groupUsers.then(group => res.redirect('/home'));
-  
-        }
-        else {
-          console.log('create group fail');
-        }
-      });
-  
+
+    console.log(req.body,">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>.");
+    let userToAddInGroupData = req.body
+    // res.redirect('/home');
+    userService.getUserIdbyName(userToAddInGroupData.newUserData.fullName).then((userToAddId) => {
+      groupService.addUserToGroup(userToAddId, userToAddInGroupData.groupDetails).then( groupUsers => res.json(groupUsers));
     });
   
   

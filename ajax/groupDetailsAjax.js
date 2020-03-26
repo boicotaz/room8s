@@ -57,9 +57,30 @@ let getUsersInGroupDetails = function getUsersInGroupDetails() {
         })
     })
 }
+
+let addUserInGroup = (newUserFullName,groupDetails,usersInGroup) => {
+    let postData = {newUserData: newUserFullName, groupDetails: groupDetails};
+
+    return new Promise((resolve, reject) => {
+        $.ajax({
+            url: '/home/add-user-in-group',
+            type: 'POST',
+            data: JSON.stringify(postData),
+            contentType: "application/json",
+            success: function (newGroupUser) {
+                // window.dispatchEvent(evt);
+                console.log(newGroupUser);
+                // socket.emit("new-group-user-added", usersInGroup);
+            },
+            error: function (error) {
+                reject(error);
+            }
+        })
+    })
+}
 let grouDetailsAjax = {};
 
 grouDetailsAjax.getGroupDetails = getGroupDetails;
 grouDetailsAjax.getUsersInGroupDetails = getUsersInGroupDetails;
-
+grouDetailsAjax.addUserInGroup = addUserInGroup;
 export { grouDetailsAjax }

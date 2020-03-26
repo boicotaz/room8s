@@ -56,14 +56,13 @@ export default class Group extends React.Component {
         return (
             
             <div id="group-dashboard" className="jumbotron col-3 ml-5">
+                <AddUserInGroupModal usersInGroup={this.state.usersInGroup} groupDetails={this.state.groupDetails}> </AddUserInGroupModal>
                 <h1 className="display-6"> <i className="fa fa-home"> </i> {this.state.groupDetails.groupName} </h1>
                 <hr className="my-4" />
                 <p className="lead"> Users in group </p>
                 <div id='usersInGroup' className="lead">
                     {console.log("userInGroup var is_______________________________", this.state.usersInGroup)}
                     {groupComponents}
-                    <AddUserInGroupModal groupDetails={this.state.groupDetails}  /> 
-                    
                 </div>
                 <button id='add-user' type="button" data-toggle="modal" data-target="#addUserForm"
                     className="btn btn-secondary mt-5"> Add users in
