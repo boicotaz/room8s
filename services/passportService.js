@@ -50,25 +50,25 @@ function passportConfigure(passport) {
   const verifyCallback = async (accessToken, refreshToken, profile, done) => {
     console.log(profile);
     console.log("email is :___________-", profile.emails[0].value);
-    Promise.all([userService.getUserByGoogleId(profile.id), userService.getUserbyEmail( profile.emails[0].value)]).then((res) => {
+    Promise.all([userService.getUserByGoogleId(profile.id), userService.getUserbyEmail(profile.emails[0].value)]).then((res) => {
       let [userByGoogleId, userByEmail] = res;
-      if (userByGoogleId){
+      if (userByGoogleId) {
         done(null, userByGoogleId);
       }
-      else if (userByEmail){
+      else if (userByEmail) {
         userService.updateGoogleIdById(profile.id, userByEmail.id);
-        done(null,userByGoogleId);
+        done(null, userByGoogleId);
       }
       else {
         let options = {};
-        if (profile.name.givenName){
+        if (profile.name.givenName) {
           options.firstName = profile.name.givenName;
         }
         else {
           options.firstName = 'NoFirstName';
         }
 
-        if (profile.name.familyName){
+        if (profile.name.familyName) {
           options.lastName = profile.name.familyName;
         }
         else {
@@ -76,13 +76,13 @@ function passportConfigure(passport) {
         }
 
         options.googleId = profile.id;
-        options.email = profile.emails[0].value; 
-        userService.createUserWithGoogleAuth(options).then(newUser => done(null,newUser));
+        options.email = profile.emails[0].value;
+        userService.createUserWithGoogleAuth(options).then(newUser => done(null, newUser));
       }
     });
 
   }
-  passport.use(new GoogleStrategy(strategyOptions, verifyCallback))
+  // passport.use(new GoogleStrategy(strategyOptions, verifyCallback))
   return passport;
 }
 
