@@ -1,11 +1,11 @@
 import React from "react"
 
-export function TextInput({ labelText, placeholder, value, handleChange, inputClasses, labelClasses }) {
+export function Input({ inputType, labelText, placeholder, value, handleChange, inputClasses, labelClasses }) {
   return (
     <label className={labelClasses}>
       {labelText}
       <input
-        type="text"
+        type={inputType}
         placeholder={placeholder}
         value={value}
         className={inputClasses}
