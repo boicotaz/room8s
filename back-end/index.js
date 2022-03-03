@@ -14,5 +14,4 @@ server.listen(process.env.PORT || 8080, process.env.SERVER_IP || '0.0.0.0', () =
 //Initialize body-parser
 app.use(bodyParser.json());
 
-
 app.use("/users", usersController);
