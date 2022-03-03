@@ -1,0 +1,15 @@
+{
+  "name": "back-end",
+  "version": "1.0.0",
+  "description": "The backend api for room8s",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Apostolos Gerodimos",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.17.3",
+    "http-server": "^14.1.0"
+  }
+}
