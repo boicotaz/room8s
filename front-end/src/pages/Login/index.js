@@ -16,6 +16,7 @@ export function Login(props) {
 
   return (
     <div className="login-form__wrapper container">
+      <h2 className="text-center mb-4">Login to your account</h2>
       <div className="row mx-0 justify-content-center">
         <form
           onSubmit={handleSubmit}
