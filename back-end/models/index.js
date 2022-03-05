@@ -16,7 +16,7 @@ const sequelizeConnection = new Sequelize(dbConfig.DB, dbConfig.USER, dbConfig.P
 const db = {};
 
 db.Sequelize = Sequelize;
-db.sequelize = sequelizeConnection;
+db.sequelizeConnection = sequelizeConnection;
 
 db.userModel = require("./user.js")(sequelizeConnection, Sequelize);
 

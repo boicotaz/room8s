@@ -16,4 +16,6 @@ app.use(bodyParser.json());
 
 app.use("/users", usersController);
 const db = require("./models");
-db.sequelize.sync();
+db.sequelizeConnection.sync();
+
+db.userModel.create({ firstName: "John", lastName: "Doe", password: "123456", email: "john.doe@example.com" });
