@@ -27,6 +27,7 @@ export function Login(props) {
             labelClasses="form-label"
             inputClasses="form-control"
             inputType="text"
+            name="email"
           />
 
           <Input
@@ -34,6 +35,7 @@ export function Login(props) {
             labelClasses="form-label"
             inputClasses="form-control"
             inputType="password"
+            name="password"
           />
 
           <SubmitButton
