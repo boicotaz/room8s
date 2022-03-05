@@ -1,8 +1,12 @@
+const bcrypt = require('bcrypt');
+
 module.exports = (sequelizeConnection, Sequelize) => {
     const userModel = sequelizeConnection.define("user", {
         id: {
             type: Sequelize.INTEGER,
-            primaryKey: true
+            autoIncrement: true,
+            primaryKey: true,
+
         },
         firstName: {
             type: Sequelize.STRING,
@@ -37,7 +41,26 @@ module.exports = (sequelizeConnection, Sequelize) => {
         //     type: Sequelize.STRING,
         //     defaultValue: null
         // }
+    }, {
+        // instanceMethods: {
+        //     comparePasswords: comparePasswords
+        // },
+        hooks: {
+            // beforeValidate: hashPassword,
+            beforeCreate: hashPassword
+        },
+
+        timestamps: false
     });
 
     return userModel;
 };
+
+// Hashes the password for a user object.
+function hashPassword(user) {
+    if (user.password == null) return null;
+
+    return bcrypt.hash(user.password, 10).then(function (hashedPassword) {
+        user.password = hashedPassword;
+    });
+}
