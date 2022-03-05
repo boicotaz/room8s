@@ -15,3 +15,5 @@ server.listen(process.env.PORT || 8080, process.env.SERVER_IP || '0.0.0.0', () =
 app.use(bodyParser.json());
 
 app.use("/users", usersController);
+const db = require("./models");
+db.sequelize.sync();
