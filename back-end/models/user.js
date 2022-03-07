@@ -52,6 +52,15 @@ module.exports = (sequelizeConnection, Sequelize) => {
 
         timestamps: false
     });
+    // Compares two passwords.
+    userModel.prototype.comparePasswords = function comparePasswords(password, callback) {
+        bcrypt.compare(password, this.password, function (error, isMatch) {
+            if (error) {
+                return callback(error);
+            }
+            return callback(null, isMatch);
+        });
+    }
 
     return userModel;
 };
@@ -64,3 +73,4 @@ function hashPassword(user) {
         user.password = hashedPassword;
     });
 }
+
