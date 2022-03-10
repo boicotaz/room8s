@@ -1,42 +1,53 @@
 import React from "react"
-import { Input } from "../../components/Input"
 import { SubmitButton } from "../../components/SubmitButton"
 import "./index.scss"
+import { useForm } from "react-hook-form"
+import { yupResolver } from '@hookform/resolvers/yup';
+import * as yup from "yup";
+
+const schema = yup.object({
+  email: yup
+    .string()
+    .email()
+    .required("E-mail is required"),
+  password: yup
+    .string()
+    .required("Password is required")
+    .min(6, "Password must contain at least 6 characters")
+    .max(10, "Password must contain maximum 10 characters")
+}).required()
 
 export function Login(props) {
-  // Uncomment when completing the login page functionality
-  // handleChange(event) {
-  //   this.setState({value: event.target.value})
-  // }
-
-  const handleSubmit = (event) => {
-    alert('A name was submitted: ')
-    event.preventDefault()
-  }
+  const { register, handleSubmit, formState: { errors } } = useForm({
+    resolver: yupResolver(schema)
+  })
+  const onSubmit = data => console.log(data)
 
   return (
     <div className="login-form__wrapper container">
       <h2 className="text-center mb-4">Login to your account</h2>
       <div className="row mx-0 justify-content-center">
         <form
-          onSubmit={handleSubmit}
+          onSubmit={handleSubmit(onSubmit)}
           className="d-flex flex-column col-11 col-md-8 col-xl-4"
         >
-          <Input
+          <input
             placeholder="Enter your name"
-            labelClasses="form-label"
-            inputClasses="form-control"
-            inputType="text"
+            className="form-control"
+            type="text"
             name="email"
+            {...register("email")}
           />
+          <p className="error">{errors.email?.message}</p>
 
-          <Input
+          <input
             placeholder="Enter your password"
-            labelClasses="form-label"
-            inputClasses="form-control"
-            inputType="password"
+            className="form-control"
+            type="password"
             name="password"
+            {...register("password")}
           />
+          <p className="error">{errors.password?.message}</p>
 
           <SubmitButton
             text="Submit"
