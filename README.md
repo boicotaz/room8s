@@ -6,7 +6,12 @@
 ```bash
 cd front-end
 ```
-2. Run server locally
+2. Install node packages
+```
+npm install
+```
+
+3. Run server locally
 ```bash
 npm start
 ```
