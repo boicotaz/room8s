@@ -11,6 +11,8 @@
   "dependencies": {
     "bcrypt": "^5.0.1",
     "express": "^4.17.3",
-    "http-server": "^14.1.0"
+    "http-server": "^14.1.0",
+    "mysql2": "^2.3.3",
+    "sequelize": "^6.25.8"
   }
 }
