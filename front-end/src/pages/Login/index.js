@@ -26,14 +26,13 @@ export function Login(props) {
   return (
     <div className="login-form__wrapper container">
       <h2 className="text-center mb-4">Login to your account</h2>
-      <div className="row mx-0 justify-content-center">
+      <div className="flex justify-center mb-8">
         <form
           onSubmit={handleSubmit(onSubmit)}
-          className="d-flex flex-column col-11 col-md-8 col-xl-4"
+          className="flex flex-col pt-8"
         >
           <input
             placeholder="Enter your name"
-            className="form-control"
             type="text"
             name="email"
             {...register("email")}
@@ -42,7 +41,6 @@ export function Login(props) {
 
           <input
             placeholder="Enter your password"
-            className="form-control"
             type="password"
             name="password"
             {...register("password")}
@@ -51,7 +49,6 @@ export function Login(props) {
 
           <SubmitButton
             text="Submit"
-            classes="btn btn-primary"
           />
         </form>
       </div>
